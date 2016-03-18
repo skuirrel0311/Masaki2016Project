@@ -3,6 +3,9 @@ using System.Collections;
 
 public class CreateFlow : MonoBehaviour {
 
+    [SerializeField]
+    ParticleSystem FlowParticle;
+
     Vector3 target;
     Vector3 flowVector;
     float collsionRadius=1;
@@ -12,6 +15,7 @@ public class CreateFlow : MonoBehaviour {
         GetNearAnchor();
 
         CreateFlowObject();
+
 	}
 
     void GetNearAnchor()
@@ -54,10 +58,20 @@ public class CreateFlow : MonoBehaviour {
         //流れのベクトルに合わせて回転させる
         boxCol.transform.position = Vector3.Lerp(target, transform.position, 0.5f);
         boxCol.transform.rotation = Quaternion.FromToRotation(Vector3.up, flowVector.normalized);
+        //流れのパーティクル
+        CreateFlowParticle();
     }
-	
-	// Update is called once per frame
-	void Update ()
+
+    void CreateFlowParticle()
+    {
+        FlowParticle.startLifetime = 0.2f*flowVector.magnitude;
+        
+        Instantiate(FlowParticle,transform.position, Quaternion.FromToRotation(Vector3.forward, flowVector.normalized));
+
+    }
+
+    // Update is called once per frame
+    void Update ()
     {
 	
 	}
