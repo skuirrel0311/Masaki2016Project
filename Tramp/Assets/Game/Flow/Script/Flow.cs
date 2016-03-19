@@ -3,7 +3,7 @@ using System.Collections;
 
 public class Flow : MonoBehaviour {
 
-   
+    private float speed=10;
 
     public Vector3 FlowVector
     {
@@ -15,8 +15,8 @@ public class Flow : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-	
-	}
+
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -35,7 +35,7 @@ public class Flow : MonoBehaviour {
     {
         if (col.tag != "Anchor")
         {
-            col.gameObject.transform.Translate(flowVector*Time.deltaTime);
+            col.gameObject.transform.Translate(flowVector*Time.deltaTime*speed);
         }
     }
 }
