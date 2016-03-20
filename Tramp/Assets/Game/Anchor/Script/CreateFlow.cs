@@ -43,7 +43,7 @@ public class CreateFlow : MonoBehaviour {
     void CreateFlowObject()
     {
         //流れのコリジョン用オブジェクト
-        GameObject boxCol = new GameObject();
+        GameObject boxCol = new GameObject("Flow");
 
         //CapsuleColliderをアタッチする
         boxCol.AddComponent<CapsuleCollider>();
@@ -58,6 +58,10 @@ public class CreateFlow : MonoBehaviour {
         //流れのベクトルに合わせて回転させる
         boxCol.transform.position = Vector3.Lerp(target, transform.position, 0.5f);
         boxCol.transform.rotation = Quaternion.FromToRotation(Vector3.up, flowVector.normalized);
+
+        //オブジェクトとの親子関係に加える
+        boxCol.transform.parent = transform;
+
         //流れのパーティクル
         CreateFlowParticle();
     }
@@ -65,9 +69,9 @@ public class CreateFlow : MonoBehaviour {
     void CreateFlowParticle()
     {
         FlowParticle.startLifetime = 0.2f*flowVector.magnitude;
-        
-        Instantiate(FlowParticle,transform.position, Quaternion.FromToRotation(Vector3.forward, flowVector.normalized));
-
+        //流れのパーティクルをインスタンス、子のオブジェクトとして追加
+        ParticleSystem obj= (ParticleSystem)Instantiate(FlowParticle,transform.position, Quaternion.FromToRotation(Vector3.forward, flowVector.normalized));
+        obj.transform.parent = transform;
     }
 
     // Update is called once per frame

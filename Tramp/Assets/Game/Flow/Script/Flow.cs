@@ -35,7 +35,7 @@ public class Flow : MonoBehaviour {
     {
         if (col.tag != "Anchor")
         {
-            col.gameObject.transform.Translate(flowVector*Time.deltaTime*speed);
+            col.gameObject.transform.Translate(flowVector*Time.deltaTime*speed,Space.World);
         }
     }
 }

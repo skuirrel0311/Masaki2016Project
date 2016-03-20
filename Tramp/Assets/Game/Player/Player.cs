@@ -5,25 +5,19 @@ public class Player : MonoBehaviour
 {
     public float moveSpeed = 5;
     public float rotationSpeed = 360;
-    public GameObject instanceAnchor;
 
     private Animator animator;
-    private GameObject camera;
+    private GameObject mainCamera;
 
     void Start()
     {
         animator = GetComponentInChildren<Animator>();
-        camera = GameObject.Find("Camera");
+        mainCamera = GameObject.Find("Camera");
     }
 
     void Update()
     {
         Move();
-
-        if (Input.GetKeyDown(KeyCode.X))
-        {
-            CreateAnchor();
-        }
     }
 
     void Move()
@@ -31,7 +25,7 @@ public class Player : MonoBehaviour
         Vector3 direction = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
 
         //入力の角度をカメラの角度に曲げる
-        direction = camera.transform.rotation * direction;
+        direction = mainCamera.transform.rotation * direction;
 
         animator.SetFloat("Speed", direction.magnitude);
 
@@ -47,11 +41,6 @@ public class Player : MonoBehaviour
         //向きを変える
         transform.LookAt(transform.position + forward);
 
-        transform.position += direction * moveSpeed * Time.deltaTime;
-    }
-
-    void CreateAnchor()
-    {
-        Instantiate(instanceAnchor, transform.position, transform.rotation);
+        transform.Translate(direction * moveSpeed * Time.deltaTime,Space.World);
     }
 }
