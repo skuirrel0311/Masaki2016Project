@@ -1,22 +1,26 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class CreateFlow : MonoBehaviour {
+public class CreateFlow : MonoBehaviour
+{
 
     [SerializeField]
     ParticleSystem FlowParticle;
 
-    Vector3 target;
+    Vector3 targetPosition;
+    GameObject targetGameObjct;
     Vector3 flowVector;
-    float collsionRadius=1;
+    float collsionRadius = 1;
 
-	void Start ()
+    #region Start
+
+    void Start()
     {
         GetNearAnchor();
 
         CreateFlowObject();
 
-	}
+    }
 
     void GetNearAnchor()
     {
@@ -30,8 +34,9 @@ public class CreateFlow : MonoBehaviour {
         {
             if (Vector3.Distance(transform.position, obj.transform.position) < distance)
             {
-                target = obj.transform.position;
-                flowVector = target - transform.position;
+                targetPosition = obj.transform.position;
+                targetGameObjct = obj;
+                flowVector = targetPosition - transform.position;
                 distance = flowVector.magnitude;
             }
         }
@@ -53,10 +58,10 @@ public class CreateFlow : MonoBehaviour {
         capcol.isTrigger = true;
 
         //FlowScriptをアタッチする
-        boxCol.AddComponent <Flow>();
+        boxCol.AddComponent<Flow>();
         boxCol.GetComponent<Flow>().FlowVector = flowVector;
         //流れのベクトルに合わせて回転させる
-        boxCol.transform.position = Vector3.Lerp(target, transform.position, 0.5f);
+        boxCol.transform.position = Vector3.Lerp(targetPosition, transform.position, 0.5f);
         boxCol.transform.rotation = Quaternion.FromToRotation(Vector3.up, flowVector.normalized);
 
         //オブジェクトとの親子関係に加える
@@ -68,15 +73,31 @@ public class CreateFlow : MonoBehaviour {
 
     void CreateFlowParticle()
     {
-        FlowParticle.startLifetime = 0.2f*flowVector.magnitude;
+        FlowParticle.startLifetime = 0.2f * flowVector.magnitude;
         //流れのパーティクルをインスタンス、子のオブジェクトとして追加
-        ParticleSystem obj= (ParticleSystem)Instantiate(FlowParticle,transform.position, Quaternion.FromToRotation(Vector3.forward, flowVector.normalized));
+        ParticleSystem obj = (ParticleSystem)Instantiate(FlowParticle, transform.position, Quaternion.FromToRotation(Vector3.forward, flowVector.normalized));
         obj.transform.parent = transform;
     }
+    #endregion
 
-    // Update is called once per frame
-    void Update ()
+    #region Update
+    void Update()
     {
-	
-	}
+        DestroyChiled();
+
+
+    }
+
+    //流れの参照先のオブジェクトが存在していなければ流れを消す
+    void DestroyChiled()
+    {
+        if (targetGameObjct != null) return;
+
+        if (transform.childCount > 0)
+        {
+            for (int i = 0; i < transform.childCount; i++)
+                Destroy(transform.GetChild(i).gameObject);
+        }
+    }
+    #endregion
 }
