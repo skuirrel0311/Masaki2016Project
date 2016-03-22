@@ -64,7 +64,7 @@ public class Player : MonoBehaviour
         animator.SetBool("Jump", IsJump);
 
         //プレイヤーがジャンプをしようとしたとき
-        if (Input.GetKeyDown(KeyCode.Space) && IsJump == false && IsDropDown == false)
+        if (Input.GetButtonDown("Jump") && IsJump == false && IsDropDown == false)
         {
             //ジャンプ時の地点を保持
             atJumpPosition = transform.position;
@@ -72,7 +72,7 @@ public class Player : MonoBehaviour
         }
 
         //ジャンプキー長押し中
-        if (Input.GetKey(KeyCode.Space) && IsDropDown == false)
+        if (Input.GetButton("Jump") && IsDropDown == false)
         {
             //最高地点に達した
             if (transform.position.y >= atJumpPosition.y + jumpLimitPositionY)
@@ -83,7 +83,7 @@ public class Player : MonoBehaviour
         }
 
         //ジャンプキーを離した
-        if (Input.GetKeyUp(KeyCode.Space))
+        if (Input.GetButtonUp("Jump"))
         {
             IsDropDown = true;
         }
