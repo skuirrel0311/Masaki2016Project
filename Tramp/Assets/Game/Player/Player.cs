@@ -14,9 +14,11 @@ public class Player : MonoBehaviour
     //ジャンプキーを長押しした際の上限
     public float jumpLimitPositionY = 5;
     //カメラは上下には動かない(予定)
-    public bool IsJump { get; private set; }
+    //public bool IsJump { get; private set; }
+    public bool IsJump;
     //ジャンプして落ちてる
-    private bool IsDropDown;
+    //private bool IsDropDown;
+    public bool IsDropDown;
     //ジャンプキーが押された時の座標
     private Vector3 atJumpPosition;
 
@@ -72,7 +74,7 @@ public class Player : MonoBehaviour
         }
 
         //ジャンプキー長押し中
-        if (Input.GetButton("Jump") && IsDropDown == false)
+        if (Input.GetButton("Jump") && IsDropDown == false && IsJump == true)
         {
             //最高地点に達した
             if (transform.position.y >= atJumpPosition.y + jumpLimitPositionY)
@@ -83,7 +85,7 @@ public class Player : MonoBehaviour
         }
 
         //ジャンプキーを離した
-        if (Input.GetButtonUp("Jump"))
+        if (Input.GetButtonUp("Jump") && IsJump == true)
         {
             IsDropDown = true;
         }
@@ -99,20 +101,9 @@ public class Player : MonoBehaviour
     {
         //ジャンプして落ちていなかったら
         if (IsDropDown == false) return;
+        if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Anchor") return;
 
-        if (collision.gameObject.tag == "Plane" || collision.gameObject.tag == "Anchor")
-        {
-            IsJump = false;
-            IsDropDown = false;
-
-            //着地時ジャンプキーを押したままなら
-            if (Input.GetKey(KeyCode.Space))
-            {
-                //ジャンプ時の地点を保持
-                atJumpPosition = transform.position;
-                IsJump = true;
-                animator.SetBool("Jump", false);
-            }
-        }
+        IsJump = false;
+        IsDropDown = false;
     }
 }
