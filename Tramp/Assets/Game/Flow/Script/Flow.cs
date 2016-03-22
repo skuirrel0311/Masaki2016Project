@@ -33,7 +33,7 @@ public class Flow : MonoBehaviour {
 
     void OnTriggerStay(Collider col)
     {
-        if (col.tag != "Anchor")
+        if (col.tag == "Player"||col.tag=="Ammo")
         {
             col.gameObject.transform.Translate(flowVector*Time.deltaTime*speed,Space.World);
         }

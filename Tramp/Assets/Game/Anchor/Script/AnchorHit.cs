@@ -7,9 +7,9 @@ public class AnchorHit : MonoBehaviour {
     //何回ヒットすれば壊れるか
     int Hp=10;
 
-    void OnTriggerEnter(Collider col)
+    void OnCollisionEnter(Collision col)
     {
-        if (col.tag=="Ammo")
+        if (col.gameObject.tag=="Ammo")
         {
             Hp--;
             //Hpが0になったらDestroy
