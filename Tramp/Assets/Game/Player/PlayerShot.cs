@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class PlayerShot : MonoBehaviour {
+public class PlayerShot : MonoBehaviour
+{
 
     [SerializeField]
     GameObject Ammo;
@@ -10,21 +11,21 @@ public class PlayerShot : MonoBehaviour {
     GameObject Nozzle;
 
     [SerializeField]
-    float MaxAngle = 30;
+    float MaxAngle = 30;//稼働できる最大角度
 
     private Vector3 NozzleAngle;
 
     // Use this for initialization
-    void Start ()
+    void Start()
     {
         NozzleAngle = Vector3.zero;
-	}
-	
-	// Update is called once per frame
-	void Update ()
+    }
+
+    // Update is called once per frame
+    void Update()
     {
-        float vertical=0;
-        float horizontal=0;
+        float vertical = 0;
+        float horizontal = 0;
 
         if (Input.GetKey(KeyCode.R))
         {
@@ -38,13 +39,12 @@ public class PlayerShot : MonoBehaviour {
         vertical = Input.GetAxis("Vertical2");
         horizontal = Input.GetAxis("Horizontal2");
 
-        NozzleAngle += new Vector3(vertical,horizontal,0);
+        NozzleAngle += new Vector3(vertical, horizontal, 0);
         //制限内であれば照準を自由に移動
         if (NozzleAngle.magnitude < MaxAngle)
         {
             Nozzle.transform.Rotate(vertical, horizontal, 0);
         }
-        //制限に引っかかれば制限する
         else
         {
             NozzleAngle = NozzleAngle.normalized * MaxAngle;
@@ -53,9 +53,9 @@ public class PlayerShot : MonoBehaviour {
 
         if (Input.GetButtonDown("Fire2"))
         {
-            Instantiate(Ammo,Nozzle.transform.position,Nozzle.transform.rotation);
+            Instantiate(Ammo, Nozzle.transform.position, Nozzle.transform.rotation);
         }
-	}
+    }
 
 
 }
