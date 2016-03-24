@@ -33,9 +33,24 @@ public class Flow : MonoBehaviour {
 
     void OnTriggerStay(Collider col)
     {
-        if (col.tag != "Anchor")
+        if (col.tag == "Player")
         {
+            Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
+            body.useGravity = false;
             col.gameObject.transform.Translate(flowVector*Time.deltaTime*speed,Space.World);
+        }
+        if (col.tag == "Ammo")
+        {
+            col.gameObject.transform.Translate(flowVector * Time.deltaTime * speed, Space.World);
+        }
+    }
+
+    void OnTriggerExit(Collider col)
+    {
+        if (col.tag == "Player")
+        {
+            Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
+            body.useGravity = true;
         }
     }
 }
