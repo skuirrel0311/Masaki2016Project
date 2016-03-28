@@ -12,22 +12,21 @@ public class Flow : MonoBehaviour {
     }
     private Vector3 flowVector;
 
+    private Vector3 PlayerVector;
 
-	// Use this for initialization
-	void Start () {
-
+    public Vector3 TargetPosition
+    {
+        get { return targetPosition; }
+        set { targetPosition = value; }
     }
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+    private Vector3 targetPosition;
 
     void OnTriggerEnter(Collider col)
     {
-        if (col.tag != "Anchor")
+        if (col.tag == "Player")
         {
-            
+            PlayerVector = targetPosition - (col.transform.position+Vector3.up);
+            PlayerVector.Normalize();
         }
     }
 
@@ -37,11 +36,11 @@ public class Flow : MonoBehaviour {
         {
             Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
             body.useGravity = false;
-            col.gameObject.transform.Translate(flowVector*Time.deltaTime*speed,Space.World);
+            col.gameObject.transform.Translate(PlayerVector*Time.deltaTime*speed,Space.World);
         }
         if (col.tag == "Ammo")
         {
-            col.gameObject.transform.Translate(flowVector * Time.deltaTime * speed, Space.World);
+            col.gameObject.transform.Translate(FlowVector * Time.deltaTime * speed, Space.World);
         }
     }
 
