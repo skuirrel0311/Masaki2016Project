@@ -6,6 +6,8 @@ public class CreateFlow : MonoBehaviour
 
     [SerializeField]
     ParticleSystem FlowParticle;
+    [SerializeField]
+    GameObject FlowEffect;
 
     Vector3 targetPosition;
     GameObject targetGameObjct;
@@ -48,13 +50,14 @@ public class CreateFlow : MonoBehaviour
     void CreateFlowObject()
     {
         //流れのコリジョン用オブジェクト
-        GameObject boxCol = new GameObject("Flow");
+        GameObject boxCol = Instantiate(FlowEffect);
+        boxCol.transform.localScale = new Vector3(2,flowVector.magnitude/2,2);
 
         //CapsuleColliderをアタッチする
         boxCol.AddComponent<CapsuleCollider>();
         CapsuleCollider capcol = boxCol.GetComponent<CapsuleCollider>();
-        capcol.height = flowVector.magnitude;
-        capcol.radius = collsionRadius;
+        capcol.height = flowVector.magnitude/ (flowVector.magnitude / 2);
+        capcol.radius = collsionRadius/2;
         capcol.isTrigger = true;
 
         //FlowScriptをアタッチする
