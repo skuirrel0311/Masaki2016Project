@@ -38,10 +38,13 @@ public class StateWander : State<Enemy>
 
     private Vector3 GetRandomPosition()
     {
-        float fieldSize = 10;
-        return new Vector3(Random.Range(-fieldSize,fieldSize),0,Random.Range(-fieldSize,fieldSize));
+        Vector2 fieldSize = new Vector2(30,75);
+        return new Vector3(Random.Range(-fieldSize.x,fieldSize.x),0,Random.Range(-fieldSize.y,fieldSize.y));
     }
 
+    /// <summary>
+    /// ターゲットに指定した距離より近い場合はtrueを返します
+    /// </summary>
     private bool IsNearThePosition(Vector3 targetPosition, float distance)
     {
         float distanceToTarget = (owner.transform.position - targetPosition).magnitude;

@@ -13,9 +13,8 @@ public class Player : MonoBehaviour
     public Vector3 jumpVec = new Vector3(0, 0.3f, 0);
     //ジャンプキーを長押しした際の上限
     public float jumpLimitPositionY = 5;
-    //カメラは上下には動かない(予定)
-    //public bool IsJump { get; private set; }
-    public bool IsJump;
+
+    public bool IsJump { get; private set; }
     //ジャンプして落ちてる
     //private bool IsDropDown;
     public bool IsDropDown;

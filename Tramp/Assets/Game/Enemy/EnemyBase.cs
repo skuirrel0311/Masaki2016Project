@@ -9,6 +9,7 @@ public abstract class EnemyBase<T, Tenum> : MonoBehaviour
 
     protected StateManager<T> stateManager;
 
+
     public virtual void ChangeState(Tenum state)
     {
         if (stateManager == null) return;
