@@ -11,17 +11,26 @@ public enum EnemyState
 public class Enemy : EnemyBase<Enemy,EnemyState>
 {
     public float speed = 5;
-    private GameObject player;
-    private NavMeshAgent navMeshAgent;
-
+    public GameObject player;
+    public NavMeshAgent navMeshAgent;
+    
     void Start()
     {
         player = GameObject.Find("Player");
         navMeshAgent = GetComponent<NavMeshAgent>();
+
+        stateManager = new StateManager<Enemy>();
+
+        //ステートのリストにEnemyStateと同じ順番で入れる
+        stateList.Add(new StateWander(this));
+        stateList.Add(new StatePursuit(this));
+        stateList.Add(new StateAttack(this));
+
+        ChangeState(EnemyState.Wander);
     }
 
     void Update()
     {
-        navMeshAgent.destination = player.transform.position;
+        stateManager.Update();
     }
 }

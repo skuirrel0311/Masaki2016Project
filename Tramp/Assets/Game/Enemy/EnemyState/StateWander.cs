@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// 敵AI(巡回)
+/// </summary>
 public class StateWander : State<Enemy>
 {
-    private Vector3 targetPosition;
-
     public StateWander(Enemy owner)
         : base(owner)
     {
@@ -13,23 +14,23 @@ public class StateWander : State<Enemy>
 
     public override void Enter()
     {
-        targetPosition = GetRandomPosition();
+        owner.navMeshAgent.destination = GetRandomPosition();
     }
 
     public override void Execute()
     {
-        if (IsNearThePosition(targetPosition, 5))
+        //目的地に近づいたか？
+        if (IsNearThePosition(owner.navMeshAgent.destination, 5))
         {
             //目的地を再設定
-            targetPosition = GetRandomPosition();
+            owner.navMeshAgent.destination = GetRandomPosition();
         }
-
-        // 目標地点の方向を向く
-        Quaternion targetRotation = Quaternion.LookRotation(targetPosition - owner.transform.position);
-        owner.transform.rotation = Quaternion.Slerp(owner.transform.rotation, targetRotation, Time.deltaTime * 360);
-
-        // 前方に進む
-        owner.transform.Translate(Vector3.forward * owner.speed * Time.deltaTime);
+        //プレイヤーに近づいたか？
+        if (IsNearThePosition(owner.player.transform.position, 10))
+        {
+            //追跡する
+            owner.ChangeState(EnemyState.Pursuit);
+        }
     }
 
     public override void Exit()
@@ -45,7 +46,7 @@ public class StateWander : State<Enemy>
     /// <summary>
     /// ターゲットに指定した距離より近い場合はtrueを返します
     /// </summary>
-    private bool IsNearThePosition(Vector3 targetPosition, float distance)
+    protected bool IsNearThePosition(Vector3 targetPosition, float distance)
     {
         float distanceToTarget = (owner.transform.position - targetPosition).magnitude;
         if (distanceToTarget > distance) return false;

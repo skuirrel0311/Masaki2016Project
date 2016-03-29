@@ -1,8 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class State<T>
+public abstract class State<T>
 {
+    /// <summary>
+    /// ステートの所持者
+    /// </summary>
     protected T owner;
 
     public State(T owner)
@@ -10,12 +13,18 @@ public class State<T>
         this.owner = owner;
     }
 
-    //この状態になったときに1度だけ呼ばれる
+    /// <summary>
+    /// この状態になったときに1度だけ呼ばれる
+    /// </summary>
     public virtual void Enter() { }
 
-    //この状態のとき毎フレーム呼ばれる
+    /// <summary>
+    /// この状態のとき毎フレーム呼ばれる
+    /// </summary>
     public virtual void Execute() { }
 
-    //この状態から別のステートになったときに1度だけ呼ばれる
+    /// <summary>
+    /// この状態から別のステートになったときに1度だけ呼ばれる
+    /// </summary>
     public virtual void Exit() { }
 }
