@@ -6,6 +6,8 @@ public class CreateFlow : MonoBehaviour
 
     [SerializeField]
     ParticleSystem FlowParticle;
+    [SerializeField]
+    GameObject FlowEffect;
 
     Vector3 targetPosition;
     GameObject targetGameObjct;
@@ -48,20 +50,24 @@ public class CreateFlow : MonoBehaviour
     void CreateFlowObject()
     {
         //流れのコリジョン用オブジェクト
-        GameObject boxCol = new GameObject("Flow");
+        GameObject boxCol = Instantiate(FlowEffect);
+        boxCol.transform.localScale = new Vector3(2,flowVector.magnitude*0.5f,2);
 
         //CapsuleColliderをアタッチする
         boxCol.AddComponent<CapsuleCollider>();
         CapsuleCollider capcol = boxCol.GetComponent<CapsuleCollider>();
-        capcol.height = flowVector.magnitude;
-        capcol.radius = collsionRadius;
+        capcol.height = flowVector.magnitude/ (flowVector.magnitude*0.5f);
+        capcol.radius = collsionRadius/2;
         capcol.isTrigger = true;
 
         //FlowScriptをアタッチする
         boxCol.AddComponent<Flow>();
-        boxCol.GetComponent<Flow>().FlowVector = flowVector;
+        Flow flow = boxCol.GetComponent<Flow>();
+        flow.FlowVector = flowVector;
+        flow.TargetPosition = targetPosition;
         //流れのベクトルに合わせて回転させる
-        boxCol.transform.position = Vector3.Lerp(targetPosition, transform.position, 0.5f);
+        float leapPosition = 0.6f;//このくらいがバグりにくいと思われる
+        boxCol.transform.position = Vector3.Lerp(targetPosition, transform.position, leapPosition);
         boxCol.transform.rotation = Quaternion.FromToRotation(Vector3.up, flowVector.normalized);
 
         //オブジェクトとの親子関係に加える
@@ -84,8 +90,6 @@ public class CreateFlow : MonoBehaviour
     void Update()
     {
         DestroyChiled();
-
-
     }
 
     //流れの参照先のオブジェクトが存在していなければ流れを消す
