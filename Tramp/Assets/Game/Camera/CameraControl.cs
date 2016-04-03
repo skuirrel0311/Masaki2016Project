@@ -8,12 +8,15 @@ public class CameraControl : MonoBehaviour
 
     private Vector3 oldPlayerPosition;
     private GameObject player;
+    private GameObject cameraObj;
     private GameObject nearAnchor;
-
+    private Vector3 lookatPosition;
+    private float timer;
     void Start()
     {
         rotationY = 0;
         player = GameObject.Find("Player");
+        cameraObj = transform.FindChild("Main Camera").gameObject;
         oldPlayerPosition = player.transform.position;
     }
 
@@ -21,34 +24,61 @@ public class CameraControl : MonoBehaviour
     {
         PlayerTrace();
 
+        //ロックオンの処理押された時と押している時で処理を分ける
         if (Input.GetKeyDown(KeyCode.R))
         {
-            nearAnchor = GetNearAnchor();
+            CameraLockOnStart();
         }
-
         if (Input.GetKey(KeyCode.R))
         {
-            if (nearAnchor == null) return;
-            if (Input.GetKeyDown(KeyCode.D))
-            {
-                Destroy(nearAnchor);
-            }
-            Vector3 vec = nearAnchor.transform.position - transform.position;
-            transform.rotation = Quaternion.Euler(0,VectorToAngle(vec.x,vec.z), 0);
+            AnchorLockOn();
             return;
         }
 
         float mouseX = Input.GetAxis("Horizontal2");
 
         rotationY += mouseX * rotationSpeed;
-
-        transform.rotation = Quaternion.Euler(0, rotationY, 0);
+        cameraObj.transform.rotation = Quaternion.Euler(0, cameraObj.transform.rotation.y, 0);
+        transform.rotation = Quaternion.Euler(0,rotationY, 0);
     }
 
     private float VectorToAngle(float a,float b)
     {
-         return Mathf.Atan2(a, b) * 180 / Mathf.PI;
+         return Mathf.Atan2(a, b) * 180.0f / Mathf.PI;
     }
+
+    /// <summary>
+    /// ロックオンをするためのキーを押した時の処理
+    /// </summary>
+    private void CameraLockOnStart()
+    {
+        nearAnchor = GetNearAnchor();
+        Camera cam = cameraObj.GetComponent<Camera>();
+        lookatPosition = cam.ScreenToWorldPoint(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, cam.nearClipPlane));
+        timer = 0;
+    }
+
+    /// <summary>
+    ///指定されたアンカーのある方向に向かってカメラを移動
+    /// </summary>
+    private void AnchorLockOn()
+    {
+        if (nearAnchor == null) return;
+        timer = Mathf.Min(timer + Time.deltaTime, 1);
+
+        //削除キーが押された場合は対象のアンカーを削除する
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            Destroy(nearAnchor);
+        }
+        //アンカーのある方向を取得
+        Vector3 vec = nearAnchor.transform.position - transform.position;
+        //オブジェクトのある方向に合わせたカメラのポジション移動
+        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(0, VectorToAngle(vec.x, vec.z), 0), timer);
+        //カメラの注視点を移動
+        cameraObj.transform.LookAt(Vector3.Lerp(lookatPosition, nearAnchor.transform.position, timer));
+    }
+
 
     //todo:CreateFlowとメソッドがかぶっているのでライブラリを作成する
     GameObject GetNearAnchor()
@@ -73,6 +103,9 @@ public class CameraControl : MonoBehaviour
         return gameObject;
     }
 
+    /// <summary>
+    /// プレイヤーの移動に合わせてカメラの位置を移動
+    /// </summary>
     private void PlayerTrace()
     {
         Vector3 movement = player.transform.position - oldPlayerPosition;

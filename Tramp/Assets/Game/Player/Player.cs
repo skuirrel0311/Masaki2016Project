@@ -39,14 +39,17 @@ public class Player : MonoBehaviour
     {
         Vector3 direction = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
 
-        //入力の角度をカメラの角度に曲げる
-        direction = mainCamera.transform.rotation * direction;
-
         //アニメーターにパラメータを送る
         animator.SetFloat("Speed", direction.magnitude);
 
         //移動していなかったら終了
         if (direction == Vector3.zero) return;
+
+
+        //入力の角度をカメラの角度に曲げる
+        direction = mainCamera.transform.rotation * direction;
+        direction = new Vector3(direction.x, 0, direction.z);
+        direction.Normalize();
 
         //弧を描くように移動
         Vector3 forward = Vector3.Slerp(
