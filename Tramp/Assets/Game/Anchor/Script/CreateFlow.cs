@@ -43,8 +43,7 @@ public class CreateFlow : MonoBehaviour
             }
         }
 
-        //アンカーとしてセットする
-        gameObject.tag = "Anchor";
+
     }
 
     void CreateFlowObject()
@@ -75,6 +74,9 @@ public class CreateFlow : MonoBehaviour
 
         //流れのパーティクル
         CreateFlowParticle();
+
+        //アンカーとしてセットする
+        gameObject.tag = "Anchor";
     }
 
     void CreateFlowParticle()

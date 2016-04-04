@@ -35,7 +35,7 @@ public class PlayerCreateAnchor : MonoBehaviour
     {
         //一番近いアンカーを探す
         GameObject[] objects = GameObject.FindGameObjectsWithTag("Anchor");
-        if (objects.Length <= 0) return false;
+        if (objects.Length <= 0) return true;
 
         float MinimumDistance = 1000000;
 

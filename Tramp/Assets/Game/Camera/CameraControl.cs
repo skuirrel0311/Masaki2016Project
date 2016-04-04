@@ -1,9 +1,14 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class CameraControl : MonoBehaviour
 {
-    public float rotationSpeed = 5;
+    [SerializeField]
+    private float rotationSpeed = 5;
+
+    [SerializeField]
+    private GameObject AlignmentSprite;
     private float rotationY;
 
     private Vector3 oldPlayerPosition;
@@ -12,6 +17,7 @@ public class CameraControl : MonoBehaviour
     private GameObject nearAnchor;
     private Vector3 lookatPosition;
     private float timer;
+
     void Start()
     {
         rotationY = 0;
@@ -29,17 +35,19 @@ public class CameraControl : MonoBehaviour
         {
             CameraLockOnStart();
         }
-        if (Input.GetKey(KeyCode.R))
+        if (Input.GetKey(KeyCode.R)&&nearAnchor != null)
         {
             AnchorLockOn();
             return;
         }
-
+        timer = Mathf.Max(timer-Time.deltaTime,0);
         float mouseX = Input.GetAxis("Horizontal2");
-
+        AlignmentSprite.SetActive(false);
         rotationY += mouseX * rotationSpeed;
-        cameraObj.transform.rotation = Quaternion.Euler(0, cameraObj.transform.rotation.y, 0);
-        transform.rotation = Quaternion.Euler(0,rotationY, 0);
+
+        cameraObj.transform.rotation = Quaternion.Lerp(Quaternion.Euler(0, cameraObj.transform.rotation.y, 0), cameraObj.transform.rotation, timer);
+        //オブジェクトのある方向に合わせたカメラのポジション移動
+        transform.rotation = Quaternion.Lerp(Quaternion.Euler(0, rotationY, 0), transform.rotation, timer);
     }
 
     private float VectorToAngle(float a,float b)
@@ -63,9 +71,8 @@ public class CameraControl : MonoBehaviour
     /// </summary>
     private void AnchorLockOn()
     {
-        if (nearAnchor == null) return;
         timer = Mathf.Min(timer + Time.deltaTime, 1);
-
+        AlignmentImage();
         //削除キーが押された場合は対象のアンカーを削除する
         if (Input.GetKeyDown(KeyCode.D))
         {
@@ -79,6 +86,13 @@ public class CameraControl : MonoBehaviour
         cameraObj.transform.LookAt(Vector3.Lerp(lookatPosition, nearAnchor.transform.position, timer));
     }
 
+    private void AlignmentImage()
+    {
+        AlignmentSprite.SetActive(true);
+        Image img = AlignmentSprite.GetComponent<Image>();
+        img.color = new Color(img.color.r, img.color.g, img.color.b, timer * timer);
+        AlignmentSprite.transform.localScale = Vector3.one * 2 * ((1 - timer * timer )+ 0.5f);
+    }
 
     //todo:CreateFlowとメソッドがかぶっているのでライブラリを作成する
     GameObject GetNearAnchor()
