@@ -3,6 +3,9 @@ using System.Collections;
 
 public class CameraControl : MonoBehaviour
 {
+    public Camera thirdPersonCamera;
+    public Camera firstPersonCamera;
+
     public float rotationSpeed = 5;
     private float rotationY;
 
