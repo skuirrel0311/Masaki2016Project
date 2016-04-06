@@ -57,7 +57,8 @@ public class Player : MonoBehaviour
         //向きを変える
         transform.LookAt(transform.position + forward);
 
-        transform.Translate(direction * moveSpeed * Time.deltaTime, Space.World);
+        transform.position += direction * moveSpeed * Time.deltaTime;
+        //transform.Translate(direction * moveSpeed * Time.deltaTime, Space.World);
     }
 
     void Jump()
