@@ -21,6 +21,12 @@ public class CameraControl : MonoBehaviour
 
     void Update()
     {
+        if (thirdPersonCamera.enabled) ThirdPersonCameraControl();
+        if (firstPersonCamera.enabled) FirstPersonCameraControl();
+    }
+
+    void ThirdPersonCameraControl()
+    {
         float mouseX = Input.GetAxis("Horizontal2");
 
         rotationY += mouseX * rotationSpeed;
@@ -36,5 +42,10 @@ public class CameraControl : MonoBehaviour
         transform.position += movement;
 
         oldPlayerPosition = player.transform.position;
+    }
+
+    void FirstPersonCameraControl()
+    {
+
     }
 }

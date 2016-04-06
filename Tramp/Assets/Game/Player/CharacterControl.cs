@@ -9,6 +9,7 @@ public class CharacterControl : MonoBehaviour
 
     private Animator animator;
     private GameObject ThirdPersonCamera;
+    public Camera FirstPersonCamera;
 
     [SerializeField]
     private Vector3 jumpVec = new Vector3(0, 0.3f, 0);
@@ -50,7 +51,8 @@ public class CharacterControl : MonoBehaviour
         //入力で移動ベクトルを取る
         Vector3 direction = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
 
-        Move(direction);
+        if (FirstPersonCamera.enabled) FirstPersonMove(direction);
+        else ThirdPersonMove(direction);
         Jump();
 
         //アニメーターにパラメータを送る
@@ -63,7 +65,7 @@ public class CharacterControl : MonoBehaviour
     /// 移動
     /// </summary>
     /// <param name="movement">移動量</param>
-    void Move(Vector3 movement)
+    void ThirdPersonMove(Vector3 movement)
     {
         //入力の角度をカメラの角度に曲げる
         movement = ThirdPersonCamera.transform.rotation * movement;
@@ -82,6 +84,19 @@ public class CharacterControl : MonoBehaviour
 
         transform.Translate(movement * moveSpeed * Time.deltaTime, Space.World);
     }
+
+
+    void FirstPersonMove(Vector3 movement)
+    {
+        //入力の角度をカメラの角度に曲げる
+        movement = ThirdPersonCamera.transform.rotation * movement;
+
+        //移動していなかったら終了
+        if (movement == Vector3.zero) return;
+
+        transform.Translate(movement * moveSpeed * Time.deltaTime, Space.World);
+    }
+
 
     void Jump()
     {
