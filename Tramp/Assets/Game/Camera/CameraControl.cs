@@ -49,6 +49,7 @@ public class CameraControl : MonoBehaviour
             AnchorLockOn();
             return;
         }
+        LockonDecision = false;
         timer = Mathf.Max(timer - Time.deltaTime, 0);
         float mouseX = Input.GetAxis("Horizontal2");
         AlignmentSprite.SetActive(false);
