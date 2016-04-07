@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using GamepadInput;
 
 public class CameraControl : MonoBehaviour
 {
@@ -7,18 +8,21 @@ public class CameraControl : MonoBehaviour
     private float rotationY;
 
     private Vector3 oldPlayerPosition;
+    [SerializeField]
     private GameObject player;
+
+    [SerializeField]
+    private int playerNo;
 
     void Start()
     {
         rotationY = 0;
-        player = GameObject.Find("Player");
         oldPlayerPosition = player.transform.position;
     }
 
     void Update()
     {
-        float mouseX = Input.GetAxis("Horizontal2");
+        float mouseX = GamePad.GetAxis(GamePad.Axis.RightStick,(GamePad.Index)playerNo).x;
 
         rotationY += mouseX * rotationSpeed;
 
