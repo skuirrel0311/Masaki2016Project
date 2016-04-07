@@ -24,7 +24,7 @@ public class PlayerCreateAnchor : MonoBehaviour
 
             if (CheckNearAnchor())
             {
-                Instantiate(InstanceAnchor, transform.position + transform.forward+Vector3.up, transform.rotation);
+                Instantiate(InstanceAnchor, transform.position + transform.forward*2+Vector3.up, transform.rotation);
             }
         }
     }
@@ -35,7 +35,7 @@ public class PlayerCreateAnchor : MonoBehaviour
     {
         //一番近いアンカーを探す
         GameObject[] objects = GameObject.FindGameObjectsWithTag("Anchor");
-        if (objects.Length <= 0) return false;
+        if (objects.Length <= 0) return true;
 
         float MinimumDistance = 1000000;
 

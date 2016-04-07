@@ -9,6 +9,7 @@ public class CreateFlow : MonoBehaviour
     [SerializeField]
     GameObject FlowEffect;
 
+    GameObject targetAnchor;
     Vector3 targetPosition;
     GameObject targetGameObjct;
     Vector3 flowVector;
@@ -18,6 +19,8 @@ public class CreateFlow : MonoBehaviour
 
     void Start()
     {
+        targetAnchor = GameObject.Find("Camera").GetComponent<CameraControl>().targetAnchor;
+
         GetNearAnchor();
 
         CreateFlowObject();
@@ -26,12 +29,19 @@ public class CreateFlow : MonoBehaviour
 
     void GetNearAnchor()
     {
+        float distance = 1000000;
+        if (targetAnchor != null)
+        {
+            targetPosition = targetAnchor.transform.position;
+            targetGameObjct = targetAnchor;
+            flowVector = targetPosition - transform.position;
+            distance = flowVector.magnitude;
+            return;
+        }
+
         //一番近いアンカーを探す
         GameObject[] objects = GameObject.FindGameObjectsWithTag("Anchor");
         if (objects.Length <= 0) return;
-
-        float distance = 1000000;
-
         foreach (GameObject obj in objects)
         {
             if (Vector3.Distance(transform.position, obj.transform.position) < distance)
@@ -43,8 +53,7 @@ public class CreateFlow : MonoBehaviour
             }
         }
 
-        //アンカーとしてセットする
-        gameObject.tag = "Anchor";
+
     }
 
     void CreateFlowObject()
@@ -75,6 +84,9 @@ public class CreateFlow : MonoBehaviour
 
         //流れのパーティクル
         CreateFlowParticle();
+
+        //アンカーとしてセットする
+        gameObject.tag = "Anchor";
     }
 
     void CreateFlowParticle()
