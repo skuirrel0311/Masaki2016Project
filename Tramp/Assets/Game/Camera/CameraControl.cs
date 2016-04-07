@@ -10,6 +10,8 @@ public class CameraControl : MonoBehaviour
         Right, Left
     }
 
+    public GameObject targetAnchor;
+
     [SerializeField]
     private float rotationSpeed = 5;
 
@@ -20,9 +22,9 @@ public class CameraControl : MonoBehaviour
     private Vector3 oldPlayerPosition;
     private GameObject player;
     private GameObject cameraObj;
-    private GameObject targetAnchor;
     private Vector3 lookatPosition;
     private float timer;
+    private bool LockonDecision;
 
     void Start()
     {
@@ -30,6 +32,7 @@ public class CameraControl : MonoBehaviour
         player = GameObject.Find("Player");
         cameraObj = transform.FindChild("Main Camera").gameObject;
         oldPlayerPosition = player.transform.position;
+        LockonDecision = false;
     }
 
     void Update()
@@ -67,9 +70,14 @@ public class CameraControl : MonoBehaviour
     private void CameraLockOnStart()
     {
         targetAnchor = GetNearAnchor();
+        InitLookatPosition();
+        timer = 0;
+    }
+
+    private void InitLookatPosition()
+    {
         Camera cam = cameraObj.GetComponent<Camera>();
         lookatPosition = cam.ScreenToWorldPoint(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, cam.nearClipPlane));
-        timer = 0;
     }
 
     /// <summary>
@@ -78,7 +86,12 @@ public class CameraControl : MonoBehaviour
     private void AnchorLockOn()
     {
         timer = Mathf.Min(timer + Time.deltaTime, 1);
-        AlignmentImage();
+
+        if (timer == 1) LockonDecision = true;
+        if (LockonDecision)
+            AlignmentImage(1);
+        else
+            AlignmentImage(timer);
         //削除キーが押された場合は対象のアンカーを削除する
         if (Input.GetKeyDown(KeyCode.D))
         {
@@ -100,7 +113,7 @@ public class CameraControl : MonoBehaviour
     /// <summary>
     ///照準画像の処理
     /// </summary>
-    private void AlignmentImage()
+    private void AlignmentImage(float timer)
     {
         AlignmentSprite.SetActive(true);
         Image img = AlignmentSprite.GetComponent<Image>();
@@ -136,7 +149,7 @@ public class CameraControl : MonoBehaviour
             float crossProduct = CrossProductToVector2(originAnchorVec, vec);
             bool withinAngle = false;
             //一番角度が小さいオブジェクトを検索する
-            if ((side == Side.Right && crossProduct < 0)|| side == Side.Left && crossProduct > 0)
+            if ((side == Side.Right && crossProduct < 0) || side == Side.Left && crossProduct > 0)
                 withinAngle = (tmpAngle >= 0 && tmpAngle < angle);
 
             if (withinAngle)
@@ -146,10 +159,17 @@ public class CameraControl : MonoBehaviour
             }
         }
         if (nextAnchor == null)
+        {
             nextAnchor = targetAnchor;
+        }
+
+        else
+        {
+            InitLookatPosition();
+            timer = 0;
+        }
 
         return nextAnchor;
-
     }
 
     /// <summary>

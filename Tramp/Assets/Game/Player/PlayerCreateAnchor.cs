@@ -24,7 +24,7 @@ public class PlayerCreateAnchor : MonoBehaviour
 
             if (CheckNearAnchor())
             {
-                Instantiate(InstanceAnchor, transform.position + transform.forward+Vector3.up, transform.rotation);
+                Instantiate(InstanceAnchor, transform.position + transform.forward*2+Vector3.up, transform.rotation);
             }
         }
     }
