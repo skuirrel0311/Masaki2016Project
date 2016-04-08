@@ -7,6 +7,9 @@ struct Bullet
 	float3 accel;
 	float4 col;
 };
+
+//時間
+float time;
  
 // 前回の更新からの経過時間
 float DeltaTime;
@@ -19,5 +22,5 @@ RWStructuredBuffer<Bullet> Bullets;
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
 	// それぞれの位置情報に移動ベクトルを加算
-    Bullets[id.x].pos += Bullets[id.x].accel * DeltaTime;
+    Bullets[id.x].pos += sin(time/10.0f)*Bullets[id.x].accel * DeltaTime;
 }

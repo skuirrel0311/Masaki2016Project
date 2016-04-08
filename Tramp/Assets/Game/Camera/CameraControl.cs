@@ -55,7 +55,7 @@ public class CameraControl : MonoBehaviour
         AlignmentSprite.SetActive(false);
         rotationY += mouseX * rotationSpeed;
 
-        cameraObj.transform.rotation = Quaternion.Lerp(Quaternion.Euler(0, cameraObj.transform.rotation.y, 0), cameraObj.transform.rotation, timer);
+        cameraObj.transform.localRotation = Quaternion.Lerp(Quaternion.Euler(0, cameraObj.transform.rotation.y, 0), cameraObj.transform.rotation, timer);
         //オブジェクトのある方向に合わせたカメラのポジション移動
         transform.rotation = Quaternion.Lerp(Quaternion.Euler(0, rotationY, 0), transform.rotation, timer);
     }

@@ -2,9 +2,9 @@
 using System.Runtime.InteropServices;
 
 /// <summary>
-/// 弾の構造体
+/// 粒子の構造体
 /// </summary>
-struct Bullet
+struct Particle
 {
     /// <summary>
     /// 座標
@@ -24,7 +24,7 @@ struct Bullet
     /// <summary>
     /// コンストラクタ
     /// </summary>
-    public Bullet(Vector3 pos, Vector3 accel, Color color)
+    public Particle(Vector3 pos, Vector3 accel, Color color)
     {
         this.pos = pos;
         this.accel = accel;
@@ -33,35 +33,35 @@ struct Bullet
 }
 
 /// <summary>
-/// 沢山の弾を管理するクラス
+/// 沢山の粒子を管理するクラス
 /// </summary>
-public class MenyBullets : MonoBehaviour
+public class LightEffects : MonoBehaviour
 {
 
     /// <summary>
-    /// 弾をレンダリングするシェーダー
+    /// レンダリングするシェーダー
     /// </summary>
-    public Shader bulletsShader;
+    public Shader ParticleShader;
 
     /// <summary>
-    /// 弾のテクスチャ
+    /// テクスチャ
     /// </summary>
-    public Texture bulletsTexture;
+    public Texture ParticleTexture;
 
     /// <summary>
-    /// 弾の更新を行うコンピュートシェーダー
+    /// 更新を行うコンピュートシェーダー
     /// </summary>
-    public ComputeShader bulletsComputeShader;
+    public ComputeShader ParticleComputeShader;
 
     /// <summary>
-    /// 弾のマテリアル
+    /// マテリアル
     /// </summary>
-    Material bulletsMaterial;
+    Material ParticleMaterial;
 
     /// <summary>
-    /// 弾のコンピュートバッファ
+    /// コンピュートバッファ
     /// </summary>
-    ComputeBuffer bulletsBuffer;
+    ComputeBuffer ParticleBuffer;
 
     [SerializeField]
     int maxparticles=10000;
@@ -72,8 +72,8 @@ public class MenyBullets : MonoBehaviour
     /// </summary>
     void OnDisable()
     {
-        // コンピュートバッファは明示的に破棄しないと怒られます
-        bulletsBuffer.Release();
+        // コンピュートバッファは明示的に破棄
+        ParticleBuffer.Release();
     }
 
     /// <summary>
@@ -81,7 +81,7 @@ public class MenyBullets : MonoBehaviour
     /// </summary>
     void Start()
     {
-        bulletsMaterial = new Material(bulletsShader);
+        ParticleMaterial = new Material(ParticleShader);
         InitializeComputeBuffer();
     }
 
@@ -90,9 +90,10 @@ public class MenyBullets : MonoBehaviour
     /// </summary>
     void Update()
     {
-        bulletsComputeShader.SetBuffer(0, "Bullets", bulletsBuffer);
-        bulletsComputeShader.SetFloat("DeltaTime", Time.deltaTime);
-        bulletsComputeShader.Dispatch(0, bulletsBuffer.count / 8 + 1, 1, 1);
+        ParticleComputeShader.SetBuffer(0, "Bullets", ParticleBuffer);
+        ParticleComputeShader.SetFloat("DeltaTime", Time.deltaTime);
+        ParticleComputeShader.SetFloat("time",Time.time);
+        ParticleComputeShader.Dispatch(0, ParticleBuffer.count / 8 + 1, 1, 1);
     }
 
     /// <summary>
@@ -100,23 +101,22 @@ public class MenyBullets : MonoBehaviour
     /// </summary>
     void InitializeComputeBuffer()
     {
-        // 弾数は1万個
-        bulletsBuffer = new ComputeBuffer(maxparticles, Marshal.SizeOf(typeof(Bullet)));
+        ParticleBuffer = new ComputeBuffer(maxparticles, Marshal.SizeOf(typeof(Particle)));
 
         // 配列に初期値を代入する
-        Bullet[] bullets = new Bullet[bulletsBuffer.count];
-        for (int i = 0; i < bulletsBuffer.count; i++)
+        Particle[] bullets = new Particle[ParticleBuffer.count];
+        for (int i = 0; i < ParticleBuffer.count; i++)
         {
             float ran = Random.Range(0.0f, 1.0f);
             bullets[i] =
-                new Bullet(
+                new Particle(
                     new Vector3(Random.Range(-10.0f, 10.0f), Random.Range(0f, 10.0f), Random.Range(-10.0f, 10.0f))*7.0f,
                     new Vector3(Random.Range(-1.0f, 1.0f), Random.Range(-1.0f, 1.0f), Random.Range(-1.0f, 1.0f)) * 0.2f,
                     new Color(1, 1, 1-ran*ran));
         }
 
         // バッファに適応
-        bulletsBuffer.SetData(bullets);
+        ParticleBuffer.SetData(bullets);
     }
 
     /// <summary>
@@ -126,14 +126,14 @@ public class MenyBullets : MonoBehaviour
     {
 
         // テクスチャ、バッファをマテリアルに設定
-        bulletsMaterial.SetTexture("_MainTex", bulletsTexture);
-        bulletsMaterial.SetBuffer("Bullets", bulletsBuffer);
+        ParticleMaterial.SetTexture("_MainTex", ParticleTexture);
+        ParticleMaterial.SetBuffer("Bullets", ParticleBuffer);
 
         // レンダリングを開始
-        bulletsMaterial.SetPass(0);
+        ParticleMaterial.SetPass(0);
 
-        // 1万個のオブジェクトをレンダリング
-        Graphics.DrawProcedural(MeshTopology.Points, bulletsBuffer.count);
+        //オブジェクトをレンダリング
+        Graphics.DrawProcedural(MeshTopology.Points, ParticleBuffer.count);
     }
 
 }

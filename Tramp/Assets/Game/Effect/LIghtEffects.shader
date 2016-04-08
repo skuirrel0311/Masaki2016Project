@@ -1,4 +1,4 @@
-﻿Shader "Custom/MenyBulletsShader" {
+﻿Shader "Custom/LightEffectsShader" {
 	SubShader{
 		// アルファを使う
 		ZWrite Off
@@ -105,7 +105,6 @@
 		float4 col = tex2D(_MainTex, i.tex) * i.col;
 		col.rg = 1.0f;
 		col.b += _SinTime.y;
-
 		col.b = mod(col.b,1);
 		col.a = col.b*col.a;
 
