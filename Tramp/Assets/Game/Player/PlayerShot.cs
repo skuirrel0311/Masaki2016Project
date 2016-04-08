@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using GamepadInput;
 
 public class PlayerShot : MonoBehaviour
 {
@@ -8,54 +9,40 @@ public class PlayerShot : MonoBehaviour
     GameObject Ammo;
 
     [SerializeField]
-    GameObject Nozzle;
+    GameObject mainCamera;
+    CameraControl cameraControl;
 
     [SerializeField]
-    float MaxAngle = 30;//稼働できる最大角度
+    int playerNo;
 
-    private Vector3 NozzleAngle;
+    [SerializeField]
+    float shotDistance;
 
-    // Use this for initialization
     void Start()
     {
-        NozzleAngle = Vector3.zero;
+        cameraControl = mainCamera.GetComponent<CameraControl>();
+        StartCoroutine("LongButtonDown");
     }
 
-    // Update is called once per frame
     void Update()
     {
-        float vertical = 0;
-        float horizontal = 0;
-
-        if (Input.GetKey(KeyCode.R))
-        {
-            vertical = 1.0f;
-        }
-        else if (Input.GetKey(KeyCode.F))
-        {
-            vertical = -1.0f;
-        }
-
-        vertical = Input.GetAxis("Vertical2");
-        horizontal = Input.GetAxis("Horizontal2");
-
-        NozzleAngle += new Vector3(vertical, horizontal, 0);
-        //制限内であれば照準を自由に移動
-        if (NozzleAngle.magnitude < MaxAngle)
-        {
-            Nozzle.transform.Rotate(vertical, horizontal, 0);
-        }
-        else
-        {
-            NozzleAngle = NozzleAngle.normalized * MaxAngle;
-            Nozzle.transform.localEulerAngles = NozzleAngle;
-        }
-
-        if (Input.GetButtonDown("Fire2"))
-        {
-            Instantiate(Ammo, Nozzle.transform.position, Nozzle.transform.rotation);
-        }
     }
 
+    void Shot()
+    {
+        cameraControl.shotPosition.LookAt(cameraControl.targetPosition);
+        Instantiate(Ammo, cameraControl.shotPosition.position, cameraControl.shotPosition.rotation);
 
+        transform.rotation = mainCamera.transform.rotation;
+    }
+
+    IEnumerator LongButtonDown()
+    {
+        while (true)
+        {
+            if(GamePad.GetButton(GamePad.Button.B, (GamePad.Index)playerNo))
+                Shot();
+            yield return new WaitForSeconds(shotDistance);
+        }
+    }
 }

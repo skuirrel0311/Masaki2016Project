@@ -8,18 +8,29 @@ public class Player : MonoBehaviour
 
     private Animator animator;
     private GameObject mainCamera;
-
-    /*ジャンプ系クラスに分けるべき？*/
+    
     public Vector3 jumpVec = new Vector3(0, 0.3f, 0);
     //ジャンプキーを長押しした際の上限
     public float jumpLimitPositionY = 5;
-    //カメラは上下には動かない(予定)
-    //public bool IsJump { get; private set; }
-    public bool IsJump;
-    //ジャンプして落ちてる
-    //private bool IsDropDown;
-    public bool IsDropDown;
-    //ジャンプキーが押された時の座標
+
+    /// <summary>
+    /// 地面に立っている
+    /// </summary>
+    public bool IsOnGround { get; private set; }
+
+    /// <summary>
+    /// ジャンプ中
+    /// </summary>
+    public bool IsJumping { get; private set; }
+
+    /// <summary>
+    /// 落下中
+    /// </summary>
+    public bool IsFalling { get; private set; }
+
+    /// <summary>
+    /// ジャンプキーが押された時の座標
+    /// </summary>
     private Vector3 atJumpPosition;
 
     void Start()
@@ -66,31 +77,31 @@ public class Player : MonoBehaviour
     void Jump()
     {
         //アニメーターにパラメータを送る
-        animator.SetBool("Jump", IsJump);
+        animator.SetBool("Jump", IsJumping);
 
         //プレイヤーがジャンプをしようとしたとき
-        if (Input.GetButtonDown("Jump") && IsJump == false && IsDropDown == false)
+        if (Input.GetButtonDown("Jump") && IsJumping == false && IsFalling == false)
         {
             //ジャンプ時の地点を保持
             atJumpPosition = transform.position;
-            IsJump = true;
+            IsJumping = true;
         }
 
         //ジャンプキー長押し中
-        if (Input.GetButton("Jump") && IsDropDown == false && IsJump == true)
+        if (Input.GetButton("Jump") && IsFalling == false && IsJumping == true)
         {
             //最高地点に達した
             if (transform.position.y >= atJumpPosition.y + jumpLimitPositionY)
             {
-                IsDropDown = true;
+                IsFalling = true;
             }
             transform.position += jumpVec;
         }
 
         //ジャンプキーを離した
-        if (Input.GetButtonUp("Jump") && IsJump == true)
+        if (Input.GetButtonUp("Jump") && IsJumping == true)
         {
-            IsDropDown = true;
+            IsFalling = true;
         }
     }
 
@@ -103,10 +114,10 @@ public class Player : MonoBehaviour
     void Landed(Collision collision)
     {
         //ジャンプして落ちていなかったら
-        if (IsDropDown == false) return;
+        if (IsFalling == false) return;
         if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Anchor") return;
 
-        IsJump = false;
-        IsDropDown = false;
+        IsJumping = false;
+        IsFalling = false;
     }
 }

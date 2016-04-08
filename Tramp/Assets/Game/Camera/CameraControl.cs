@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using GamepadInput;
 
 
 public class CameraControl : MonoBehaviour
@@ -20,15 +21,24 @@ public class CameraControl : MonoBehaviour
     private float rotationY;
 
     private Vector3 oldPlayerPosition;
+    [SerializeField]
     private GameObject player;
     private GameObject cameraObj;
     private Vector3 lookatPosition;
     private float timer;
     private bool LockonDecision;
 
+    [SerializeField]
+    private int playerNo;
+    
+    public Transform targetPosition;
+    
+    public Transform shotPosition;
+
     void Start()
     {
         rotationY = 0;
+
         player = GameObject.Find("Player");
         cameraObj = transform.FindChild("Main Camera").gameObject;
         oldPlayerPosition = player.transform.position;
@@ -37,6 +47,7 @@ public class CameraControl : MonoBehaviour
 
     void Update()
     {
+
         PlayerTrace();
 
         //ロックオンの処理押された時と押している時で処理を分ける
@@ -50,8 +61,10 @@ public class CameraControl : MonoBehaviour
             return;
         }
         LockonDecision = false;
+
         timer = Mathf.Max(timer - Time.deltaTime, 0);
-        float mouseX = Input.GetAxis("Horizontal2");
+        float mouseX = GamePad.GetAxis(GamePad.Axis.RightStick, (GamePad.Index)playerNo).x;
+
         AlignmentSprite.SetActive(false);
         rotationY += mouseX * rotationSpeed;
 
