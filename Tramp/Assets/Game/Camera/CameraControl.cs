@@ -13,6 +13,10 @@ public class CameraControl : MonoBehaviour
 
     [SerializeField]
     private int playerNo;
+    
+    public Transform targetPosition;
+    
+    public Transform shotPosition;
 
     void Start()
     {
