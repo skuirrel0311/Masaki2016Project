@@ -20,12 +20,14 @@ public class PlayerCreateAnchor : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (GamePad.GetButton(GamePad.Button.B, (GamePad.Index)0))
+        if (GamePad.GetButtonDown(GamePad.Button.B, (GamePad.Index)0))
         {
 
             if (CheckNearAnchor())
             {
-                Instantiate(InstanceAnchor, transform.position + transform.forward*2+Vector3.up, transform.rotation);
+                GameObject obj;
+                obj = (GameObject)Instantiate(InstanceAnchor, transform.position + transform.forward*2+Vector3.up, transform.rotation);
+                obj.GetComponent<CreateFlow>().SetCreatePlayerIndex(1);
             }
         }
     }

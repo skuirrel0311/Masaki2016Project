@@ -29,7 +29,7 @@ public class CameraControl : MonoBehaviour
     private bool LockonDecision;
 
     [SerializeField]
-    private int playerNo;
+    private int playerNum=1;
     
     public Transform targetPosition;
     
@@ -39,8 +39,7 @@ public class CameraControl : MonoBehaviour
     {
         rotationY = 0;
 
-        player = GameObject.Find("Player");
-        cameraObj = transform.FindChild("Main Camera").gameObject;
+        cameraObj = transform.FindChild("ThirdPersonCamera").gameObject;
         oldPlayerPosition = player.transform.position;
         LockonDecision = false;
     }
@@ -51,11 +50,11 @@ public class CameraControl : MonoBehaviour
         PlayerTrace();
 
         //ロックオンの処理押された時と押している時で処理を分ける
-        if (Input.GetKeyDown(KeyCode.R))
+        if (GamePad.GetButtonDown(GamePad.Button.Y,(GamePad.Index)playerNum))
         {
             CameraLockOnStart();
         }
-        if (Input.GetKey(KeyCode.R) && targetAnchor != null)
+        if (GamePad.GetButton(GamePad.Button.Y,(GamePad.Index)playerNum)&& targetAnchor != null)
         {
             AnchorLockOn();
             return;
@@ -63,7 +62,7 @@ public class CameraControl : MonoBehaviour
         LockonDecision = false;
 
         timer = Mathf.Max(timer - Time.deltaTime, 0);
-        float mouseX = GamePad.GetAxis(GamePad.Axis.RightStick, (GamePad.Index)playerNo).x;
+        float mouseX = GamePad.GetAxis(GamePad.Axis.RightStick, (GamePad.Index)playerNum).x;
 
         AlignmentSprite.SetActive(false);
         rotationY += mouseX * rotationSpeed;
@@ -107,14 +106,14 @@ public class CameraControl : MonoBehaviour
         else
             AlignmentImage(timer);
         //削除キーが押された場合は対象のアンカーを削除する
-        if (Input.GetKeyDown(KeyCode.D))
+        if (0<GamePad.GetTrigger(GamePad.Trigger.RightTrigger,(GamePad.Index)playerNum,false))
         {
             Destroy(targetAnchor);
         }
 
-        if (Input.GetKeyDown(KeyCode.E)) targetAnchor = GetSideAnchor(Side.Left);
+        if (GamePad.GetButtonDown(GamePad.Button.LeftShoulder, (GamePad.Index)playerNum)) targetAnchor = GetSideAnchor(Side.Left);
 
-        if (Input.GetKeyDown(KeyCode.T)) targetAnchor = GetSideAnchor(Side.Right);
+        if (GamePad.GetButtonDown(GamePad.Button.RightShoulder, (GamePad.Index)playerNum)) targetAnchor = GetSideAnchor(Side.Right);
 
         //アンカーのある方向を取得
         Vector3 vec = targetAnchor.transform.position - transform.position;

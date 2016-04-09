@@ -15,16 +15,22 @@ public class CreateFlow : MonoBehaviour
     Vector3 flowVector;
     float collsionRadius = 1;
 
+    float PlayerIndex=1;
+
     #region Start
 
     void Start()
     {
-        targetAnchor = GameObject.Find("Camera").GetComponent<CameraControl>().targetAnchor;
+        targetAnchor = GameObject.Find("Camera"+PlayerIndex).GetComponent<CameraControl>().targetAnchor;
 
         GetNearAnchor();
 
         CreateFlowObject();
+    }
 
+    public void SetCreatePlayerIndex(int index)
+    {
+         PlayerIndex = index;
     }
 
     void GetNearAnchor()
