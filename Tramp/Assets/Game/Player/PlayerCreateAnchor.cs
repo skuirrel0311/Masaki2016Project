@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using GamepadInput;
 
 public class PlayerCreateAnchor : MonoBehaviour
 {
@@ -19,7 +20,7 @@ public class PlayerCreateAnchor : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetButtonDown("Fire1"))
+        if (GamePad.GetButton(GamePad.Button.B, (GamePad.Index)0))
         {
 
             if (CheckNearAnchor())

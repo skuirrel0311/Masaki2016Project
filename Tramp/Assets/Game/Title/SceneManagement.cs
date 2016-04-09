@@ -9,8 +9,8 @@ public class SceneManagement : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         //シーンを予め読み込んでおく
-        mainScene = SceneManager.LoadSceneAsync ("GPGPUtest");
-        mainScene.allowSceneActivation = false;
+        //mainScene =
+        //mainScene.allowSceneActivation = false;
 	}
 	
 	// Update is called once per frame
@@ -18,7 +18,8 @@ public class SceneManagement : MonoBehaviour {
         if (Input.GetButtonDown("Fire1"))
         {
             //シーン遷移を開始する
-            mainScene.allowSceneActivation = true;
+           // mainScene.allowSceneActivation = true;
+            SceneManager.LoadScene("GPGPUtest");
         }
 	}
 }
