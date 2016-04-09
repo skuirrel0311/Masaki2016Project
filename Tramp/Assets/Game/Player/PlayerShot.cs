@@ -9,38 +9,54 @@ public class PlayerShot : MonoBehaviour
     GameObject Ammo;
 
     [SerializeField]
-    GameObject mainCamera;
-    CameraControl cameraControl;
+    GameObject cameraObj;
+    
+    private int playerNum;
 
+    /// <summary>
+    /// 弾の発射される位置
+    /// </summary>
     [SerializeField]
-    int playerNo;
+    private Transform shotPosition;
 
     [SerializeField]
     float shotDistance;
 
     void Start()
     {
-        cameraControl = mainCamera.GetComponent<CameraControl>();
+        playerNum = GetComponent<PlayerControl>().playerNum;
         StartCoroutine("LongButtonDown");
-    }
-
-    void Update()
-    {
     }
 
     void Shot()
     {
-        cameraControl.shotPosition.LookAt(cameraControl.targetPosition);
-        Instantiate(Ammo, cameraControl.shotPosition.position, cameraControl.shotPosition.rotation);
+        Camera cam = cameraObj.GetComponentInChildren<Camera>();
+        Ray ray = cam.ViewportPointToRay(new Vector3(cam.pixelWidth / 2, cam.pixelHeight / 2, 0));
+        RaycastHit hit;
+        Vector3 targetPosition = Vector3.zero;
 
-        transform.rotation = mainCamera.transform.rotation;
+        if (Physics.Raycast(ray, out hit, 100))
+        {
+            targetPosition = hit.point;
+        }
+        else
+        {
+            targetPosition = ray.origin + (ray.direction * 100);
+        }
+        
+        transform.rotation = cameraObj.transform.rotation;
+
+        shotPosition.LookAt(targetPosition);
+        Instantiate(Ammo, shotPosition.position, shotPosition.rotation);
+
+
     }
 
     IEnumerator LongButtonDown()
     {
         while (true)
         {
-            if(GamePad.GetButton(GamePad.Button.B, (GamePad.Index)playerNo))
+            if(GamePad.GetButton(GamePad.Button.B, (GamePad.Index)playerNum))
                 Shot();
             yield return new WaitForSeconds(shotDistance);
         }
