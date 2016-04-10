@@ -37,9 +37,8 @@ public class PlayerControl : MonoBehaviour
     /// ジャンプキーが押された時の座標
     /// </summary>
     private Vector3 atJumpPosition;
-
-    [SerializeField]
-    private int playerNo;
+    
+    public int playerNum;
 
     void Start()
     {
@@ -50,7 +49,7 @@ public class PlayerControl : MonoBehaviour
 
     void Update()
     {
-        Vector2 leftStick = GamePad.GetAxis(GamePad.Axis.LeftStick, (GamePad.Index)playerNo);
+        Vector2 leftStick = GamePad.GetAxis(GamePad.Axis.LeftStick, (GamePad.Index)playerNum);
         Vector3 direction = new Vector3(leftStick.x,0,leftStick.y);
         Move(direction);
         Jump();
@@ -87,7 +86,7 @@ public class PlayerControl : MonoBehaviour
     void Jump()
     {
         //プレイヤーがジャンプをしようとしたとき
-        if (GamePad.GetButtonDown(GamePad.Button.A, (GamePad.Index)playerNo) && IsOnGround)
+        if (GamePad.GetButtonDown(GamePad.Button.A, (GamePad.Index)playerNum) && IsOnGround)
         {
             //ジャンプ時の地点を保持
             atJumpPosition = transform.position;
@@ -96,7 +95,7 @@ public class PlayerControl : MonoBehaviour
         }
 
         //ジャンプキー長押し中
-        if (GamePad.GetButton(GamePad.Button.A, (GamePad.Index)playerNo) && Isfalling == false && IsJumping == true)
+        if (GamePad.GetButton(GamePad.Button.A, (GamePad.Index)playerNum) && Isfalling == false && IsJumping == true)
         {
             //最高地点に達した
             if (transform.position.y >= atJumpPosition.y + jumpLimitPositionY)
@@ -107,7 +106,7 @@ public class PlayerControl : MonoBehaviour
         }
 
         //ジャンプキーを離した
-        if (GamePad.GetButtonUp(GamePad.Button.A, (GamePad.Index)playerNo) && IsJumping == true)
+        if (GamePad.GetButtonUp(GamePad.Button.A, (GamePad.Index)playerNum) && IsJumping == true)
         {
             Isfalling = true;
         }

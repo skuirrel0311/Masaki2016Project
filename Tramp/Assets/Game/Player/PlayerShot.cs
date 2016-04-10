@@ -8,39 +8,60 @@ public class PlayerShot : MonoBehaviour
     [SerializeField]
     GameObject Ammo;
 
-    [SerializeField]
-    GameObject mainCamera;
-    CameraControl cameraControl;
+    GameObject cameraObj;
+    
+    private int playerNum;
 
+    /// <summary>
+    /// 弾の発射される位置
+    /// </summary>
     [SerializeField]
-    int playerNo;
+    private Transform shotPosition;
 
+    /// <summary>
+    /// 弾の発射間隔
+    /// </summary>
     [SerializeField]
-    float shotDistance;
+    float shotDistance = 0.2f;
 
     void Start()
     {
-        cameraControl = mainCamera.GetComponent<CameraControl>();
+        playerNum = GetComponent<PlayerControl>().playerNum;
+        cameraObj = GameObject.Find("Camera" + playerNum);
         StartCoroutine("LongButtonDown");
-    }
-
-    void Update()
-    {
     }
 
     void Shot()
     {
-        cameraControl.shotPosition.LookAt(cameraControl.targetPosition);
-        Instantiate(Ammo, cameraControl.shotPosition.position, cameraControl.shotPosition.rotation);
+        Camera cam = cameraObj.GetComponentInChildren<Camera>();
+        //カメラの中心座標からレイを飛ばす
+        Ray ray = cam.ViewportPointToRay(new Vector3(cam.pixelWidth / 2, cam.pixelHeight / 2, 0));
+        RaycastHit hit;
+        Vector3 targetPosition = Vector3.zero;
 
-        transform.rotation = mainCamera.transform.rotation;
+        if (Physics.Raycast(ray, out hit, 100))
+        {
+            targetPosition = hit.point;
+        }
+        else
+        {
+            targetPosition = ray.origin + (ray.direction * 100);
+        }
+        
+        //先にプレイヤーをカメラと同じ方向に向ける
+        transform.rotation = cameraObj.transform.rotation;
+
+        shotPosition.LookAt(targetPosition);
+        Instantiate(Ammo, shotPosition.position, shotPosition.rotation);
+
+
     }
 
     IEnumerator LongButtonDown()
     {
         while (true)
         {
-            if(GamePad.GetButton(GamePad.Button.B, (GamePad.Index)playerNo))
+            if(GamePad.GetButton(GamePad.Button.B, (GamePad.Index)playerNum))
                 Shot();
             yield return new WaitForSeconds(shotDistance);
         }
