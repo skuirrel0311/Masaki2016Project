@@ -28,12 +28,7 @@ public class CameraControl : MonoBehaviour
     private float timer;
     private bool LockonDecision;
 
-    [SerializeField]
-    private int playerNum=1;
-    
-    public Transform targetPosition;
-    
-    public Transform shotPosition;
+    private int playerNum = 1;
 
     void Start()
     {
@@ -41,6 +36,7 @@ public class CameraControl : MonoBehaviour
 
         cameraObj = transform.FindChild("ThirdPersonCamera").gameObject;
         oldPlayerPosition = player.transform.position;
+        playerNum = player.GetComponent<PlayerControl>().playerNum;
         LockonDecision = false;
     }
 

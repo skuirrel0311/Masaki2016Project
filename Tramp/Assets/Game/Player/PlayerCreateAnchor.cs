@@ -11,16 +11,18 @@ public class PlayerCreateAnchor : MonoBehaviour
     [SerializeField]
     float UncreateDistance = 3;
 
+    private int playerNum;
+
     // Use this for initialization
     void Start()
     {
-
+        playerNum = GetComponentInParent<PlayerControl>().playerNum;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (GamePad.GetButtonDown(GamePad.Button.B, (GamePad.Index)0))
+        if (GamePad.GetButtonDown(GamePad.Button.B, (GamePad.Index)playerNum))
         {
 
             if (CheckNearAnchor())

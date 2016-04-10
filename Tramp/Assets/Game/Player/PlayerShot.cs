@@ -9,6 +9,7 @@ public class PlayerShot : MonoBehaviour
     GameObject Ammo;
 
     GameObject cameraObj;
+    Camera cam;
     
     private int playerNum;
 
@@ -28,14 +29,14 @@ public class PlayerShot : MonoBehaviour
     {
         playerNum = GetComponent<PlayerControl>().playerNum;
         cameraObj = GameObject.Find("Camera" + playerNum);
+        cam = cameraObj.GetComponentInChildren<Camera>();
         StartCoroutine("LongButtonDown");
     }
 
     void Shot()
     {
-        Camera cam = cameraObj.GetComponentInChildren<Camera>();
         //カメラの中心座標からレイを飛ばす
-        Ray ray = cam.ViewportPointToRay(new Vector3(cam.pixelWidth / 2, cam.pixelHeight / 2, 0));
+        Ray ray = cam.ViewportPointToRay(new Vector3(0.5f,0.5f, 0));
         RaycastHit hit;
         Vector3 targetPosition = Vector3.zero;
 
@@ -61,7 +62,7 @@ public class PlayerShot : MonoBehaviour
     {
         while (true)
         {
-            if(GamePad.GetButton(GamePad.Button.B, (GamePad.Index)playerNum))
+            if(GamePad.GetButton(GamePad.Button.X, (GamePad.Index)playerNum))
                 Shot();
             yield return new WaitForSeconds(shotDistance);
         }
