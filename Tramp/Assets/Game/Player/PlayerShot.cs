@@ -8,7 +8,6 @@ public class PlayerShot : MonoBehaviour
     [SerializeField]
     GameObject Ammo;
 
-    [SerializeField]
     GameObject cameraObj;
     
     private int playerNum;
@@ -19,18 +18,23 @@ public class PlayerShot : MonoBehaviour
     [SerializeField]
     private Transform shotPosition;
 
+    /// <summary>
+    /// 弾の発射間隔
+    /// </summary>
     [SerializeField]
-    float shotDistance;
+    float shotDistance = 0.2f;
 
     void Start()
     {
         playerNum = GetComponent<PlayerControl>().playerNum;
+        cameraObj = GameObject.Find("Camera" + playerNum);
         StartCoroutine("LongButtonDown");
     }
 
     void Shot()
     {
         Camera cam = cameraObj.GetComponentInChildren<Camera>();
+        //カメラの中心座標からレイを飛ばす
         Ray ray = cam.ViewportPointToRay(new Vector3(cam.pixelWidth / 2, cam.pixelHeight / 2, 0));
         RaycastHit hit;
         Vector3 targetPosition = Vector3.zero;
@@ -44,6 +48,7 @@ public class PlayerShot : MonoBehaviour
             targetPosition = ray.origin + (ray.direction * 100);
         }
         
+        //先にプレイヤーをカメラと同じ方向に向ける
         transform.rotation = cameraObj.transform.rotation;
 
         shotPosition.LookAt(targetPosition);
