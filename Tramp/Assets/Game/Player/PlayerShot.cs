@@ -62,7 +62,7 @@ public class PlayerShot : MonoBehaviour
     {
         while (true)
         {
-            if(GamePad.GetButton(GamePad.Button.X, (GamePad.Index)playerNum))
+            if(GamePad.GetTrigger(GamePad.Trigger.RightTrigger,(GamePad.Index)playerNum,true)>0)
                 Shot();
             yield return new WaitForSeconds(shotDistance);
         }

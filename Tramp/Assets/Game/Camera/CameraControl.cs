@@ -63,7 +63,7 @@ public class CameraControl : MonoBehaviour
         AlignmentSprite.SetActive(false);
         rotationY += mouseX * rotationSpeed;
 
-        cameraObj.transform.localRotation = Quaternion.Lerp(Quaternion.Euler(0, cameraObj.transform.rotation.y, 0), cameraObj.transform.rotation, timer);
+        cameraObj.transform.localRotation = Quaternion.Lerp(Quaternion.Euler(0, cameraObj.transform.localRotation.y, 0), cameraObj.transform.localRotation, timer);
         //オブジェクトのある方向に合わせたカメラのポジション移動
         transform.rotation = Quaternion.Lerp(Quaternion.Euler(0, rotationY, 0), transform.rotation, timer);
     }
@@ -101,11 +101,6 @@ public class CameraControl : MonoBehaviour
             AlignmentImage(1);
         else
             AlignmentImage(timer);
-        //削除キーが押された場合は対象のアンカーを削除する
-        if (0<GamePad.GetTrigger(GamePad.Trigger.RightTrigger,(GamePad.Index)playerNum,false))
-        {
-            Destroy(targetAnchor);
-        }
 
         if (GamePad.GetButtonDown(GamePad.Button.LeftShoulder, (GamePad.Index)playerNum)) targetAnchor = GetSideAnchor(Side.Left);
 
