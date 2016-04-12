@@ -24,7 +24,7 @@ public class Shot : MonoBehaviour
 
     void OnCollisionEnter(Collision col)
     {
-        if (col.gameObject.tag == "Player") return;
+        //if (col.gameObject.tag == "Player") return;
         Debug.Log("Ammohit");
         Instantiate(HitEffect,transform.position,Quaternion.identity);
         Destroy(gameObject);
