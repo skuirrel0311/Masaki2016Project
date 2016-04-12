@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections;
 using GamepadInput;
 
-public class PlayerCreateAnchor : MonoBehaviour
+public class PlayerCreateAnchor : NetworkBehaviour
 {
 
     [SerializeField]
@@ -27,16 +28,40 @@ public class PlayerCreateAnchor : MonoBehaviour
 
             if (CheckNearAnchor())
             {
-                GameObject obj;
-                obj = (GameObject)Instantiate(InstanceAnchor, transform.position + transform.forward*2+Vector3.up, transform.rotation);
-                obj.GetComponent<CreateFlow>().SetCreatePlayerIndex(1);
+                //GameObject obj;
+                //obj = (GameObject)Instantiate(InstanceAnchor, transform.position + transform.forward*2+Vector3.up, transform.rotation);
+                //obj.GetComponent<CreateFlow>().SetCreatePlayerIndex(1);
+                //NetworkServer.Spawn(obj);
+                Debug.Log("start");
+                CreateAnchor();
             }
         }
     }
 
+    [ClientCallback]
+    void CreateAnchor()
+    {
+        Debug.Log("clientCall");
+        if (InstanceAnchor == null)
+        {
+            Debug.Log("anchor null");
+        }
+        Cmd_rezobjectonserver();
+        Debug.Log("clientCallend");
+    }
 
-    //他のアンカーが近すぎないかチェック
-    bool CheckNearAnchor()
+    [Command]
+    public void Cmd_rezobjectonserver()
+    {
+        Debug.Log("end1");
+        GameObject obj;
+        obj = Instantiate(InstanceAnchor,transform.position + transform.forward * 2 + Vector3.up, transform.rotation) as GameObject;
+        obj.GetComponent<CreateFlow>().SetCreatePlayerIndex(1);
+        NetworkServer.Spawn(obj);
+        Debug.Log("end2");
+    }
+        //他のアンカーが近すぎないかチェック
+        bool CheckNearAnchor()
     {
         //一番近いアンカーを探す
         GameObject[] objects = GameObject.FindGameObjectsWithTag("Anchor");

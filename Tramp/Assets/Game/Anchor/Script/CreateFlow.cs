@@ -21,7 +21,7 @@ public class CreateFlow : MonoBehaviour
 
     void Start()
     {
-        targetAnchor = GameObject.Find("Camera"+PlayerIndex).GetComponent<CameraControl>().targetAnchor;
+        //targetAnchor = GameObject.Find("Camera").GetComponent<CameraControl>().targetAnchor;
 
         GetNearAnchor();
 
