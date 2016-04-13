@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections;
 using GamepadInput;
 
-public class PlayerShot : MonoBehaviour
+public class PlayerShot : NetworkBehaviour
 {
 
     [SerializeField]
@@ -32,7 +33,6 @@ public class PlayerShot : MonoBehaviour
         cam = cameraObj.GetComponentInChildren<Camera>();
         StartCoroutine("LongButtonDown");
     }
-
     void Shot()
     {
         //カメラの中心座標からレイを飛ばす
@@ -54,18 +54,23 @@ public class PlayerShot : MonoBehaviour
         cameraRotation.x = 0;
         cameraRotation.z = 0;
         transform.rotation = cameraRotation;
-
         shotPosition.LookAt(targetPosition);
-        Instantiate(Ammo, shotPosition.position, shotPosition.rotation);
+        CmdAmmoSpawn(shotPosition.position,shotPosition.eulerAngles);
 
+    }
 
+    [Command]
+    public void CmdAmmoSpawn(Vector3 shotposition,Vector3 shotrotation)
+    {
+        GameObject go = Instantiate(Ammo, shotposition,Quaternion.Euler(shotrotation)) as GameObject;
+        NetworkServer.Spawn(go);
     }
 
     IEnumerator LongButtonDown()
     {
         while (true)
         {
-            if(GamePad.GetTrigger(GamePad.Trigger.RightTrigger,(GamePad.Index)playerNum,true)>0)
+            if(isLocalPlayer && GamePad.GetTrigger(GamePad.Trigger.RightTrigger,(GamePad.Index)playerNum,true)>0)
                 Shot();
             yield return new WaitForSeconds(shotDistance);
         }

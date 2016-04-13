@@ -24,14 +24,14 @@ public class Flow : NetworkBehaviour{
     [SyncVar]
     private Vector3 targetPosition;
 
-    private bool isCalc = false;
+    private bool isCalc = true;
     void Start()
     {
         isCalc = false;
     }
     void Update()
     {
-        if (!isCalc) return;
+       // if (!isCalc) return;
         transform.localScale = new Vector3(2, flowVector.magnitude * 0.5f, 2);
         //CapsuleColliderをアタッチする
         CapsuleCollider capcol = GetComponent<CapsuleCollider>();

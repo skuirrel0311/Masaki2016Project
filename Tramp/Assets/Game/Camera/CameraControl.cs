@@ -32,8 +32,7 @@ public class CameraControl : MonoBehaviour
     float longitude = 180;
 
     private Vector3 oldPlayerPosition;
-    [SerializeField]
-    private GameObject player;
+    public GameObject player;
     private GameObject cameraObj;
     private Vector3 lookatPosition;
     private float timer;
@@ -47,6 +46,13 @@ public class CameraControl : MonoBehaviour
         oldPlayerPosition = player.transform.position;
         playerNum = player.GetComponent<PlayerControl>().playerNum;
         LockonDecision = false;
+    }
+
+    public void SetPlayer(GameObject Player)
+    {
+        player = Player;
+        oldPlayerPosition = player.transform.position;
+        playerNum = player.GetComponent<PlayerControl>().playerNum;
     }
 
     void Update()

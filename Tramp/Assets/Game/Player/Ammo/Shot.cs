@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections;
 
-public class Shot : MonoBehaviour
+public class Shot : NetworkBehaviour
 {
 
     [SerializeField]
@@ -19,12 +20,17 @@ public class Shot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        ShotMove();
+    }
+    [Server]
+    void ShotMove()
+    {
         transform.Translate(transform.forward * speed * Time.deltaTime, Space.World);
     }
 
+    
     void OnCollisionEnter(Collision col)
     {
-        if (col.gameObject.tag == "Player") return;
         Debug.Log("Ammohit");
         Instantiate(HitEffect,transform.position,Quaternion.identity);
         Destroy(gameObject);
