@@ -7,6 +7,12 @@ public class PlayerState : MonoBehaviour
     int maxHp = 10;
     int hp;
 
+    /// <summary>
+    /// 復活にかかる時間
+    /// </summary>
+    [SerializeField]
+    float TimeToReturn = 3;
+    
     [SerializeField]
     Vector3 startPosition = Vector3.zero;
 
@@ -25,6 +31,7 @@ public class PlayerState : MonoBehaviour
 
     void Start()
     {
+        
         Initialize();
     }
 
@@ -32,7 +39,14 @@ public class PlayerState : MonoBehaviour
     {
         if(!IsAlive)
         {
-            StartCoroutine("IsDead");
+            //操作できない
+            PlayerControl playerControl = GetComponent<PlayerControl>();
+
+            if (playerControl.enabled)
+            {
+                playerControl.enabled = false;
+                StartCoroutine("IsDead");
+            }
         }
     }
 
@@ -49,11 +63,22 @@ public class PlayerState : MonoBehaviour
     /// </summary>
     IEnumerator IsDead()
     {
-        transform.position = startPosition;
-        PlayerControl playerControl = GetComponent<PlayerControl>();
-        playerControl.enabled = false;
-        yield return new WaitForSeconds(3);
+        //フィーバーゲージ減少
+        GetComponent<FeverGauge>().KilledInPlayer();
+
+        GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("Player");
+        foreach (GameObject playerObj in playerObjects)
+        {
+            //自分以外のプレイヤーを
+            if (gameObject.Equals(playerObj) == false) playerObj.GetComponent<FeverGauge>().KillPlayer();
+        }
+
+        yield return new WaitForSeconds(TimeToReturn);
+
         //3秒後に復活
+        transform.position = startPosition;
+        //操作できない
+        PlayerControl playerControl = GetComponent<PlayerControl>();
         playerControl.enabled = true;
         Initialize();
     }

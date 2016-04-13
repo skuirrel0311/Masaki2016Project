@@ -24,6 +24,10 @@ public class AppealItem : MonoBehaviour
 
     void Update()
     {
+        if(Input.GetKeyDown(KeyCode.S))
+        {
+            SpawnInRandomPosition();
+        }
 
     }
 
