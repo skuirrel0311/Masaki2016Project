@@ -48,9 +48,12 @@ public class PlayerShot : MonoBehaviour
         {
             targetPosition = ray.origin + (ray.direction * 100);
         }
-        
+
         //先にプレイヤーをカメラと同じ方向に向ける
-        transform.rotation = cameraObj.transform.rotation;
+        Quaternion cameraRotation = cameraObj.transform.rotation;
+        cameraRotation.x = 0;
+        cameraRotation.z = 0;
+        transform.rotation = cameraRotation;
 
         shotPosition.LookAt(targetPosition);
         Instantiate(Ammo, shotPosition.position, shotPosition.rotation);
