@@ -17,8 +17,19 @@ public class CameraControl : MonoBehaviour
     private float rotationSpeed = 5;
 
     [SerializeField]
+    float radius = 3;       //球体の半径(ターゲットの位置からの距離)
+
+    [SerializeField]
     private GameObject AlignmentSprite;
-    private float rotationY;
+    
+    /// <summary>
+    /// 緯度
+    /// </summary>
+    float latitude = 15;
+    /// <summary>
+    /// 経度
+    /// </summary>
+    float longitude = 180;
 
     private Vector3 oldPlayerPosition;
     [SerializeField]
@@ -32,8 +43,6 @@ public class CameraControl : MonoBehaviour
 
     void Start()
     {
-        rotationY = 0;
-
         cameraObj = transform.FindChild("ThirdPersonCamera").gameObject;
         oldPlayerPosition = player.transform.position;
         playerNum = player.GetComponent<PlayerControl>().playerNum;
@@ -42,9 +51,6 @@ public class CameraControl : MonoBehaviour
 
     void Update()
     {
-
-        PlayerTrace();
-
         //ロックオンの処理押された時と押している時で処理を分ける
         if (GamePad.GetButtonDown(GamePad.Button.Y,(GamePad.Index)playerNum))
         {
@@ -52,20 +58,46 @@ public class CameraControl : MonoBehaviour
         }
         if (GamePad.GetButton(GamePad.Button.Y,(GamePad.Index)playerNum)&& targetAnchor != null)
         {
+            PlayerTrace();
             AnchorLockOn();
             return;
         }
         LockonDecision = false;
 
         timer = Mathf.Max(timer - Time.deltaTime, 0);
-        float mouseX = GamePad.GetAxis(GamePad.Axis.RightStick, (GamePad.Index)playerNum).x;
 
-        AlignmentSprite.SetActive(false);
-        rotationY += mouseX * rotationSpeed;
+        Vector2 rightStick = GamePad.GetAxis(GamePad.Axis.RightStick, (GamePad.Index)playerNum);
+
+        latitude += -rightStick.y * rotationSpeed * Time.deltaTime;
+        longitude += rightStick.x * rotationSpeed * Time.deltaTime;
+
+        //経度には制限を掛ける
+        latitude = Mathf.Clamp(latitude, -25, 80);
+
+        SphereCameraControl();
 
         cameraObj.transform.localRotation = Quaternion.Lerp(Quaternion.Euler(0, cameraObj.transform.localRotation.y, 0), cameraObj.transform.localRotation, timer);
-        //オブジェクトのある方向に合わせたカメラのポジション移動
-        transform.rotation = Quaternion.Lerp(Quaternion.Euler(0, rotationY, 0), transform.rotation, timer);
+    }
+
+    /// <summary>
+    /// 球体座標系によるカメラの制御
+    /// </summary>
+    void SphereCameraControl()
+    {
+        Vector3 cameraPosition;
+
+        float deg2Rad = Mathf.Deg2Rad;
+
+        cameraPosition.x = radius * Mathf.Cos(latitude * deg2Rad) * Mathf.Sin(longitude * deg2Rad);
+        cameraPosition.y = radius * Mathf.Sin(latitude * deg2Rad);
+        cameraPosition.z = radius * Mathf.Cos(latitude * deg2Rad) * Mathf.Cos(longitude * deg2Rad);
+
+        //プレイヤーの足元からY座標に+1した座標をターゲットにする
+        Vector3 target = player.transform.position;
+        target.y += 1f;
+
+        transform.position = cameraPosition + target;
+        transform.LookAt(target);
     }
 
     private float VectorToAngle(float a, float b)
