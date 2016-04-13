@@ -10,7 +10,8 @@ public class PlayerShot : MonoBehaviour
 
     GameObject cameraObj;
     Camera cam;
-    
+
+    private PlayerState playerState;
     private int playerNum;
 
     /// <summary>
@@ -28,6 +29,7 @@ public class PlayerShot : MonoBehaviour
     void Start()
     {
         playerNum = GetComponent<PlayerControl>().playerNum;
+        playerState = GetComponent<PlayerState>();
         cameraObj = GameObject.Find("Camera" + playerNum);
         cam = cameraObj.GetComponentInChildren<Camera>();
         StartCoroutine("LongButtonDown");
@@ -62,7 +64,8 @@ public class PlayerShot : MonoBehaviour
     {
         while (true)
         {
-            if(GamePad.GetTrigger(GamePad.Trigger.RightTrigger,(GamePad.Index)playerNum,true)>0)
+            //アイテムを持っているときはショットは打てない
+            if(GamePad.GetTrigger(GamePad.Trigger.RightTrigger,(GamePad.Index)playerNum,true)>0 && !playerState.IsPossessionOfItem)
                 Shot();
             yield return new WaitForSeconds(shotDistance);
         }

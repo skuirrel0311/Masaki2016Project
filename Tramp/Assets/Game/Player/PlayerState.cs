@@ -29,6 +29,16 @@ public class PlayerState : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// アイテムを所持しているか？
+    /// </summary>
+    public bool IsPossessionOfItem { get; private set; }
+
+    /// <summary>
+    /// アピール中か？
+    /// </summary>
+    public bool IsAppealing{ get; private set; }
+
     void Start()
     {
         
@@ -81,6 +91,11 @@ public class PlayerState : MonoBehaviour
         PlayerControl playerControl = GetComponent<PlayerControl>();
         playerControl.enabled = true;
         Initialize();
+    }
+
+    public void GetItem()
+    {
+        IsPossessionOfItem = true;
     }
 
     void OnCollisionEnter(Collision collision)

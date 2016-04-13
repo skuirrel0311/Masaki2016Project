@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using GamepadInput;
 
 public class AppealItem : MonoBehaviour
 {
@@ -39,5 +40,19 @@ public class AppealItem : MonoBehaviour
         int num = Random.Range(0, scaffoldList.Count);
 
         transform.position = scaffoldList[num].position;
+    }
+
+    void OnTriggerStay(Collider col)
+    {
+        if (col.gameObject.tag != "Player") return;
+        
+        int playerIndex = col.gameObject.GetComponent<PlayerControl>().playerNum;
+
+        if (GamePad.GetButtonDown(GamePad.Button.LeftShoulder,(GamePad.Index)playerIndex))
+        {
+            //プレイヤーの子にする。
+            transform.parent = col.transform;
+            col.gameObject.GetComponent<PlayerState>().GetItem();
+        }
     }
 }

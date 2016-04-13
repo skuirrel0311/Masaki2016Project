@@ -43,6 +43,7 @@ public class PlayerControl : MonoBehaviour
     void Start()
     {
         animator = GetComponentInChildren<Animator>();
+        
         atJumpPosition = Vector3.zero;
         IsOnGround = true;
     }
