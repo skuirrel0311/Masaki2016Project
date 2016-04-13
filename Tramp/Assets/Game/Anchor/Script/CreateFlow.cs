@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections;
 
-public class CreateFlow : MonoBehaviour
+public class CreateFlow :NetworkBehaviour
 {
 
     [SerializeField]
@@ -12,6 +13,7 @@ public class CreateFlow : MonoBehaviour
     GameObject targetAnchor;
     Vector3 targetPosition;
     GameObject targetGameObjct;
+    [SyncVar]
     Vector3 flowVector;
     float collsionRadius = 1;
 
@@ -25,7 +27,7 @@ public class CreateFlow : MonoBehaviour
 
         GetNearAnchor();
 
-        CreateFlowObject();
+        CmdCreateFlowObject();
     }
 
     public void SetCreatePlayerIndex(int index)
@@ -61,22 +63,20 @@ public class CreateFlow : MonoBehaviour
 
 
     }
-
-    void CreateFlowObject()
+    [Command]
+    void CmdCreateFlowObject()
     {
         //流れのコリジョン用オブジェクト
         GameObject boxCol = Instantiate(FlowEffect);
         boxCol.transform.localScale = new Vector3(2,flowVector.magnitude*0.5f,2);
 
         //CapsuleColliderをアタッチする
-        boxCol.AddComponent<CapsuleCollider>();
         CapsuleCollider capcol = boxCol.GetComponent<CapsuleCollider>();
         capcol.height = flowVector.magnitude/ (flowVector.magnitude*0.5f);
         capcol.radius = collsionRadius/2;
         capcol.isTrigger = true;
 
         //FlowScriptをアタッチする
-        boxCol.AddComponent<Flow>();
         Flow flow = boxCol.GetComponent<Flow>();
         flow.FlowVector = flowVector;
         flow.TargetPosition = targetPosition;
@@ -87,7 +87,7 @@ public class CreateFlow : MonoBehaviour
 
         //オブジェクトとの親子関係に加える
         boxCol.transform.parent = transform;
-
+        NetworkServer.Spawn(boxCol);
         //流れのパーティクル
         CreateFlowParticle();
 
@@ -99,8 +99,9 @@ public class CreateFlow : MonoBehaviour
     {
         FlowParticle.startLifetime = 0.2f * flowVector.magnitude;
         //流れのパーティクルをインスタンス、子のオブジェクトとして追加
-        ParticleSystem obj = (ParticleSystem)Instantiate(FlowParticle, transform.position, Quaternion.FromToRotation(Vector3.forward, flowVector.normalized));
-        obj.transform.parent = transform;
+        ParticleSystem ps = (ParticleSystem)Instantiate(FlowParticle, transform.position, Quaternion.FromToRotation(Vector3.forward, flowVector.normalized));
+        ps.transform.parent = transform;
+        //NetworkServer.Spawn(ps);
     }
     #endregion
 
@@ -108,6 +109,7 @@ public class CreateFlow : MonoBehaviour
     void Update()
     {
         DestroyChiled();
+
     }
 
     //流れの参照先のオブジェクトが存在していなければ流れを消す
