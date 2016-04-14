@@ -32,7 +32,7 @@ public class PlayerShot : MonoBehaviour
         playerState = GetComponent<PlayerState>();
         cameraObj = GameObject.Find("Camera" + playerNum);
         cam = cameraObj.GetComponentInChildren<Camera>();
-        StartCoroutine("LongButtonDown");
+        StartCoroutine("LongTriggerDown");
     }
 
     void Shot()
@@ -60,12 +60,12 @@ public class PlayerShot : MonoBehaviour
 
     }
 
-    IEnumerator LongButtonDown()
+    IEnumerator LongTriggerDown()
     {
         while (true)
         {
-            //アイテムを持っているときはショットは打てない
-            if(GamePad.GetTrigger(GamePad.Trigger.RightTrigger,(GamePad.Index)playerNum,true)>0 && !playerState.IsPossessionOfItem)
+            //アピール中はショットは打てない
+            if(GamePad.GetTrigger(GamePad.Trigger.RightTrigger,(GamePad.Index)playerNum,true)>0 && !playerState.IsAppealing)
                 Shot();
             yield return new WaitForSeconds(shotDistance);
         }

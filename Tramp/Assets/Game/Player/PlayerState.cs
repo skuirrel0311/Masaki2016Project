@@ -5,7 +5,7 @@ public class PlayerState : MonoBehaviour
 {
     [SerializeField]
     int maxHp = 10;
-    int hp;
+    public int Hp { get; private set; }
 
     /// <summary>
     /// 復活にかかる時間
@@ -13,8 +13,20 @@ public class PlayerState : MonoBehaviour
     [SerializeField]
     float TimeToReturn = 3;
     
+    /// <summary>
+    /// 初期位置
+    /// </summary>
     [SerializeField]
-    Vector3 startPosition = Vector3.zero;
+    Transform startPosition;
+
+    public GameObject appealItem;
+
+    /// <summary>
+    /// 左手のボーンのTransform
+    /// </summary>
+    public Transform LeftHand;
+
+    Animator animator;
 
     /// <summary>
     /// 生きているか？
@@ -23,7 +35,7 @@ public class PlayerState : MonoBehaviour
     {
         get
         {
-            if (hp <= 0) return false;
+            if (Hp <= 0) return false;
             if (transform.position.y < -3) return false;
             return true;
         }
@@ -32,7 +44,7 @@ public class PlayerState : MonoBehaviour
     /// <summary>
     /// アイテムを所持しているか？
     /// </summary>
-    public bool IsPossessionOfItem { get; private set; }
+    public bool IsPossessionOfItem { get; set; }
 
     /// <summary>
     /// アピール中か？
@@ -41,12 +53,18 @@ public class PlayerState : MonoBehaviour
 
     void Start()
     {
-        
+        if(startPosition == null)
+        {
+            startPosition = GameObject.Find("sartPosition" + GetComponent<PlayerControl>().playerNum).transform;
+        }
+        animator = GetComponentInChildren<Animator>();
         Initialize();
     }
 
     void Update()
     {
+        animator.SetBool("HaveItem", IsPossessionOfItem);
+
         if(!IsAlive)
         {
             //操作できない
@@ -55,6 +73,7 @@ public class PlayerState : MonoBehaviour
             if (playerControl.enabled)
             {
                 playerControl.enabled = false;
+                //コルーチンを呼ぶのは1回のみ
                 StartCoroutine("IsDead");
             }
         }
@@ -62,10 +81,13 @@ public class PlayerState : MonoBehaviour
 
     void Initialize()
     {
-        hp = maxHp;
+        Hp = maxHp;
+        if (startPosition == null) startPosition.position = Vector3.zero;
+        transform.position = startPosition.position;
+        transform.rotation = Quaternion.Euler(Vector3.zero);
+        PlayerControl playerControl = GetComponent<PlayerControl>();
+        playerControl.enabled = true;
 
-        transform.position = startPosition;
-        transform.rotation = Quaternion.Euler(Vector3.zero); 
     }
 
     /// <summary>
@@ -79,23 +101,16 @@ public class PlayerState : MonoBehaviour
         GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("Player");
         foreach (GameObject playerObj in playerObjects)
         {
-            //自分以外のプレイヤーを
+            //自分以外のプレイヤーのフィーバーゲージを増加させる
             if (gameObject.Equals(playerObj) == false) playerObj.GetComponent<FeverGauge>().KillPlayer();
         }
+        //操作できないようにする。
+        GetComponent<PlayerControl>().enabled = false;
 
         yield return new WaitForSeconds(TimeToReturn);
-
         //3秒後に復活
-        transform.position = startPosition;
-        //操作できない
-        PlayerControl playerControl = GetComponent<PlayerControl>();
-        playerControl.enabled = true;
-        Initialize();
-    }
 
-    public void GetItem()
-    {
-        IsPossessionOfItem = true;
+        Initialize();
     }
 
     void OnCollisionEnter(Collision collision)
@@ -103,6 +118,28 @@ public class PlayerState : MonoBehaviour
         if (collision.gameObject.tag != "Ammo") return;
         if (!IsAlive) return;
 
-        hp = hp <= 0 ? 0 : hp - 1;
+        Damege();
+    }
+
+    void Damege()
+    {
+        //hpを減らす
+        Hp = Hp <= 0 ? 0 : Hp - 1;
+        
+        if (!IsPossessionOfItem || appealItem == null) return;
+
+        //アイテムを所持していたら
+        int firstHp = appealItem.GetComponent<AppealItem>().FirstHp;
+
+        //hpがアイテムを所持したときのhpよりも３小さかったら
+        if(Hp <= firstHp - 3)
+        {
+            //親子関係を解除
+            appealItem.transform.parent = null;
+            //ランダムに再配置
+            appealItem.GetComponent<AppealItem>().SpawnInRandomPosition();
+            IsPossessionOfItem = false;
+        }
+
     }
 }
