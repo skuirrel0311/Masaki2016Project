@@ -66,8 +66,12 @@ public class PlayerControl : MonoBehaviour
     /// <param name="movement">移動量</param>
     void Move(Vector3 movement)
     {
+        //カメラの角度のx､zは見ない
+        Quaternion cameraRotation = mainCamera.transform.rotation;
+        cameraRotation.x = 0;
+        cameraRotation.z = 0;
         //入力の角度をカメラの角度に曲げる
-        movement = mainCamera.transform.rotation * movement;
+        movement = cameraRotation * movement;
 
         //移動していなかったら終了
         if (movement == Vector3.zero) return;
