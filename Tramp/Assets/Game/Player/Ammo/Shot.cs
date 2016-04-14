@@ -14,7 +14,7 @@ public class Shot : NetworkBehaviour
     // Use this for initialization
     void Start()
     {
-        Destroy(gameObject, 10);
+        Destroy(gameObject, 3);
     }
 
     // Update is called once per frame
@@ -22,10 +22,13 @@ public class Shot : NetworkBehaviour
     {
         ShotMove();
     }
-    [Server]
+
     void ShotMove()
     {
-        transform.Translate(transform.forward * speed * Time.deltaTime, Space.World);
+        if (isServer)
+        {
+            transform.Translate(transform.forward * speed * Time.deltaTime, Space.World);
+        }
     }
 
     
