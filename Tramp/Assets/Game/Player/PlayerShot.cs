@@ -68,7 +68,7 @@ public class PlayerShot : MonoBehaviour
         while (true)
         {
             //アピール中はショットは打てない
-            if(GamePad.GetTrigger(GamePad.Trigger.RightTrigger,(GamePad.Index)playerNum,true)>0 && !playerState.IsAppealing)
+            if (GamePad.GetTrigger(GamePad.Trigger.RightTrigger, (GamePad.Index)playerNum, true) > 0 && !playerState.IsAppealing)
                 Shot();
             yield return new WaitForSeconds(shotDistance);
         }

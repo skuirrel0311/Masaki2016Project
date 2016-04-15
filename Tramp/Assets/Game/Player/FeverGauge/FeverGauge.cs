@@ -7,7 +7,7 @@ public class FeverGauge : MonoBehaviour
     [SerializeField]
     Image gaugeSprite;//中身
     float gaugeMaxWidth = 3.82f; //中身のスプライトが満タンになる拡大率
-    int gaugeMaxPoint = 100;
+    int gaugeMaxPoint = 2000;
     /// <summary>
     /// 現在のフィーバーポイント
     /// </summary>

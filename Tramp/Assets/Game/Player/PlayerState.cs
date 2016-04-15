@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using GamepadInput;
 
 public class PlayerState : MonoBehaviour
 {
@@ -51,12 +52,15 @@ public class PlayerState : MonoBehaviour
     /// </summary>
     public bool IsAppealing{ get; private set; }
 
+    private int playerIndex = 1;
+
     void Start()
     {
         if(startPosition == null)
         {
             startPosition = GameObject.Find("sartPosition" + GetComponent<PlayerControl>().playerNum).transform;
         }
+        playerIndex = GetComponent<PlayerControl>().playerNum;
         animator = GetComponentInChildren<Animator>();
         Initialize();
     }
@@ -64,6 +68,16 @@ public class PlayerState : MonoBehaviour
     void Update()
     {
         animator.SetBool("HaveItem", IsPossessionOfItem);
+
+        //アイテムを所持していたら
+        if(IsPossessionOfItem)
+        {
+            if (GamePad.GetButtonDown(GamePad.Button.RightShoulder, (GamePad.Index)playerIndex))
+            {
+                //反転
+                IsAppealing = true;
+            }
+        }
 
         if(!IsAlive)
         {
@@ -87,7 +101,8 @@ public class PlayerState : MonoBehaviour
         transform.rotation = Quaternion.Euler(Vector3.zero);
         PlayerControl playerControl = GetComponent<PlayerControl>();
         playerControl.enabled = true;
-
+        IsAppealing = false;
+        IsPossessionOfItem = false;
     }
 
     /// <summary>
@@ -104,6 +119,15 @@ public class PlayerState : MonoBehaviour
             //自分以外のプレイヤーのフィーバーゲージを増加させる
             if (gameObject.Equals(playerObj) == false) playerObj.GetComponent<FeverGauge>().KillPlayer();
         }
+
+        //アイテムを所持していたら
+        if(IsPossessionOfItem)
+        {
+            //親子関係をはずしランダムに再設置。
+            appealItem.transform.parent = null;
+            appealItem.GetComponent<AppealItem>().SpawnInRandomPosition();
+        }
+
         //操作できないようにする。
         GetComponent<PlayerControl>().enabled = false;
 
