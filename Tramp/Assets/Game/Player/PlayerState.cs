@@ -75,7 +75,7 @@ public class PlayerState : MonoBehaviour
             if (GamePad.GetButtonDown(GamePad.Button.RightShoulder, (GamePad.Index)playerIndex))
             {
                 //反転
-                IsAppealing = true;
+                IsAppealing = IsAppealing ? false : true;
             }
         }
 
@@ -163,6 +163,7 @@ public class PlayerState : MonoBehaviour
             //ランダムに再配置
             appealItem.GetComponent<AppealItem>().SpawnInRandomPosition();
             IsPossessionOfItem = false;
+            IsAppealing = false;
         }
 
     }

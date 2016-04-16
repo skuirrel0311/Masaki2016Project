@@ -19,6 +19,12 @@ public class PlayerAppeal : MonoBehaviour
     {
         feverGauge = GetComponent<FeverGauge>();
         playerState = GetComponent<PlayerState>();
+        Vector3 particlePosition = transform.position;
+        particlePosition.y += 1;
+
+        starParticle = (ParticleSystem)Instantiate(starParticle, particlePosition, transform.rotation);
+        starParticle.transform.parent = transform;
+        
     }
     
     void Update()
@@ -37,10 +43,8 @@ public class PlayerAppeal : MonoBehaviour
     /// </summary>
     void StartAppeal()
     {
-        //流れのパーティクルをインスタンス、子のオブジェクトとして追加
-        ParticleSystem particle = (ParticleSystem)Instantiate(starParticle, transform.position, transform.rotation);
-        particle.transform.parent = transform;
-        particle.Play();
+        Debug.Log("startParticle");
+        starParticle.Play();
     }
 
     void Appeal()
@@ -58,25 +62,19 @@ public class PlayerAppeal : MonoBehaviour
 
         float additional; //加点
 
-        additional = ChackedArea.Count * (ChackedArea.Count * 1.2f);
+        additional = 100 * (ChackedArea.Count * 1.2f);
 
         feverGauge.AddPoint((int)additional);
 
         //リストを破棄
-        //ChackedArea.RemoveAll(n => true);
-        for(int i = ChackedArea.Count; i > 0; i--)
-        {
-            ChackedArea[i] = null;
-        }
+        ChackedArea.Clear();
     }
 
     void OnTriggerEnter(Collider col)
     {
         if (playerState.IsAppealing == false) return;
         if (col.gameObject.tag != "Area") return;
-
-        //初回はStartAppealを呼ぶ
-        if (ChackedArea.Count == 0) StartAppeal();
+        if (ChackedArea.Count == 0) return;
 
         //すでに踏破されていたらreturn
         foreach(GameObject g in ChackedArea)
@@ -84,6 +82,18 @@ public class PlayerAppeal : MonoBehaviour
             if (g.Equals(col.gameObject)) return;
         }
 
+        ChackedArea.Add(col.gameObject);
+    }
+
+    void OnTriggerStay(Collider col)
+    {
+        if (playerState.IsAppealing == false) return;
+        if (col.gameObject.tag != "Area") return;
+        if (ChackedArea.Count != 0) return;
+
+        //初回のみStayで判定
+
+        StartAppeal();
         ChackedArea.Add(col.gameObject);
     }
 }
