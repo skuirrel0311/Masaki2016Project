@@ -31,11 +31,24 @@ public class Shot : NetworkBehaviour
         }
     }
 
-    
+
     void OnCollisionEnter(Collision col)
     {
         Debug.Log("Ammohit");
-        Instantiate(HitEffect,transform.position,Quaternion.identity);
+        if (col.gameObject.tag != "Player")
+            foreach (ContactPoint point in col.contacts)
+            {
+                //衝突位置
+                CmdHitEffect(point.point);
+                Debug.Log(point);
+            }
         Destroy(gameObject);
+    }
+
+    [Command]
+    void CmdHitEffect(Vector3 position)
+    {
+        GameObject go = Instantiate(HitEffect, position, Quaternion.identity) as GameObject;
+        NetworkServer.Spawn(go);
     }
 }
