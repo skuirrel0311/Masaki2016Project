@@ -25,10 +25,7 @@ public class Shot : NetworkBehaviour
 
     void ShotMove()
     {
-        if (isServer)
-        {
-            transform.Translate(transform.forward * speed * Time.deltaTime, Space.World);
-        }
+            transform.Translate(transform.forward * speed * Time.deltaTime, Space.World);       
     }
 
 

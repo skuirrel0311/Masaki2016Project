@@ -55,14 +55,15 @@ public class PlayerShot : NetworkBehaviour
         cameraRotation.z = 0;
         transform.rotation = cameraRotation;
         shotPosition.LookAt(targetPosition);
-        CmdAmmoSpawn(shotPosition.position,shotPosition.eulerAngles);
+        CmdAmmoSpawn(shotPosition.position,shotPosition.rotation);
 
     }
 
     [Command]
-    public void CmdAmmoSpawn(Vector3 shotposition,Vector3 shotrotation)
+    public void CmdAmmoSpawn(Vector3 shotposition,Quaternion shotrotation)
     {
-        GameObject go = Instantiate(Ammo, shotposition,Quaternion.Euler(shotrotation)) as GameObject;
+        GameObject go = Instantiate(Ammo, shotposition,shotrotation) as GameObject;
+        go.transform.rotation = shotrotation;
         NetworkServer.Spawn(go);
     }
 
