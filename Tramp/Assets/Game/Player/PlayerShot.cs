@@ -36,7 +36,7 @@ public class PlayerShot : NetworkBehaviour
     void Shot()
     {
         //カメラの中心座標からレイを飛ばす
-        Ray ray = cam.ViewportPointToRay(new Vector3(0.5f,0.5f, 0));
+        Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         RaycastHit hit;
         Vector3 targetPosition = Vector3.zero;
 
@@ -55,7 +55,16 @@ public class PlayerShot : NetworkBehaviour
         cameraRotation.z = 0;
         transform.rotation = cameraRotation;
         shotPosition.LookAt(targetPosition);
-        CmdAmmoSpawn(shotPosition.position,shotPosition.rotation);
+        if (isServer)
+        {
+            GameObject go = Instantiate(Ammo, shotPosition.position, shotPosition.rotation) as GameObject;
+            NetworkServer.Spawn(go);
+        }
+        else
+        {
+            GameObject go = Instantiate(Ammo,shotPosition.position, shotPosition.rotation) as GameObject;
+            CmdAmmoSpawn(shotPosition.position, shotPosition.rotation);
+        }
 
     }
 
@@ -64,7 +73,6 @@ public class PlayerShot : NetworkBehaviour
     {
         GameObject go = Instantiate(Ammo, shotposition,shotrotation) as GameObject;
         go.transform.rotation = shotrotation;
-        NetworkServer.Spawn(go);
     }
 
     IEnumerator LongButtonDown()

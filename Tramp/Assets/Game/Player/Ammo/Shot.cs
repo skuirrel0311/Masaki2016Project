@@ -33,12 +33,17 @@ public class Shot : NetworkBehaviour
     {
         Debug.Log("Ammohit");
         if (col.gameObject.tag != "Player")
-            foreach (ContactPoint point in col.contacts)
+        {
+            if (isServer)
             {
-                //衝突位置
-                CmdHitEffect(point.point);
-                Debug.Log(point);
+                    //衝突位置
+                    CmdHitEffect(transform.position);
             }
+            else
+            {
+                Instantiate(HitEffect, transform.position, Quaternion.identity);
+            }
+        }
         Destroy(gameObject);
     }
 
