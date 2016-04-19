@@ -15,13 +15,15 @@ public class AppealItem : MonoBehaviour
     void Start()
     {
         //生成されている足場をすべて取得する
-        GameObject stage = GameObject.Find("Stage");
+        GameObject stage = GameObject.Find("Stage(8Area)");
 
-        foreach(Transform child in stage.transform)
+        foreach(Transform area in stage.transform)
         {
-            if(child.name == "scaffold")
+            if (area.tag != "Area") continue;
+            foreach(Transform scaffold in area.transform)
             {
-                scaffoldList.Add(child);
+                if (scaffold.name == "scaffold")
+                    scaffoldList.Add(scaffold);
             }
         }
         SpawnInRandomPosition();
