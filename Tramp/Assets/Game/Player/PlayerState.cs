@@ -14,11 +14,6 @@ public class PlayerState : MonoBehaviour
     [SerializeField]
     float TimeToReturn = 3;
     
-    /// <summary>
-    /// 初期位置
-    /// </summary>
-    [SerializeField]
-    Transform startPosition;
 
     public GameObject appealItem;
 
@@ -54,12 +49,8 @@ public class PlayerState : MonoBehaviour
 
     private int playerIndex = 1;
 
-    void Start()
+    void Awake()
     {
-        if(startPosition == null)
-        {
-            startPosition = GameObject.Find("sartPosition" + GetComponent<PlayerControl>().playerNum).transform;
-        }
         playerIndex = GetComponent<PlayerControl>().playerNum;
         animator = GetComponentInChildren<Animator>();
         Initialize();
@@ -96,8 +87,7 @@ public class PlayerState : MonoBehaviour
     void Initialize()
     {
         Hp = maxHp;
-        if (startPosition == null) startPosition.position = Vector3.zero;
-        transform.position = startPosition.position;
+        transform.position = Vector3.zero;
         transform.rotation = Quaternion.Euler(Vector3.zero);
         PlayerControl playerControl = GetComponent<PlayerControl>();
         playerControl.enabled = true;

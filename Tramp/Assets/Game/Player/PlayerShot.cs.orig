@@ -39,10 +39,17 @@ public class PlayerShot : NetworkBehaviour
     {
         //カメラの中心座標からレイを飛ばす
         Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
-
+        RaycastHit hit;
         Vector3 targetPosition = Vector3.zero;
 
-        targetPosition = ray.origin + (ray.direction * 100);
+        if (Physics.Raycast(ray, out hit, 100))
+        {
+            targetPosition = hit.point;
+        }
+        else
+        {
+            targetPosition = ray.origin + (ray.direction * 100);
+        }
 
         //先にプレイヤーをカメラと同じ方向に向ける
         Quaternion cameraRotation = cameraObj.transform.rotation;
@@ -74,7 +81,12 @@ public class PlayerShot : NetworkBehaviour
     {
         while (true)
         {
-     if (GamePad.GetTrigger(GamePad.Trigger.RightTrigger, (GamePad.Index)playerNum, true) > 0 && !playerState.IsAppealing&&isLocalPlayer)
+<<<<<<< HEAD
+            if(isLocalPlayer && GamePad.GetTrigger(GamePad.Trigger.RightTrigger,(GamePad.Index)playerNum,true)>0)
+=======
+            //アピール中はショットは打てない
+            if (GamePad.GetTrigger(GamePad.Trigger.RightTrigger, (GamePad.Index)playerNum, true) > 0 && !playerState.IsAppealing)
+>>>>>>> origin/Player/Appeal
                 Shot();
             yield return new WaitForSeconds(shotDistance);
         }

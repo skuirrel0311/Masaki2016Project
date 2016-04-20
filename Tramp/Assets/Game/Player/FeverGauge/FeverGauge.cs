@@ -26,6 +26,7 @@ public class FeverGauge : MonoBehaviour
     void Start()
     {
         FeverPoint = 20;
+        gaugeSprite = GameObject.Find("Gauge").GetComponent<Image>();
     }
 
     void Update()
