@@ -1,12 +1,17 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections;
 using GamepadInput;
 
-public class PlayerState : MonoBehaviour
+public class PlayerState : NetworkBehaviour
 {
     [SerializeField]
     int maxHp = 10;
-    public int Hp { get; private set; }
+    public int Hp { get { return hp; }private set { hp = value; }}
+    [SerializeField][SyncVar]
+    private int hp;
+
+
 
     /// <summary>
     /// 復活にかかる時間
@@ -131,14 +136,13 @@ public class PlayerState : MonoBehaviour
     {
         if (collision.gameObject.tag != "Ammo") return;
         if (!IsAlive) return;
-
+        if (!isLocalPlayer) return;
         Damege();
     }
 
     void Damege()
     {
-        //hpを減らす
-        Hp = Hp <= 0 ? 0 : Hp - 1;
+        CmdHpDamage();
         
         if (!IsPossessionOfItem || appealItem == null) return;
 
@@ -155,6 +159,12 @@ public class PlayerState : MonoBehaviour
             IsPossessionOfItem = false;
             IsAppealing = false;
         }
+    }
 
+    [Command]
+    void CmdHpDamage()
+    {
+        //hpを減らす
+        hp = hp <= 0 ? 0 : hp - 1;
     }
 }

@@ -6,7 +6,7 @@ public class FeverGauge : MonoBehaviour
 {
     [SerializeField]
     Image gaugeSprite;//中身
-    float gaugeMaxWidth = 3.82f; //中身のスプライトが満タンになる拡大率
+    float gaugeMaxWidth = 1.0f; //中身のスプライトが満タンになる拡大率
     int gaugeMaxPoint = 2000;
     /// <summary>
     /// 現在のフィーバーポイント
@@ -63,4 +63,11 @@ public class FeverGauge : MonoBehaviour
         AddPoint(killedPoint);
     }
 
+    void OnCollisionEnter(Collision col)
+    {
+        if (col.transform.tag=="Anchor")
+        {
+            AddPoint(10);
+        }
+    }
 }
