@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections;
 using GamepadInput;
 
-public class PlayerControl : MonoBehaviour
+public class PlayerControl : NetworkBehaviour
 {
     [SerializeField]
     private float moveSpeed = 5;         //移動速度
@@ -45,6 +46,11 @@ public class PlayerControl : MonoBehaviour
         animator = GetComponentInChildren<Animator>();
         atJumpPosition = Vector3.zero;
         IsOnGround = true;
+        if (isLocalPlayer)
+        {
+            GameObject.Find("Camera1").GetComponent<CameraControl>().SetPlayer(gameObject);
+            mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+        }
     }
 
     void Update()

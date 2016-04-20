@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections;
 using GamepadInput;
 
-public class PlayerShot : MonoBehaviour
+public class PlayerShot : NetworkBehaviour
 {
 
     [SerializeField]
@@ -32,11 +33,10 @@ public class PlayerShot : MonoBehaviour
         cam = cameraObj.GetComponentInChildren<Camera>();
         StartCoroutine("LongButtonDown");
     }
-
     void Shot()
     {
         //カメラの中心座標からレイを飛ばす
-        Ray ray = cam.ViewportPointToRay(new Vector3(0.5f,0.5f, 0));
+        Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         RaycastHit hit;
         Vector3 targetPosition = Vector3.zero;
 
@@ -54,18 +54,32 @@ public class PlayerShot : MonoBehaviour
         cameraRotation.x = 0;
         cameraRotation.z = 0;
         transform.rotation = cameraRotation;
-
         shotPosition.LookAt(targetPosition);
-        Instantiate(Ammo, shotPosition.position, shotPosition.rotation);
+        if (isServer)
+        {
+            GameObject go = Instantiate(Ammo, shotPosition.position, shotPosition.rotation) as GameObject;
+            NetworkServer.Spawn(go);
+        }
+        else
+        {
+            GameObject go = Instantiate(Ammo,shotPosition.position, shotPosition.rotation) as GameObject;
+            CmdAmmoSpawn(shotPosition.position, shotPosition.rotation);
+        }
 
+    }
 
+    [Command]
+    public void CmdAmmoSpawn(Vector3 shotposition,Quaternion shotrotation)
+    {
+        GameObject go = Instantiate(Ammo, shotposition,shotrotation) as GameObject;
+        go.transform.rotation = shotrotation;
     }
 
     IEnumerator LongButtonDown()
     {
         while (true)
         {
-            if(GamePad.GetTrigger(GamePad.Trigger.RightTrigger,(GamePad.Index)playerNum,true)>0)
+            if(isLocalPlayer && GamePad.GetTrigger(GamePad.Trigger.RightTrigger,(GamePad.Index)playerNum,true)>0)
                 Shot();
             yield return new WaitForSeconds(shotDistance);
         }
