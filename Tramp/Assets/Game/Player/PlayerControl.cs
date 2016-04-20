@@ -49,6 +49,7 @@ public class PlayerControl : NetworkBehaviour
         if (isLocalPlayer)
         {
             GameObject.Find("Camera1").GetComponent<CameraControl>().SetPlayer(gameObject);
+            mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
         }
     }
 
