@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
-using UnityEngine.Networking;
 using System.Collections;
 
-public class Shot : NetworkBehaviour
+public class Shot : MonoBehaviour
 {
 
     [SerializeField]
@@ -14,43 +13,20 @@ public class Shot : NetworkBehaviour
     // Use this for initialization
     void Start()
     {
-        Destroy(gameObject, 3);
+        Destroy(gameObject, 10);
     }
 
     // Update is called once per frame
     void Update()
     {
-        ShotMove();
+        transform.Translate(transform.forward * speed * Time.deltaTime, Space.World);
     }
-
-    void ShotMove()
-    {
-            transform.Translate(transform.forward * speed * Time.deltaTime, Space.World);       
-    }
-
 
     void OnCollisionEnter(Collision col)
     {
+        //if (col.gameObject.tag == "Player") return;
         Debug.Log("Ammohit");
-        if (col.gameObject.tag != "Player")
-        {
-            if (isServer)
-            {
-                    //衝突位置
-                    CmdHitEffect(transform.position);
-            }
-            else
-            {
-                Instantiate(HitEffect, transform.position, Quaternion.identity);
-            }
-        }
+        Instantiate(HitEffect,transform.position,Quaternion.identity);
         Destroy(gameObject);
-    }
-
-    [Command]
-    void CmdHitEffect(Vector3 position)
-    {
-        GameObject go = Instantiate(HitEffect, position, Quaternion.identity) as GameObject;
-        NetworkServer.Spawn(go);
     }
 }

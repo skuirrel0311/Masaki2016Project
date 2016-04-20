@@ -22,17 +22,17 @@ public class PlayerControl : NetworkBehaviour
     /// <summary>
     /// 地上にいる
     /// </summary>
-    public bool IsOnGround { get; private set; }
+    private bool IsOnGround;
 
     /// <summary>
     /// ジャンプ中
     /// </summary>
-    public bool IsJumping { get; private set; }
+    private bool IsJumping;
 
     /// <summary>
     /// 落下中
     /// </summary>
-    public bool Isfalling { get; private set; }
+    private bool Isfalling;
 
     /// <summary>
     /// ジャンプキーが押された時の座標
@@ -44,6 +44,7 @@ public class PlayerControl : NetworkBehaviour
     void Start()
     {
         animator = GetComponentInChildren<Animator>();
+        
         atJumpPosition = Vector3.zero;
         IsOnGround = true;
         if (isLocalPlayer)
@@ -131,8 +132,9 @@ public class PlayerControl : NetworkBehaviour
     void Landed(Collision collision)
     {
         //ジャンプして落ちていなかったら
-        if (Isfalling == false) return;
-        if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Anchor") return;
+        if (IsOnGround) return;
+        if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Anchor" && collision.gameObject.tag != "Area") return;
+        //Areaはトリガーなのでここでは呼ばれない。したがってscaffoldである。
 
         IsJumping = false;
         Isfalling = false;

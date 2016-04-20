@@ -11,7 +11,8 @@ public class PlayerShot : NetworkBehaviour
 
     GameObject cameraObj;
     Camera cam;
-    
+
+    private PlayerState playerState;
     private int playerNum;
 
     /// <summary>
@@ -29,9 +30,10 @@ public class PlayerShot : NetworkBehaviour
     void Start()
     {
         playerNum = GetComponent<PlayerControl>().playerNum;
+        playerState = GetComponent<PlayerState>();
         cameraObj = GameObject.Find("Camera" + playerNum);
         cam = cameraObj.GetComponentInChildren<Camera>();
-        StartCoroutine("LongButtonDown");
+        StartCoroutine("LongTriggerDown");
     }
     void Shot()
     {
@@ -75,11 +77,11 @@ public class PlayerShot : NetworkBehaviour
         go.transform.rotation = shotrotation;
     }
 
-    IEnumerator LongButtonDown()
+    IEnumerator LongTriggerDown()
     {
         while (true)
         {
-            if(isLocalPlayer && GamePad.GetTrigger(GamePad.Trigger.RightTrigger,(GamePad.Index)playerNum,true)>0)
+     if (GamePad.GetTrigger(GamePad.Trigger.RightTrigger, (GamePad.Index)playerNum, true) > 0 && !playerState.IsAppealing&&isLocalPlayer)
                 Shot();
             yield return new WaitForSeconds(shotDistance);
         }
