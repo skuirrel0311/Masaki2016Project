@@ -36,7 +36,7 @@ public class PlayerState : NetworkBehaviour
     {
         get
         {
-            if (Hp <= 0) return false;
+            if (hp <= 0) return false;
             if (transform.position.y < -3) return false;
             return true;
         }
@@ -91,7 +91,7 @@ public class PlayerState : NetworkBehaviour
 
     void Initialize()
     {
-        Hp = maxHp;
+        hp = maxHp;
         transform.position = Vector3.zero;
         transform.rotation = Quaternion.Euler(Vector3.zero);
         PlayerControl playerControl = GetComponent<PlayerControl>();
@@ -132,15 +132,15 @@ public class PlayerState : NetworkBehaviour
         Initialize();
     }
 
-    void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.tag != "Ammo") return;
-        if (!IsAlive) return;
-        if (!isLocalPlayer) return;
-        Damege();
-    }
+    //void OnCollisionEnter(Collision collision)
+    //{
+    //    if (collision.gameObject.tag != "Ammo") return;
+    //    if (!IsAlive) return;
+    //    if (!isLocalPlayer) return;
+    //    Damege();
+    //}
 
-    void Damege()
+    public void Damege()
     {
         CmdHpDamage();
         
@@ -150,7 +150,7 @@ public class PlayerState : NetworkBehaviour
         int firstHp = appealItem.GetComponent<AppealItem>().FirstHp;
 
         //hpがアイテムを所持したときのhpよりも３小さかったら
-        if(Hp <= firstHp - 3)
+        if(hp <= firstHp - 3)
         {
             //親子関係を解除
             appealItem.transform.parent = null;
