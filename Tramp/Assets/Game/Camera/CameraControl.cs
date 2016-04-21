@@ -16,8 +16,16 @@ public class CameraControl : MonoBehaviour
     [SerializeField]
     private float rotationSpeed = 5;
 
+    /// <summary>
+    /// 球体の半径(ターゲットの位置からの距離)
+    /// </summary>
     [SerializeField]
-    float radius = 3;       //球体の半径(ターゲットの位置からの距離)
+    float radius = 3;
+
+    /// <summary>
+    /// 極座標から足す距離(カメラが地面を滑る時に使用します)
+    /// </summary>
+    float addDistance;
 
     [SerializeField]
     private GameObject AlignmentSprite;
@@ -77,9 +85,16 @@ public class CameraControl : MonoBehaviour
         latitude += -rightStick.y * rotationSpeed * Time.deltaTime;
         longitude += rightStick.x * rotationSpeed * Time.deltaTime;
 
-        //経度には制限を掛ける
-        latitude = Mathf.Clamp(latitude, -25, 80);
+        //経度が-25を超えていたら
+        if (latitude <= -25)
+        {
+            //プレイヤーの方向に行く
+            addDistance += rightStick.y * 5 * Time.deltaTime;
 
+            addDistance = Mathf.Clamp(addDistance, 0, 2.5f);
+        }
+        else addDistance = 0;
+        
         SphereCameraControl();
 
         cameraObj.transform.localRotation = Quaternion.Lerp(Quaternion.Euler(0, cameraObj.transform.localRotation.y, 0), cameraObj.transform.localRotation, timer);
@@ -94,15 +109,26 @@ public class CameraControl : MonoBehaviour
 
         float deg2Rad = Mathf.Deg2Rad;
 
-        cameraPosition.x = radius * Mathf.Cos(latitude * deg2Rad) * Mathf.Sin(longitude * deg2Rad);
-        cameraPosition.y = radius * Mathf.Sin(latitude * deg2Rad);
-        cameraPosition.z = radius * Mathf.Cos(latitude * deg2Rad) * Mathf.Cos(longitude * deg2Rad);
+        //経度には制限を掛ける
+        float temp = Mathf.Clamp(latitude, -25, 80);
+
+        cameraPosition.x = radius * Mathf.Cos(temp * deg2Rad) * Mathf.Sin(longitude * deg2Rad);
+        cameraPosition.y = radius * Mathf.Sin(temp * deg2Rad);
+        cameraPosition.z = radius * Mathf.Cos(temp * deg2Rad) * Mathf.Cos(longitude * deg2Rad);
 
         //プレイヤーの足元からY座標に+1した座標をターゲットにする
         Vector3 target = player.transform.position;
         target.y += 1f;
 
         transform.position = cameraPosition + target;
+
+        //地面を滑っている場合はその分座標を足す
+        if (addDistance != 0)
+        {
+            Vector3 toPlayerVector = (player.transform.position - transform.position).normalized;
+            transform.position += toPlayerVector * addDistance;
+        }
+
         transform.LookAt(target);
     }
 
