@@ -22,17 +22,13 @@ public class CameraControl : MonoBehaviour
     [SerializeField]
     float radius = 3;
 
-    /// <summary>
-    /// 極座標から足す距離(カメラが地面を滑る時に使用します)
-    /// </summary>
-    float addDistance;
-
     [SerializeField]
     private GameObject AlignmentSprite;
-    
+
     /// <summary>
     /// 緯度
     /// </summary>
+    [SerializeField]
     float latitude = 15;
     /// <summary>
     /// 経度
@@ -66,11 +62,11 @@ public class CameraControl : MonoBehaviour
     void Update()
     {
         //ロックオンの処理押された時と押している時で処理を分ける
-        if (GamePad.GetButtonDown(GamePad.Button.Y,(GamePad.Index)playerNum))
+        if (GamePad.GetButtonDown(GamePad.Button.Y, (GamePad.Index)playerNum))
         {
             CameraLockOnStart();
         }
-        if (GamePad.GetButton(GamePad.Button.Y,(GamePad.Index)playerNum)&& targetAnchor != null)
+        if (GamePad.GetButton(GamePad.Button.Y, (GamePad.Index)playerNum) && targetAnchor != null)
         {
             PlayerTrace();
             AnchorLockOn();
@@ -85,16 +81,6 @@ public class CameraControl : MonoBehaviour
         latitude += -rightStick.y * rotationSpeed * Time.deltaTime;
         longitude += rightStick.x * rotationSpeed * Time.deltaTime;
 
-        //経度が-25を超えていたら
-        if (latitude <= -25)
-        {
-            //プレイヤーの方向に行く
-            addDistance += rightStick.y * 5 * Time.deltaTime;
-
-            addDistance = Mathf.Clamp(addDistance, 0, 2.5f);
-        }
-        else addDistance = 0;
-        
         SphereCameraControl();
 
         cameraObj.transform.localRotation = Quaternion.Lerp(Quaternion.Euler(0, cameraObj.transform.localRotation.y, 0), cameraObj.transform.localRotation, timer);
@@ -106,15 +92,28 @@ public class CameraControl : MonoBehaviour
     void SphereCameraControl()
     {
         Vector3 cameraPosition;
-
-        float deg2Rad = Mathf.Deg2Rad;
+        Vector3 toPlayerVector = (player.transform.position - transform.position).normalized;
 
         //経度には制限を掛ける
         float temp = Mathf.Clamp(latitude, -25, 80);
+        latitude = Mathf.Clamp(latitude, -75, 80);
 
-        cameraPosition.x = radius * Mathf.Cos(temp * deg2Rad) * Mathf.Sin(longitude * deg2Rad);
-        cameraPosition.y = radius * Mathf.Sin(temp * deg2Rad);
-        cameraPosition.z = radius * Mathf.Cos(temp * deg2Rad) * Mathf.Cos(longitude * deg2Rad);
+        if (latitude < 0)
+        {
+            //緯度が0の場合の座標
+            Vector3 vec1 = SphereCoordinate(longitude, 0);
+            //緯度が-75の場合の座標
+            Vector3 vec2 = SphereCoordinate(longitude, -25);
+            vec2 += toPlayerVector * 1.2f;
+
+            //latitudeを＋に戻して最大値で割る
+            float t = (latitude * -1) / 75;
+            cameraPosition = Vector3.Slerp(vec1, vec2, t);
+        }
+        else
+        {
+            cameraPosition = SphereCoordinate(longitude, temp);
+        }
 
         //プレイヤーの足元からY座標に+1した座標をターゲットにする
         Vector3 target = player.transform.position;
@@ -122,14 +121,28 @@ public class CameraControl : MonoBehaviour
 
         transform.position = cameraPosition + target;
 
-        //地面を滑っている場合はその分座標を足す
-        if (addDistance != 0)
-        {
-            Vector3 toPlayerVector = (player.transform.position - transform.position).normalized;
-            transform.position += toPlayerVector * addDistance;
-        }
-
         transform.LookAt(target);
+    }
+
+    /// <summary>
+    /// 指定した角度の球体座標を返します
+    /// </summary>
+    /// <param name="longitude">経度</param>
+    /// <param name="latitude">緯度</param>
+    /// <returns></returns>
+    Vector3 SphereCoordinate(float longitude, float latitude)
+    {
+        Vector3 temp = Vector3.zero;
+
+        //重複した計算
+        float deg2Rad = Mathf.Deg2Rad;
+        float t = radius * Mathf.Cos(latitude * deg2Rad);
+
+        temp.x = t * Mathf.Sin(longitude * deg2Rad);
+        temp.y = radius * Mathf.Sin(latitude * deg2Rad);
+        temp.z = t * Mathf.Cos(longitude * deg2Rad);
+
+        return temp;
     }
 
     private float VectorToAngle(float a, float b)
