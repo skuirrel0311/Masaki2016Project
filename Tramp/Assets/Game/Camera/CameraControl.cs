@@ -78,7 +78,8 @@ public class CameraControl : MonoBehaviour
 
         Vector2 rightStick = GamePad.GetAxis(GamePad.Axis.RightStick, (GamePad.Index)playerNum);
 
-        latitude += -rightStick.y * rotationSpeed * Time.deltaTime;
+        if (latitude < 0)   latitude += -rightStick.y * (rotationSpeed * 1.5f) * Time.deltaTime;
+        else                latitude += -rightStick.y * rotationSpeed * Time.deltaTime;
         longitude += rightStick.x * rotationSpeed * Time.deltaTime;
 
         SphereCameraControl();
@@ -92,34 +93,37 @@ public class CameraControl : MonoBehaviour
     void SphereCameraControl()
     {
         Vector3 cameraPosition;
-        Vector3 toPlayerVector = (player.transform.position - transform.position).normalized;
-
-        //経度には制限を掛ける
-        float temp = Mathf.Clamp(latitude, -25, 80);
-        latitude = Mathf.Clamp(latitude, -75, 80);
-
-        if (latitude < 0)
-        {
-            //緯度が0の場合の座標
-            Vector3 vec1 = SphereCoordinate(longitude, 0);
-            //緯度が-75の場合の座標
-            Vector3 vec2 = SphereCoordinate(longitude, -25);
-            vec2 += toPlayerVector * 1.2f;
-
-            //latitudeを＋に戻して最大値で割る
-            float t = (latitude * -1) / 75;
-            cameraPosition = Vector3.Slerp(vec1, vec2, t);
-        }
-        else
-        {
-            cameraPosition = SphereCoordinate(longitude, temp);
-        }
 
         //プレイヤーの足元からY座標に+1した座標をターゲットにする
         Vector3 target = player.transform.position;
         target.y += 1f;
 
-        transform.position = cameraPosition + target;
+        //経度には制限を掛ける
+        float temp = Mathf.Clamp(latitude, -50, 60);
+        latitude = Mathf.Clamp(latitude, -120, 60);
+
+        if (latitude < 0)
+        {
+            //カメラが地面にめり込むので球面線形補正をする
+            //緯度が0の場合の座標
+            Vector3 vec1 = SphereCoordinate(longitude, 0);
+            //緯度が-120の場合の座標
+            Vector3 vec2 = SphereCoordinate(longitude, -50);
+            Vector3 toPlayerVector = (Vector3.zero - vec2).normalized;
+            vec2 += toPlayerVector * 2f;
+
+            //latitudeが-120だったらtは1になる
+            float t = (latitude * -1) / 120;
+            cameraPosition = Vector3.Slerp(vec1, vec2, t);
+            transform.position = target + cameraPosition;
+        }
+        else
+        {
+            //カメラが地面にめり込まない場合は球体座標をそのまま使う
+            cameraPosition = SphereCoordinate(longitude, temp);
+            transform.position = target +cameraPosition;
+        }
+
 
         transform.LookAt(target);
     }
