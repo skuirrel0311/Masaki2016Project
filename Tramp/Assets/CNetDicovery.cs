@@ -5,16 +5,16 @@ using UnityEngine.Networking;
 public class CNetDicovery : MonoBehaviour
 {
     /** NetworkDiscovery*/
-    private NetworkDiscovery netdisc;
+    private MyNetworkDiscovery netdisc;
     /** NetworkManager*/
-    private NetworkManager netman;
+    private MyNetworkManager netman;
     bool isflag;
 
     // Use this for initialization
     void Start()
     {
-        netman = GetComponent<NetworkManager>();
-        netdisc = GetComponent<NetworkDiscovery>();
+        netman = GetComponent<MyNetworkManager>();
+        netdisc = GetComponent<MyNetworkDiscovery>();
         isflag = false;
     }
 
@@ -37,7 +37,7 @@ public class CNetDicovery : MonoBehaviour
             if (netdisc.isServer)
             {
                 // ホストとして開始
-                NetworkManager.singleton.StartHost();
+                netman.StartHost();
             }
         }
     }

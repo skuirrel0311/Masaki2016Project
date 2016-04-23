@@ -4,20 +4,20 @@ using System.Collections;
 
 public class MyNetworkDiscovery : NetworkDiscovery {
 
-    NetworkManager networkManager;
+    MyNetworkManager networkManager;
 
     void Start()
     {
-        networkManager = GetComponent<NetworkManager>();
+        networkManager = GetComponent<MyNetworkManager>();
     }
 
     public override void OnReceivedBroadcast(string fromAddress, string data)
     {
-        //networkManager.networkAddress = fromAddress;
-        NetworkManager.singleton.networkAddress = fromAddress;
-        if (NetworkManager.singleton.isNetworkActive) return;
-        NetworkManager.singleton.StartClient();
-       // networkManager.StartClient();
+        //NetworkManager.singleton.networkAddress = fromAddress;
+        //if (NetworkManager.singleton.isNetworkActive) return;
+        //NetworkManager.singleton.StartClient();
+        networkManager.networkAddress = fromAddress;
+        networkManager.StartClient();
         //base.OnReceivedBroadcast(fromAddress, data);
     }
 }
