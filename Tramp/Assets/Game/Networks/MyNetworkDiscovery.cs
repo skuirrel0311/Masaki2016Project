@@ -13,9 +13,11 @@ public class MyNetworkDiscovery : NetworkDiscovery {
 
     public override void OnReceivedBroadcast(string fromAddress, string data)
     {
+        //networkManager.networkAddress = fromAddress;
         NetworkManager.singleton.networkAddress = fromAddress;
+        if (NetworkManager.singleton.isNetworkActive) return;
         NetworkManager.singleton.StartClient();
-        networkManager.StartClient();
+       // networkManager.StartClient();
         //base.OnReceivedBroadcast(fromAddress, data);
     }
 }
