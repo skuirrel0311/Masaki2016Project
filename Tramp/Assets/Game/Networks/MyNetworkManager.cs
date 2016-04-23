@@ -20,12 +20,25 @@ public class MyNetworkManager : NetworkManager {
 
     public override void OnStartClient(NetworkClient client)
     {
-        discovery.showGUI = false;
+        discovery.Initialize();
+        discovery.StartAsClient();
     }
 
     public override void OnStopClient()
     {
         discovery.StopBroadcast();
         discovery.showGUI = true;
+    }
+
+    public override void OnStopHost()
+    {
+        GetComponent<CNetDicovery>().isStartHost = false;
+        base.OnStopHost();
+    }
+
+    public override void OnStopServer()
+    {
+        base.OnStopServer();
+        GetComponent<CNetDicovery>().isStartHost = false;
     }
 }
