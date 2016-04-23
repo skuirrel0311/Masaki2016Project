@@ -8,19 +8,30 @@ public class CNetDicovery : MonoBehaviour
     private NetworkDiscovery netdisc;
     /** NetworkManager*/
     private NetworkManager netman;
+    bool isflag;
 
     // Use this for initialization
     void Start()
     {
         netman = GetComponent<NetworkManager>();
         netdisc = GetComponent<NetworkDiscovery>();
+        isflag = false;
     }
 
     // Update is called once per frame
     void Update()
     {
+        // NetworkManagerが開始していたらGUIを消す
+        if (netman.isNetworkActive)
+        {
+            isflag = true;
+        }
+        else
+        {
+            isflag = false;
+        }
         // NetworkManagerが開始していない時に処理
-        if (netdisc.showGUI)
+        if (isflag == false)
         {
             // NetworkDiscoveryがサーバーとして動作していたら、NetworkManagerをHostで開始する
             if (netdisc.isServer)
@@ -28,12 +39,12 @@ public class CNetDicovery : MonoBehaviour
                 // ホストとして開始
                 netman.StartHost();
             }
-
-            // NetworkManagerが開始していたらGUIを消す
-            if (netman.isNetworkActive)
+            else if (netdisc.isClient)
             {
-                netdisc.showGUI = false;
+                netman.StartClient();
             }
+
+
         }
     }
 }
