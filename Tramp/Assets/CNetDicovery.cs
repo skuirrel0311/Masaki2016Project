@@ -14,7 +14,7 @@ public class CNetDicovery : MonoBehaviour
     void Start()
     {
         netman = GetComponent<NetworkManager>();
-        netdisc = GetComponent<NetworkDiscovery>();
+        netdisc = GetComponent<MyNetworkDiscovery>();
         isflag = false;
     }
 
@@ -39,12 +39,6 @@ public class CNetDicovery : MonoBehaviour
                 // ホストとして開始
                 netman.StartHost();
             }
-            else if (netdisc.isClient)
-            {
-                netman.StartClient();
-            }
-
-
         }
     }
 }
