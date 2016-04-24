@@ -16,15 +16,19 @@ public class CameraControl : MonoBehaviour
     [SerializeField]
     private float rotationSpeed = 5;
 
+    /// <summary>
+    /// 球体の半径(ターゲットの位置からの距離)
+    /// </summary>
     [SerializeField]
-    float radius = 3;       //球体の半径(ターゲットの位置からの距離)
+    float radius = 3;
 
     [SerializeField]
     private GameObject AlignmentSprite;
-    
+
     /// <summary>
     /// 緯度
     /// </summary>
+    [SerializeField]
     float latitude = 15;
     /// <summary>
     /// 経度
@@ -58,11 +62,11 @@ public class CameraControl : MonoBehaviour
     void Update()
     {
         //ロックオンの処理押された時と押している時で処理を分ける
-        if (GamePad.GetButtonDown(GamePad.Button.Y,(GamePad.Index)playerNum))
+        if (GamePad.GetButtonDown(GamePad.Button.Y, (GamePad.Index)playerNum))
         {
             CameraLockOnStart();
         }
-        if (GamePad.GetButton(GamePad.Button.Y,(GamePad.Index)playerNum)&& targetAnchor != null)
+        if (GamePad.GetButton(GamePad.Button.Y, (GamePad.Index)playerNum) && targetAnchor != null)
         {
             PlayerTrace();
             AnchorLockOn();
@@ -74,11 +78,9 @@ public class CameraControl : MonoBehaviour
 
         Vector2 rightStick = GamePad.GetAxis(GamePad.Axis.RightStick, (GamePad.Index)playerNum);
 
-        latitude += -rightStick.y * rotationSpeed * Time.deltaTime;
+        if (latitude < 0)   latitude += -rightStick.y * (rotationSpeed * 1.5f) * Time.deltaTime;
+        else                latitude += -rightStick.y * rotationSpeed * Time.deltaTime;
         longitude += rightStick.x * rotationSpeed * Time.deltaTime;
-
-        //経度には制限を掛ける
-        latitude = Mathf.Clamp(latitude, -25, 80);
 
         SphereCameraControl();
 
@@ -92,18 +94,59 @@ public class CameraControl : MonoBehaviour
     {
         Vector3 cameraPosition;
 
-        float deg2Rad = Mathf.Deg2Rad;
-
-        cameraPosition.x = radius * Mathf.Cos(latitude * deg2Rad) * Mathf.Sin(longitude * deg2Rad);
-        cameraPosition.y = radius * Mathf.Sin(latitude * deg2Rad);
-        cameraPosition.z = radius * Mathf.Cos(latitude * deg2Rad) * Mathf.Cos(longitude * deg2Rad);
-
         //プレイヤーの足元からY座標に+1した座標をターゲットにする
         Vector3 target = player.transform.position;
         target.y += 1f;
 
-        transform.position = cameraPosition + target;
+        //経度には制限を掛ける
+        float temp = Mathf.Clamp(latitude, -50, 60);
+        latitude = Mathf.Clamp(latitude, -120, 60);
+
+        if (latitude < 0)
+        {
+            //カメラが地面にめり込むので球面線形補正をする
+            //緯度が0の場合の座標
+            Vector3 vec1 = SphereCoordinate(longitude, 0);
+            //緯度が-120の場合の座標
+            Vector3 vec2 = SphereCoordinate(longitude, -50);
+            Vector3 toPlayerVector = (Vector3.zero - vec2).normalized;
+            vec2 += toPlayerVector * 2f;
+
+            //latitudeが-120だったらtは1になる
+            float t = (latitude * -1) / 120;
+            cameraPosition = Vector3.Slerp(vec1, vec2, t);
+            transform.position = target + cameraPosition;
+        }
+        else
+        {
+            //カメラが地面にめり込まない場合は球体座標をそのまま使う
+            cameraPosition = SphereCoordinate(longitude, temp);
+            transform.position = target +cameraPosition;
+        }
+
+
         transform.LookAt(target);
+    }
+
+    /// <summary>
+    /// 指定した角度の球体座標を返します
+    /// </summary>
+    /// <param name="longitude">経度</param>
+    /// <param name="latitude">緯度</param>
+    /// <returns></returns>
+    Vector3 SphereCoordinate(float longitude, float latitude)
+    {
+        Vector3 temp = Vector3.zero;
+
+        //重複した計算
+        float deg2Rad = Mathf.Deg2Rad;
+        float t = radius * Mathf.Cos(latitude * deg2Rad);
+
+        temp.x = t * Mathf.Sin(longitude * deg2Rad);
+        temp.y = radius * Mathf.Sin(latitude * deg2Rad);
+        temp.z = t * Mathf.Cos(longitude * deg2Rad);
+
+        return temp;
     }
 
     private float VectorToAngle(float a, float b)
