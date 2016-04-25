@@ -8,12 +8,11 @@ using System.Collections.Generic;
 
 public class MyNetworkManager : NetworkManager {
 
-    NetworkDiscovery discovery;
-    MatchDesc roomList = null;
+    MyNetworkDiscovery discovery;
     public string IpAddress;
     // Use this for initialization
     void Start () {
-        discovery = GetComponent<NetworkDiscovery>();
+        discovery = GetComponent<MyNetworkDiscovery>();
 	}
 
     void Update()
@@ -39,23 +38,27 @@ public class MyNetworkManager : NetworkManager {
     public void StartupHost()
     {
         SetPort();
-        NetworkManager.singleton.StartHost();
+        discovery.Initialize();
+        discovery.StartAsServer();
+        StartHost();
     }
-
+    
     //ButtonJoinGameボタンを押した時に実行
     //IPアドレスとポートを設定し、クライアントとして接続
     public void JoinGame()
     {
         SetIPAddress();
         SetPort();
-        NetworkManager.singleton.StartClient();
+        //NetworkManager.singleton.StartClient();
+        discovery.Initialize();
+        discovery.StartAsClient();
     }
 
     void SetIPAddress()
     {
         //Input Fieldに記入されたIPアドレスを取得し、接続する
-        string ipAddress = GameObject.Find("InputFieldIPAddress").transform.FindChild("Text").GetComponent<Text>().text;
-        NetworkManager.singleton.networkAddress = ipAddress;
+       // string ipAddress = GameObject.Find("InputFieldIPAddress").transform.FindChild("Text").GetComponent<Text>().text;
+        //NetworkManager.singleton.networkAddress = ipAddress;
     }
 
     //ポートの設定

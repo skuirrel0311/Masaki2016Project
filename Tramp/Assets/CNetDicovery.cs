@@ -22,17 +22,17 @@ public class CNetDicovery : MonoBehaviour
     void Update()
     {
         // NetworkManagerが開始していない時に処理
-        if (isStartHost == false)
-        {
-            if (netdisc.isServer)
-            {
-                netman.StartHost();
-            }
-            if (netman.isNetworkActive)
-            {
-                isStartHost = true;
-            }
-        }
+        //if (isStartHost == false)
+        //{
+        //    if (netdisc.isServer)
+        //    {
+        //        netman.StartHost();
+        //    }
+        //    if (netman.isNetworkActive)
+        //    {
+        //        isStartHost = true;
+        //    }
+        //}
 
         // NetworkDiscoveryがサーバーとして動作していたら、NetworkManagerをHostで開始する
         //if (netdisc.isServer)

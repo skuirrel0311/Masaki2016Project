@@ -15,7 +15,8 @@ public class MyNetworkDiscovery : NetworkDiscovery {
 
     public override void OnReceivedBroadcast(string fromAddress, string data)
     {
-        networkManager.serverBindToIP = true;
+        if (networkManager.IsClientConnected()) return;
+        fromAddress = fromAddress.Replace("::ffff:","");
         networkManager.networkAddress = fromAddress;
         networkManager.StartClient();
     }
