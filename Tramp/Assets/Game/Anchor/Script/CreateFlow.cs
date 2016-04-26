@@ -23,7 +23,7 @@ public class CreateFlow :NetworkBehaviour
 
     void Start()
     {
-        //targetAnchor = GameObject.Find("Camera").GetComponent<CameraControl>().targetAnchor;
+        targetAnchor = GameObject.Find("Camera1").GetComponent<CameraControl>().targetAnchor;
 
         GetNearAnchor();
 
