@@ -92,8 +92,8 @@ public class PlayerState : NetworkBehaviour
     void Initialize()
     {
         hp = maxHp;
-        transform.position = Vector3.zero;
-        transform.rotation = Quaternion.Euler(Vector3.zero);
+        //transform.position = Vector3.zero;
+        //transform.rotation = Quaternion.Euler(Vector3.zero);
         PlayerControl playerControl = GetComponent<PlayerControl>();
         playerControl.enabled = true;
         IsAppealing = false;
