@@ -98,6 +98,7 @@ public class PlayerState : NetworkBehaviour
         playerControl.enabled = true;
         IsAppealing = false;
         IsPossessionOfItem = false;
+        animator.SetBool("Dead", false);
     }
 
     /// <summary>
@@ -125,6 +126,7 @@ public class PlayerState : NetworkBehaviour
 
         //操作できないようにする。
         GetComponent<PlayerControl>().enabled = false;
+        animator.SetBool("Dead", true);
 
         yield return new WaitForSeconds(TimeToReturn);
         //3秒後に復活
