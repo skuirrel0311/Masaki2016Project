@@ -50,7 +50,7 @@ public class PlayerAppeal : MonoBehaviour
     void Appeal()
     {
         //常に１ポイント付与
-        feverGauge.AddPoint(1);
+        feverGauge.CmdAddPoint(1);
     }
 
     /// <summary>
@@ -64,7 +64,7 @@ public class PlayerAppeal : MonoBehaviour
 
         additional = 100 * (ChackedArea.Count * 1.2f);
 
-        feverGauge.AddPoint((int)additional);
+        feverGauge.CmdAddPoint((int)additional);
 
         //リストを破棄
         ChackedArea.Clear();

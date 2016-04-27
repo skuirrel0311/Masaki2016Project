@@ -25,6 +25,13 @@ public class Flow : NetworkBehaviour{
     private Vector3 targetPosition;
 
     private bool isCalc = true;
+
+    void Awake()
+    {
+        CreateFlow.flowEffectCount++;
+        gameObject.name = "FlowEffect"+CreateFlow.flowEffectCount;
+    }
+
     void Start()
     {
         isCalc = false;

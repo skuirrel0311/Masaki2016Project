@@ -5,7 +5,7 @@ public class AnchorHit : MonoBehaviour {
 
     [SerializeField]
     //何回ヒットすれば壊れるか
-    int Hp=10;
+    int Hp=1;
 
     [SerializeField]
     GameObject HitEffect;
@@ -14,7 +14,7 @@ public class AnchorHit : MonoBehaviour {
 
     void Start()
     {
-        FlowEffect = transform.FindChild("FlowEffect(Clone)").gameObject;
+        FlowEffect =GameObject.Find("FlowEffect"+CreateFlow.flowEffectCount);
     }
 
     void OnCollisionEnter(Collision col)
@@ -36,7 +36,7 @@ public class AnchorHit : MonoBehaviour {
                 Destroy(FlowEffect, 2);
             }
             Destroy(gameObject);
-
+            col.gameObject.GetComponent<FeverGauge>().CmdAddPoint(10);
             Instantiate(HitEffect,transform.position,Quaternion.identity);
         }
     }

@@ -1,17 +1,22 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.UI;
 using System.Collections;
 
-public class FeverGauge : MonoBehaviour
+public class FeverGauge : NetworkBehaviour
 {
     [SerializeField]
     Image gaugeSprite;//中身
     float gaugeMaxWidth = 1.0f; //中身のスプライトが満タンになる拡大率
-    int gaugeMaxPoint = 2000;
+    int gaugeMaxPoint = 100;
     /// <summary>
     /// 現在のフィーバーポイント
     /// </summary>
-    public int FeverPoint { get; private set; }
+    [SerializeField]
+    [SyncVar]
+    public int feverPoint;
+
+    int oppnentFeverGauge;
 
     /// <summary>
     /// 敵を倒したときに上昇する量
@@ -25,26 +30,64 @@ public class FeverGauge : MonoBehaviour
 
     void Start()
     {
-        FeverPoint = 20;
-        gaugeSprite = GameObject.Find("Gauge").GetComponent<Image>();
+        oppnentFeverGauge = 0;
+        feverPoint = 20;
+        if (isServer)
+        {
+            if (isLocalPlayer)
+                gaugeSprite = GameObject.Find("Gauge1").GetComponent<Image>();
+            else
+                gaugeSprite = GameObject.Find("Gauge2").GetComponent<Image>();
+        }
+        else
+        {
+            if (isLocalPlayer)
+                gaugeSprite = GameObject.Find("Gauge2").GetComponent<Image>();
+            else
+                gaugeSprite = GameObject.Find("Gauge1").GetComponent<Image>();
+        }
     }
+
 
     void Update()
     {
-        float width =(float)FeverPoint / gaugeMaxPoint;
+
+
+        float width = (float)feverPoint / (feverPoint+oppnentFeverGauge);
         width = gaugeMaxWidth * width;
-        
+
         gaugeSprite.transform.localScale = new Vector3(width, 1, 1);
+
+        if (Input.GetKey(KeyCode.A) && isLocalPlayer)
+            CmdAddPoint(10);
+
+        GetOppnentFeverGauge();
+
+    }
+
+    void GetOppnentFeverGauge()
+    {
+        GameObject[] go = GameObject.FindGameObjectsWithTag("Player");
+        if (go.Length <= 1) return;
+
+        for (int i = 0; i < go.Length; i++)
+        {
+            if (go[i]!=gameObject)
+            {
+                oppnentFeverGauge = go[i].GetComponent<FeverGauge>().feverPoint;
+            }
+        }
     }
 
     /// <summary>
     /// 渡された数値分ゲージが増減します。
     /// </summary>
-    public void AddPoint(int num)
+    [Command]
+    public void CmdAddPoint(int num)
     {
-        FeverPoint += num;
-        if (FeverPoint < 0) FeverPoint = 0;
-        if (FeverPoint > gaugeMaxPoint) FeverPoint = gaugeMaxPoint;
+        feverPoint += num;
+        if (feverPoint < 0) feverPoint = 0;
+        if (feverPoint > gaugeMaxPoint) feverPoint = gaugeMaxPoint;
     }
 
     /// <summary>
@@ -52,7 +95,7 @@ public class FeverGauge : MonoBehaviour
     /// </summary>
     public void KillPlayer()
     {
-        AddPoint(killPoint);
+        CmdAddPoint(killPoint);
     }
 
     /// <summary>
@@ -60,14 +103,8 @@ public class FeverGauge : MonoBehaviour
     /// </summary>
     public void KilledInPlayer()
     {
-        AddPoint(killedPoint);
+        CmdAddPoint(killedPoint);
     }
 
-    void OnCollisionEnter(Collision col)
-    {
-        if (col.transform.tag=="Anchor")
-        {
-            AddPoint(10);
-        }
-    }
+
 }

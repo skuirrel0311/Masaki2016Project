@@ -19,6 +19,8 @@ public class CreateFlow :NetworkBehaviour
 
     float PlayerIndex=1;
 
+    public static int flowEffectCount = 0;
+
     #region Start
 
     void Start()
@@ -28,6 +30,9 @@ public class CreateFlow :NetworkBehaviour
         GetNearAnchor();
 
         CmdCreateFlowObject();
+
+        //アンカーとしてセットする
+        gameObject.tag = "Anchor";
     }
 
     public void SetCreatePlayerIndex(int index)
@@ -84,15 +89,9 @@ public class CreateFlow :NetworkBehaviour
         float leapPosition = 0.6f;//このくらいがバグりにくいと思われる
         boxCol.transform.position = Vector3.Lerp(targetPosition, transform.position, leapPosition);
         boxCol.transform.rotation = Quaternion.FromToRotation(Vector3.up, flowVector.normalized);
-
-        //オブジェクトとの親子関係に加える
-        boxCol.transform.parent = transform;
         NetworkServer.Spawn(boxCol);
         //流れのパーティクル
         CreateFlowParticle();
-
-        //アンカーとしてセットする
-        gameObject.tag = "Anchor";
     }
 
     void CreateFlowParticle()
