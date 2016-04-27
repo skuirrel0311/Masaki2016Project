@@ -6,13 +6,22 @@ public class PlayerDamage : NetworkBehaviour
 {
     [SerializeField]
     GameObject HitEffect;
+    private PlayerState state;
+
+    void Start()
+    {
+        state = gameObject.GetComponent<PlayerState>();
+    }
 
     void OnCollisionEnter(Collision col)
     {
+        if (!isLocalPlayer) return;
         if (col.gameObject.tag == "Ammo")
         {
             Debug.Log("Hit");
                 CmdHitEffect(col.gameObject.transform.position);
+                state.Damege();
+            
         }
     }
     [Command]

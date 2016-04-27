@@ -1,12 +1,17 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections;
 using GamepadInput;
 
-public class PlayerState : MonoBehaviour
+public class PlayerState : NetworkBehaviour
 {
     [SerializeField]
     int maxHp = 10;
-    public int Hp { get; private set; }
+    public int Hp { get { return hp; }private set { hp = value; }}
+    [SerializeField][SyncVar]
+    private int hp;
+
+
 
     /// <summary>
     /// 復活にかかる時間
@@ -31,7 +36,7 @@ public class PlayerState : MonoBehaviour
     {
         get
         {
-            if (Hp <= 0) return false;
+            if (hp <= 0) return false;
             if (transform.position.y < -3) return false;
             return true;
         }
@@ -86,9 +91,9 @@ public class PlayerState : MonoBehaviour
 
     void Initialize()
     {
-        Hp = maxHp;
-        transform.position = Vector3.zero;
-        transform.rotation = Quaternion.Euler(Vector3.zero);
+        hp = maxHp;
+        //transform.position = Vector3.zero;
+        //transform.rotation = Quaternion.Euler(Vector3.zero);
         PlayerControl playerControl = GetComponent<PlayerControl>();
         playerControl.enabled = true;
         IsAppealing = false;
@@ -127,18 +132,17 @@ public class PlayerState : MonoBehaviour
         Initialize();
     }
 
-    void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.tag != "Ammo") return;
-        if (!IsAlive) return;
+    //void OnCollisionEnter(Collision collision)
+    //{
+    //    if (collision.gameObject.tag != "Ammo") return;
+    //    if (!IsAlive) return;
+    //    if (!isLocalPlayer) return;
+    //    Damege();
+    //}
 
-        Damege();
-    }
-
-    void Damege()
+    public void Damege()
     {
-        //hpを減らす
-        Hp = Hp <= 0 ? 0 : Hp - 1;
+        CmdHpDamage();
         
         if (!IsPossessionOfItem || appealItem == null) return;
 
@@ -146,7 +150,7 @@ public class PlayerState : MonoBehaviour
         int firstHp = appealItem.GetComponent<AppealItem>().FirstHp;
 
         //hpがアイテムを所持したときのhpよりも３小さかったら
-        if(Hp <= firstHp - 3)
+        if(hp <= firstHp - 3)
         {
             //親子関係を解除
             appealItem.transform.parent = null;
@@ -155,6 +159,12 @@ public class PlayerState : MonoBehaviour
             IsPossessionOfItem = false;
             IsAppealing = false;
         }
+    }
 
+    [Command]
+    void CmdHpDamage()
+    {
+        //hpを減らす
+        hp = hp <= 0 ? 0 : hp - 1;
     }
 }
