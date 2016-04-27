@@ -39,17 +39,31 @@ public class PlayerShot : NetworkBehaviour
     {
         //カメラの中心座標からレイを飛ばす
         Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
-
+        RaycastHit hit;
         Vector3 targetPosition = Vector3.zero;
-
-        targetPosition = ray.origin + (ray.direction * 100);
 
         //先にプレイヤーをカメラと同じ方向に向ける
         Quaternion cameraRotation = cameraObj.transform.rotation;
         cameraRotation.x = 0;
         cameraRotation.z = 0;
         transform.rotation = cameraRotation;
+
+        if(Physics.Raycast(ray,out hit,100))
+        {
+            //衝突点がカメラとプレイヤーの間にあるか判定
+            Vector3 temp = hit.point - shotPosition.position;
+            float angle = Vector3.Angle(ray.direction,temp);
+
+            if(angle < 90) targetPosition = hit.point;                  //９０度以内
+            else targetPosition = ray.origin + (ray.direction * 100);   //角度がありすぎる
+        }
+        else
+        {
+            targetPosition = ray.origin + (ray.direction * 100);
+        }
+
         shotPosition.LookAt(targetPosition);
+
         if (isServer)
         {
             GameObject go = Instantiate(Ammo, shotPosition.position, shotPosition.rotation) as GameObject;
