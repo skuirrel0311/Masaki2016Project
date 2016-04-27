@@ -69,6 +69,7 @@ public class CameraControl : MonoBehaviour
         if (GamePad.GetButton(GamePad.Button.Y, (GamePad.Index)playerNum) && targetAnchor != null)
         {
             PlayerTrace();
+            oldPlayerPosition = player.transform.position;
             AnchorLockOn();
             return;
         }
@@ -85,6 +86,8 @@ public class CameraControl : MonoBehaviour
         SphereCameraControl();
 
         cameraObj.transform.localRotation = Quaternion.Lerp(Quaternion.Euler(0, cameraObj.transform.localRotation.y, 0), cameraObj.transform.localRotation, timer);
+
+        oldPlayerPosition = player.transform.position;
     }
 
     /// <summary>
@@ -313,7 +316,5 @@ public class CameraControl : MonoBehaviour
 
         //プレイヤーについていく
         transform.position += movement;
-
-        oldPlayerPosition = player.transform.position;
     }
 }
