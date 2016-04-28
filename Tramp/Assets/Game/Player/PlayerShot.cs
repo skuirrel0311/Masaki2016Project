@@ -106,10 +106,19 @@ public class PlayerShot : NetworkBehaviour
     {
         while (true)
         {
-            if (IsReload) yield return new WaitForSeconds(3.5f);
-
-            if(IsReload)
+            if (IsReload)
             {
+                while (true)
+                {
+                    if (!GamePad.GetButtonDown(GamePad.Button.X, (GamePad.Index)playerNum)) yield return null;
+                    else break;
+                }
+                //ボタン押したら3秒待つ
+                gameObject.GetComponentInChildren<Animator>().SetBool("Reload", true);
+                //動けない
+                GetComponent<PlayerControl>().enabled = false;
+                yield return new WaitForSeconds(3);
+
                 //リロードが終わったら
                 IsReload = false;
                 gameObject.GetComponentInChildren<Animator>().SetBool("Reload", false);
@@ -126,9 +135,6 @@ public class PlayerShot : NetworkBehaviour
             if (stock < 0)
             {
                 IsReload = true;
-                gameObject.GetComponentInChildren<Animator>().SetBool("Reload",true);
-                //動けない
-                GetComponent<PlayerControl>().enabled = false;
             }
 
             yield return new WaitForSeconds(shotDistance);
