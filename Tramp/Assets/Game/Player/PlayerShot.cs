@@ -140,4 +140,12 @@ public class PlayerShot : NetworkBehaviour
             yield return new WaitForSeconds(shotDistance);
         }
     }
+
+    void OnGUI()
+    {
+        if (!IsReload) return;
+
+        GUI.TextField(new Rect(500, 100, 100, 30), "Push_X Reload");
+    }
+
 }
