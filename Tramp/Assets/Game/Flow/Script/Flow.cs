@@ -26,6 +26,8 @@ public class Flow : NetworkBehaviour{
 
     private bool isCalc = true;
 
+    public bool isDestory;
+
     void Awake()
     {
         CreateFlow.flowEffectCount++;
@@ -35,6 +37,7 @@ public class Flow : NetworkBehaviour{
     void Start()
     {
         isCalc = false;
+        isDestory = false;
     }
     void Update()
     {
@@ -70,7 +73,7 @@ public class Flow : NetworkBehaviour{
     {
         if (col.tag == "Player")
         {
-            Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
+            if (isDestory) { Destroy(gameObject); }
         }
     }
 }

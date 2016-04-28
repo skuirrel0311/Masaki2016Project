@@ -34,7 +34,7 @@ public class AnchorHit : MonoBehaviour {
             if (FlowEffect!=null)
             {
                 FlowEffect.transform.parent = null;
-                Destroy(FlowEffect, 2);
+                FlowEffect.GetComponent<Flow>().isDestory = true;
             }
             Destroy(gameObject);
             col.gameObject.GetComponent<FeverGauge>().CmdAddPoint(10);

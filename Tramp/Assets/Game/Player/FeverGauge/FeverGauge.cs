@@ -21,7 +21,7 @@ public class FeverGauge : NetworkBehaviour
     /// <summary>
     /// 敵を倒したときに上昇する量
     /// </summary>
-    int killPoint = 10;
+    int killPoint = 100;
     /// <summary>
     /// 敵に倒されたときに減少する量
     /// </summary>
@@ -51,6 +51,17 @@ public class FeverGauge : NetworkBehaviour
 
     void Update()
     {
+        if (isLocalPlayer)
+        {
+            if (feverPoint > oppnentFeverGauge)
+            {
+                SoundManager.isWin = true;
+            }
+            else
+            {
+                SoundManager.isWin = false;
+            }
+        }
 
 
         float width = (float)feverPoint / (feverPoint+oppnentFeverGauge);

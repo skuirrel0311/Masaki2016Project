@@ -8,7 +8,7 @@ public class SoundManager : MonoBehaviour
     AudioSource mainMusic;
 
     [SerializeField]
-    AudioClip  HostVoiceClip;
+    AudioClip HostVoiceClip;
 
     [SerializeField]
     AudioClip ClientVoiceClip;
@@ -31,14 +31,23 @@ public class SoundManager : MonoBehaviour
     void Start()
     {
         mainMusic = GetComponent<AudioSource>();
-
+        isEnd = false;
+        isWin = false;
     }
-
+    bool isEnd = false;
+    public static bool isWin;
     // Update is called once per frame
     void Update()
     {
         if (mainMusic.time >= mainMusic.clip.length)
         {
+            isEnd = true;
+
+            if (!GamepadInput.GamePad.GetButtonDown(GamepadInput.GamePad.Button.A, GamepadInput.GamePad.Index.One))
+            {
+                return;
+            }
+
             MyNetworkDiscovery netMana = GetComponent<MyNetworkDiscovery>();
             netMana.StopBroadcast();
             if (netMana.isServer)
@@ -54,4 +63,17 @@ public class SoundManager : MonoBehaviour
         }
 
     }
+
+    void OnGUI()
+    {
+        if (isEnd)
+        {
+            if (isWin)
+                GUI.Label(new Rect(0, 0, 1000, 200), "YOU WIN");
+            else
+                GUI.Label(new Rect(0, 0, 1000, 200), "YOU LOSE");
+        }
+
+    }
+
 }

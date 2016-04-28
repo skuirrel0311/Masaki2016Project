@@ -146,7 +146,7 @@ public class PlayerState : NetworkBehaviour
     public void Damege()
     {
         CmdHpDamage();
-        
+
         if (!IsPossessionOfItem || appealItem == null) return;
 
         //アイテムを所持していたら

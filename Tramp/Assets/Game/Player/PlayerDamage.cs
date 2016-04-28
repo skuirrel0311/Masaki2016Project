@@ -29,7 +29,6 @@ public class PlayerDamage : NetworkBehaviour
     {
         Debug.Log("HitEffect");
         GameObject go = Instantiate(HitEffect, position, Quaternion.identity) as GameObject;
-
         NetworkServer.Spawn(go);
     }
 }
