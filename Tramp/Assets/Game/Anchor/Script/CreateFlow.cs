@@ -29,7 +29,7 @@ public class CreateFlow :NetworkBehaviour
 
         GetNearAnchor();
 
-        CmdCreateFlowObject();
+        CallCmd();
 
         //アンカーとしてセットする
         gameObject.tag = "Anchor";
@@ -38,6 +38,12 @@ public class CreateFlow :NetworkBehaviour
     public void SetCreatePlayerIndex(int index)
     {
          PlayerIndex = index;
+    }
+
+    [ClientCallback]
+    void CallCmd()
+    {
+            CmdCreateFlowObject(targetPosition, flowVector);
     }
 
     void GetNearAnchor()
@@ -65,29 +71,28 @@ public class CreateFlow :NetworkBehaviour
                 distance = flowVector.magnitude;
             }
         }
-
-
     }
     [Command]
-    void CmdCreateFlowObject()
+    void CmdCreateFlowObject(Vector3 tpos,Vector3 flowvec)
     {
+        if (!isServer) return;
         //流れのコリジョン用オブジェクト
         GameObject boxCol = Instantiate(FlowEffect);
-        boxCol.transform.localScale = new Vector3(2,flowVector.magnitude*0.5f,2);
+        boxCol.transform.localScale = new Vector3(2, flowvec.magnitude*0.5f,2);
 
         //CapsuleColliderをアタッチする
         CapsuleCollider capcol = boxCol.GetComponent<CapsuleCollider>();
-        capcol.height = flowVector.magnitude/ (flowVector.magnitude*0.5f);
+        capcol.height = flowvec.magnitude/ (flowvec.magnitude*0.5f);
         capcol.radius = collsionRadius/2;
         capcol.isTrigger = true;
 
         //FlowScriptをアタッチする
         Flow flow = boxCol.GetComponent<Flow>();
-        flow.FlowVector = flowVector;
-        flow.TargetPosition = targetPosition;
+        flow.FlowVector = flowvec;
+        flow.TargetPosition = tpos;
         //流れのベクトルに合わせて回転させる
         float leapPosition = 0.6f;//このくらいがバグりにくいと思われる
-        boxCol.transform.position = Vector3.Lerp(targetPosition, transform.position, leapPosition);
+        boxCol.transform.position = Vector3.Lerp(tpos, transform.position, leapPosition);
         boxCol.transform.rotation = Quaternion.FromToRotation(Vector3.up, flowVector.normalized);
         NetworkServer.Spawn(boxCol);
         //流れのパーティクル

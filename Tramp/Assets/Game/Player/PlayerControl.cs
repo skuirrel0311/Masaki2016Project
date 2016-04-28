@@ -61,6 +61,7 @@ public class PlayerControl : NetworkBehaviour
 
     void Update()
     {
+        body.isKinematic = false;
         Vector2 leftStick = GamePad.GetAxis(GamePad.Axis.LeftStick, (GamePad.Index)playerNum);
         Vector3 direction = new Vector3(leftStick.x,0,leftStick.y);
         Move(direction);
@@ -133,10 +134,8 @@ public class PlayerControl : NetworkBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-
         //地面にいたらダメ
         if (IsOnGround) return;
-
 
         //Areaはトリガーなのでヒットしないが
         //どうやら親のタグを取得しているみたい

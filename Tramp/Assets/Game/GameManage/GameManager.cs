@@ -1,24 +1,19 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
-public class GameManager : MonoBehaviour {
-  
+public class GameManager : MonoBehaviour
+{
 
-    AudioSource mainMusic;
+    [SerializeField]
+    GameObject networkManager;
 
-    public void PlayMusic()
+
+    void Start()
     {
-        mainMusic.Play();
-        Debug.Log("Play MainMusic");
+        GameObject go = Instantiate(networkManager);
+        GameObject.Find("Button1").GetComponent<Button>().onClick.AddListener((go.GetComponent<MyNetworkManager>().StartupHost));
+        GameObject.Find("Button2").GetComponent<Button>().onClick.AddListener((go.GetComponent<MyNetworkManager>().JoinGame));
     }
 
-	// Use this for initialization
-	void Start () {
-        mainMusic = GetComponent<AudioSource>();
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
 }

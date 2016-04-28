@@ -71,7 +71,6 @@ public class Flow : NetworkBehaviour{
         if (col.tag == "Player")
         {
             Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
-            body.isKinematic = false;
         }
     }
 }

@@ -26,6 +26,7 @@ public class AnchorHit : MonoBehaviour {
             if (Hp <= 0)
             {
                 Destroy(gameObject);
+                Destroy(FlowEffect);
             }
         }
         else if (col.gameObject.tag=="Player")

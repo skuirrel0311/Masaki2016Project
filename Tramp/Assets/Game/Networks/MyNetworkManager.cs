@@ -11,13 +11,13 @@ public class MyNetworkManager : NetworkManager
 
     MyNetworkDiscovery discovery;
     public string IpAddress;
-    GameManager gameManager;
+    SoundManager soundManager;
 
     // Use this for initialization
     void Start()
     {
         discovery = GetComponent<MyNetworkDiscovery>();
-        gameManager = GetComponent<GameManager>();
+        soundManager = GetComponent<SoundManager>();
     }
 
     void Update()
@@ -32,7 +32,7 @@ public class MyNetworkManager : NetworkManager
     {
         if (numPlayers == 1)
         {
-            gameManager.PlayMusic();
+            soundManager.PlayMusic(true);
         }
         base.OnServerAddPlayer(conn, playerControllerId);
     }
@@ -40,7 +40,7 @@ public class MyNetworkManager : NetworkManager
     public override void OnClientConnect(NetworkConnection conn)
     {
         if (!GetComponent<NetworkDiscovery>().isServer)
-            gameManager.PlayMusic();
+            soundManager.PlayMusic(false);
 
         base.OnClientConnect(conn);
     }
@@ -59,30 +59,14 @@ public class MyNetworkManager : NetworkManager
     //IPアドレスとポートを設定し、クライアントとして接続
     public void JoinGame()
     {
-        SetIPAddress();
         SetPort();
-        //NetworkManager.singleton.StartClient();
         discovery.Initialize();
         discovery.StartAsClient();
-    }
-
-    void SetIPAddress()
-    {
-        //Input Fieldに記入されたIPアドレスを取得し、接続する
-        // string ipAddress = GameObject.Find("InputFieldIPAddress").transform.FindChild("Text").GetComponent<Text>().text;
-        //NetworkManager.singleton.networkAddress = ipAddress;
     }
 
     //ポートの設定
     void SetPort()
     {
         NetworkManager.singleton.networkPort = 7777;
-    }
-
-
-    public override void OnStopClient()
-    {
-        discovery.StopBroadcast();
-        discovery.showGUI = true;
     }
 }
