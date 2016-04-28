@@ -61,7 +61,7 @@ public class Flow : NetworkBehaviour{
         if (col.tag == "Player")
         {
             Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
-            body.useGravity = false;
+            body.isKinematic = true;
             col.gameObject.transform.Translate(PlayerVector*Time.deltaTime*speed,Space.World);
         }
     }
@@ -71,7 +71,7 @@ public class Flow : NetworkBehaviour{
         if (col.tag == "Player")
         {
             Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
-            body.useGravity = true;
+            body.isKinematic = false;
         }
     }
 }

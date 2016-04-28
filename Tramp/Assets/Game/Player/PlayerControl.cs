@@ -22,16 +22,19 @@ public class PlayerControl : NetworkBehaviour
     /// <summary>
     /// 地上にいる
     /// </summary>
+    [SerializeField]
     private bool IsOnGround;
 
     /// <summary>
     /// ジャンプ中
     /// </summary>
+    [SerializeField]
     private bool IsJumping;
 
     /// <summary>
     /// 落下中
     /// </summary>
+    [SerializeField]
     private bool Isfalling;
 
     /// <summary>
@@ -41,10 +44,12 @@ public class PlayerControl : NetworkBehaviour
     
     public int playerNum;
 
+    private Rigidbody body;
+
     void Start()
     {
         animator = GetComponentInChildren<Animator>();
-        
+        body = GetComponent<Rigidbody>();
         atJumpPosition = Vector3.zero;
         IsOnGround = true;
         if (isLocalPlayer)
@@ -103,6 +108,7 @@ public class PlayerControl : NetworkBehaviour
             atJumpPosition = transform.position;
             IsJumping = true;
             IsOnGround = false;
+            body.isKinematic = true;
         }
 
         //ジャンプキー長押し中
@@ -112,6 +118,7 @@ public class PlayerControl : NetworkBehaviour
             if (transform.position.y >= atJumpPosition.y + jumpLimitPositionY)
             {
                 Isfalling = true;
+                body.isKinematic = false;
             }
             transform.position += jumpVec;
         }
@@ -120,24 +127,39 @@ public class PlayerControl : NetworkBehaviour
         if (GamePad.GetButtonUp(GamePad.Button.A, (GamePad.Index)playerNum) && IsJumping == true)
         {
             Isfalling = true;
+            body.isKinematic = false;
         }
     }
 
     void OnCollisionEnter(Collision collision)
     {
-        Landed(collision);
+
+        //地面にいたらダメ
+        if (IsOnGround) return;
+
+
+        //Areaはトリガーなのでヒットしないが
+        //どうやら親のタグを取得しているみたい
+        if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Anchor" && collision.gameObject.tag != "Area") return;
+
+        //ジャンプ中で落ちていない
+        if (!Isfalling && IsJumping)    SlipThrough();
+        //ジャンプ中で落ちている
+        if (Isfalling && IsJumping)     Landed();
     }
 
     //着地した
-    void Landed(Collision collision)
+    void Landed()
     {
-        //ジャンプして落ちていなかったら
-        if (IsOnGround) return;
-        if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Anchor" && collision.gameObject.tag != "Area") return;
-        //Areaはトリガーなのでここでは呼ばれない。したがってscaffoldである。
-
         IsJumping = false;
         Isfalling = false;
         IsOnGround = true;
+        body.isKinematic = false;
+    }
+
+    //上昇中はすり抜ける
+    void SlipThrough()
+    {
+        body.isKinematic = true;
     }
 }
