@@ -87,6 +87,8 @@ public class PlayerState : NetworkBehaviour
                 StartCoroutine("IsDead");
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.A)) animator.SetTrigger("Dead");
     }
 
     void Initialize()
@@ -125,6 +127,7 @@ public class PlayerState : NetworkBehaviour
 
         //操作できないようにする。
         GetComponent<PlayerControl>().enabled = false;
+        animator.SetTrigger("Dead");
 
         yield return new WaitForSeconds(TimeToReturn);
         //3秒後に復活
