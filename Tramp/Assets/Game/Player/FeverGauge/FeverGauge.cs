@@ -53,7 +53,7 @@ public class FeverGauge : NetworkBehaviour
     {
         if (isLocalPlayer)
         {
-            if (feverPoint > oppnentFeverGauge)
+            if (feverPoint >= oppnentFeverGauge)
             {
                 SoundManager.isWin = true;
             }

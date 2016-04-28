@@ -66,12 +66,15 @@ public class SoundManager : MonoBehaviour
 
     void OnGUI()
     {
+        GUIStyle style = new GUIStyle();
+        style.fontSize = 70;
+        style.fontStyle = FontStyle.Bold;
         if (isEnd)
         {
             if (isWin)
-                GUI.Label(new Rect(0, 0, 1000, 200), "YOU WIN");
+                GUI.Label(new Rect(400, 400, 1000, 200), "YOU WIN");
             else
-                GUI.Label(new Rect(0, 0, 1000, 200), "YOU LOSE");
+                GUI.Label(new Rect(400, 400, 1000, 200), "YOU LOSE");
         }
 
     }

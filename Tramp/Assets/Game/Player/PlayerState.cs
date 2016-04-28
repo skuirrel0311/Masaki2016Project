@@ -170,4 +170,16 @@ public class PlayerState : NetworkBehaviour
         //hpを減らす
         hp = hp <= 0 ? 0 : hp - 1;
     }
+
+    void OnGUI()
+    {
+
+        if (!isLocalPlayer) return;
+        GUIStyle style = new GUIStyle();
+        style.fontSize = 30;
+        style.fontStyle = FontStyle.Bold;
+        GUI.TextArea(new Rect(800,0,400,200),"残HP："+hp,style);
+    }
+
+
 }
