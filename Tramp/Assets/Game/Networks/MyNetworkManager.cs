@@ -6,14 +6,19 @@ using UnityEngine.Networking.Match;
 using UnityEngine.UI;
 using System.Collections.Generic;
 
-public class MyNetworkManager : NetworkManager {
+public class MyNetworkManager : NetworkManager
+{
 
     MyNetworkDiscovery discovery;
     public string IpAddress;
+    GameManager gameManager;
+
     // Use this for initialization
-    void Start () {
+    void Start()
+    {
         discovery = GetComponent<MyNetworkDiscovery>();
-	}
+        gameManager = GetComponent<GameManager>();
+    }
 
     void Update()
     {
@@ -23,14 +28,21 @@ public class MyNetworkManager : NetworkManager {
         }
     }
 
-    public override void OnStartHost()
+    public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId)
     {
-
+        if (numPlayers == 1)
+        {
+            gameManager.PlayMusic();
+        }
+        base.OnServerAddPlayer(conn, playerControllerId);
     }
 
-    public override void OnStartClient(NetworkClient client)
+    public override void OnClientConnect(NetworkConnection conn)
     {
+        if (!GetComponent<NetworkDiscovery>().isServer)
+            gameManager.PlayMusic();
 
+        base.OnClientConnect(conn);
     }
 
     //ButtonStartHostボタンを押した時に実行
@@ -42,7 +54,7 @@ public class MyNetworkManager : NetworkManager {
         discovery.StartAsServer();
         StartHost();
     }
-    
+
     //ButtonJoinGameボタンを押した時に実行
     //IPアドレスとポートを設定し、クライアントとして接続
     public void JoinGame()
@@ -57,7 +69,7 @@ public class MyNetworkManager : NetworkManager {
     void SetIPAddress()
     {
         //Input Fieldに記入されたIPアドレスを取得し、接続する
-       // string ipAddress = GameObject.Find("InputFieldIPAddress").transform.FindChild("Text").GetComponent<Text>().text;
+        // string ipAddress = GameObject.Find("InputFieldIPAddress").transform.FindChild("Text").GetComponent<Text>().text;
         //NetworkManager.singleton.networkAddress = ipAddress;
     }
 
