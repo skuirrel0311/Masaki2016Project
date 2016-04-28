@@ -72,9 +72,9 @@ public class SoundManager : MonoBehaviour
         if (isEnd)
         {
             if (isWin)
-                GUI.Label(new Rect(400, 400, 1000, 200), "YOU WIN");
+                GUI.Label(new Rect(400, 400, 1000, 200), "YOU WIN",style);
             else
-                GUI.Label(new Rect(400, 400, 1000, 200), "YOU LOSE");
+                GUI.Label(new Rect(400, 400, 1000, 200), "YOU LOSE",style);
         }
 
     }

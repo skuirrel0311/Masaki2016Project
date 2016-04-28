@@ -2,7 +2,7 @@
 using UnityEngine.Networking;
 using System.Collections;
 
-public class CreateFlow :NetworkBehaviour
+public class CreateFlow : NetworkBehaviour
 {
 
     [SerializeField]
@@ -17,7 +17,7 @@ public class CreateFlow :NetworkBehaviour
     Vector3 flowVector;
     float collsionRadius = 1;
 
-    float PlayerIndex=1;
+    float PlayerIndex = 1;
 
     public static int flowEffectCount = 0;
 
@@ -37,13 +37,13 @@ public class CreateFlow :NetworkBehaviour
 
     public void SetCreatePlayerIndex(int index)
     {
-         PlayerIndex = index;
+        PlayerIndex = index;
     }
 
     [ClientCallback]
     void CallCmd()
     {
-            CmdCreateFlowObject(targetPosition, flowVector);
+        CmdCreateFlowObject(targetPosition, flowVector);
     }
 
     void GetNearAnchor()
@@ -73,17 +73,17 @@ public class CreateFlow :NetworkBehaviour
         }
     }
     [Command]
-    void CmdCreateFlowObject(Vector3 tpos,Vector3 flowvec)
+    void CmdCreateFlowObject(Vector3 tpos, Vector3 flowvec)
     {
         if (!isServer) return;
         //流れのコリジョン用オブジェクト
         GameObject boxCol = Instantiate(FlowEffect);
-        boxCol.transform.localScale = new Vector3(2, flowvec.magnitude*0.5f,2);
+        boxCol.transform.localScale = new Vector3(2, flowvec.magnitude * 0.5f, 2);
 
         //CapsuleColliderをアタッチする
         CapsuleCollider capcol = boxCol.GetComponent<CapsuleCollider>();
-        capcol.height = flowvec.magnitude/ (flowvec.magnitude*0.5f);
-        capcol.radius = collsionRadius/2;
+        capcol.height = flowvec.magnitude / (flowvec.magnitude * 0.5f);
+        capcol.radius = collsionRadius / 2;
         capcol.isTrigger = true;
 
         //FlowScriptをアタッチする
@@ -91,8 +91,9 @@ public class CreateFlow :NetworkBehaviour
         flow.FlowVector = flowvec;
         flow.TargetPosition = tpos;
         //流れのベクトルに合わせて回転させる
-        float leapPosition = 0.6f;//このくらいがバグりにくいと思われる
-        boxCol.transform.position = Vector3.Lerp(tpos, transform.position, leapPosition);
+        float dist = Vector3.Distance(tpos, transform.position);
+        float leap = ((1.5f+dist)/dist)*0.5f;//少し出す位置をずらす
+        boxCol.transform.position = Vector3.Lerp(tpos, transform.position, leap);
         boxCol.transform.rotation = Quaternion.FromToRotation(Vector3.up, flowVector.normalized);
         NetworkServer.Spawn(boxCol);
         //流れのパーティクル

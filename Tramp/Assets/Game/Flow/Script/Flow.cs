@@ -50,19 +50,12 @@ public class Flow : NetworkBehaviour{
         capcol.isTrigger = true;
     }
 
-    void OnTriggerEnter(Collider col)
-    {
-        if (col.tag == "Player")
-        {
-            PlayerVector = targetPosition - (col.transform.position+Vector3.up);
-            PlayerVector.Normalize();
-        }
-    }
-
     void OnTriggerStay(Collider col)
     {
         if (col.tag == "Player")
         {
+            PlayerVector = targetPosition - (col.transform.position + Vector3.up);
+            PlayerVector.Normalize();
             Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
             body.isKinematic = true;
             col.gameObject.transform.Translate(PlayerVector*Time.deltaTime*speed,Space.World);
