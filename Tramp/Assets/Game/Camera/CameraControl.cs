@@ -74,13 +74,15 @@ public class CameraControl : MonoBehaviour
             return;
         }
         LockonDecision = false;
-
+        targetAnchor = null;
         timer = Mathf.Max(timer - Time.deltaTime, 0);
 
         Vector2 rightStick = GamePad.GetAxis(GamePad.Axis.RightStick, (GamePad.Index)playerNum);
 
-        if (latitude < 0)   latitude += -rightStick.y * (rotationSpeed * 1.5f) * Time.deltaTime;
-        else                latitude += -rightStick.y * rotationSpeed * Time.deltaTime;
+        if (latitude < 0)
+            latitude += -rightStick.y * (rotationSpeed * 1.5f) * Time.deltaTime;
+        else
+            latitude += -rightStick.y * rotationSpeed * Time.deltaTime;
         longitude += rightStick.x * rotationSpeed * Time.deltaTime;
 
         SphereCameraControl();
@@ -124,7 +126,7 @@ public class CameraControl : MonoBehaviour
         {
             //カメラが地面にめり込まない場合は球体座標をそのまま使う
             cameraPosition = SphereCoordinate(longitude, temp);
-            transform.position = target +cameraPosition;
+            transform.position = target + cameraPosition;
         }
 
 
