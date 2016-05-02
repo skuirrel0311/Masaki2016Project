@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 using GamepadInput;
 
 
@@ -79,8 +80,8 @@ public class CameraControl : MonoBehaviour
 
         Vector2 rightStick = GamePad.GetAxis(GamePad.Axis.RightStick, (GamePad.Index)playerNum);
 
-        if (latitude < 0)   latitude += -rightStick.y * (rotationSpeed * 1.5f) * Time.deltaTime;
-        else                latitude += -rightStick.y * rotationSpeed * Time.deltaTime;
+        if (latitude < 0) latitude += -rightStick.y * (rotationSpeed * 1.5f) * Time.deltaTime;
+        else latitude += -rightStick.y * rotationSpeed * Time.deltaTime;
         longitude += rightStick.x * rotationSpeed * Time.deltaTime;
 
         SphereCameraControl();
@@ -124,7 +125,7 @@ public class CameraControl : MonoBehaviour
         {
             //カメラが地面にめり込まない場合は球体座標をそのまま使う
             cameraPosition = SphereCoordinate(longitude, temp);
-            transform.position = target +cameraPosition;
+            transform.position = target + cameraPosition;
         }
 
 
@@ -162,7 +163,7 @@ public class CameraControl : MonoBehaviour
     /// </summary>
     private void CameraLockOnStart()
     {
-        targetAnchor = GetNearAnchor();
+        targetAnchor = GetTargetAnchor();
         InitLookatPosition();
         timer = 0;
     }
@@ -224,6 +225,7 @@ public class CameraControl : MonoBehaviour
 
         GameObject nextAnchor = null;
         GameObject[] objects = GameObject.FindGameObjectsWithTag("Anchor");
+
         foreach (GameObject obj in objects)
         {
             if (targetAnchor.Equals(obj)) continue;
@@ -281,27 +283,109 @@ public class CameraControl : MonoBehaviour
         return a.x * b.y - a.y * b.x;
     }
 
-    //todo:CreateFlowとメソッドがかぶっているのでライブラリを作成する
-    GameObject GetNearAnchor()
+    GameObject GetTargetAnchor()
     {
-        GameObject gameObject = null;
-        //一番近いアンカーを探す
-        GameObject[] objects = GameObject.FindGameObjectsWithTag("Anchor");
-        if (objects.Length <= 0) return null;
+        GameObject targetAnchor = null;
+        
+        //カメラに写っているアンカーを取得
+        List<GameObject> anchorList = GetViewAnchor();
+        if (anchorList.Count == 0) return null;
 
-        float distance = 1000000;
+        //見ている可能性が高いアンカーを取得
+        List<GameObject> temp = GetShouldLookAnchor(anchorList);
 
-        foreach (GameObject obj in objects)
+        if(temp.Count != 0)
         {
-            if (Vector3.Distance(transform.position, obj.transform.position) < distance)
-            {
-                Vector3 vec = obj.transform.position - transform.position;
-                distance = vec.magnitude;
-                gameObject = obj;
-            }
+            //15度以内のアンカーのなかで一番近いアンカーを取得
+            targetAnchor = GetNearAnchor(temp);
+        }
+        else
+        {
+            //15度以内にアンカーが存在しなかったら一番角度の低いアンカーを取得
+            targetAnchor = GetLowAngleAnchor(anchorList);
         }
 
-        return gameObject;
+        return targetAnchor;
+    }
+
+    /// <summary>
+    /// 渡されたリストの中から最も近いアンカーを返します
+    /// </summary>
+    GameObject GetNearAnchor(List<GameObject> anchorList)
+    {
+        GameObject nearAnchor = null;
+        float distance = 100000;
+
+        anchorList.ForEach(n =>
+        {
+            if(Vector3.Distance(transform.position,n.transform.position) < distance)
+            {
+                distance = Vector3.Distance(transform.position, n.transform.position);
+                nearAnchor = n;
+            }
+        });
+
+        return nearAnchor;
+    }
+
+    /// <summary>
+    /// カメラに写っているアンカーのリストを返します
+    /// </summary>
+    List<GameObject> GetViewAnchor()
+    {
+        List<GameObject> anchorList = new List<GameObject>();
+        anchorList.AddRange(GameObject.FindGameObjectsWithTag("Anchor"));
+
+        if (anchorList.Count <= 0) return null;
+
+        return anchorList.FindAll(n => n.GetComponent<IsRendered>().WasRendered);
+    }
+
+    /// <summary>
+    /// 見ている可能性の高い(15度以内)アンカーをすべて返します
+    /// </summary>
+    List<GameObject> GetShouldLookAnchor(List<GameObject> anchorList)
+    {
+        Vector2 originAnchorVec = new Vector2(transform.forward.x, transform.forward.z);
+        anchorList = anchorList.FindAll(n =>
+        {
+            Vector2 vec = new Vector2(n.transform.position.x - transform.position.x
+                                         , n.transform.position.z - transform.position.z);
+
+            float tmpAngle = Vector2.Angle(vec, originAnchorVec);
+
+            //15度以内のアンカーを検索
+            return tmpAngle < 10;
+        });
+        
+        return anchorList;
+    }
+
+    /// <summary>
+    /// 一番角度が小さいアンカーを返します
+    /// </summary>
+    GameObject GetLowAngleAnchor(List<GameObject> anchorList)
+    {
+        GameObject anchor = null;
+        float angle = 360;
+        Vector2 originAnchorVec = new Vector2(transform.forward.x, transform.forward.z);
+
+        anchorList.ForEach(n =>
+        {
+            Vector2 vec = new Vector2(n.transform.position.x - transform.position.x
+                             , n.transform.position.z - transform.position.z);
+
+            float tmpAngle = Vector2.Angle(vec, originAnchorVec);
+
+            //一番小さい角度のアンカーを検索
+            if (tmpAngle < angle)
+            {
+                angle = tmpAngle;
+                anchor = n;
+            }
+        });
+
+        return anchor;
     }
 
     /// <summary>
@@ -314,7 +398,7 @@ public class CameraControl : MonoBehaviour
         //プレイヤーが移動していなかったら終了
         if (movement.magnitude == 0) return;
 
-        //プレイヤーについていく
+        //プレイヤーについていくMOMO
         transform.position += movement;
     }
 }
