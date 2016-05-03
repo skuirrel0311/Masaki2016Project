@@ -34,6 +34,7 @@ public class CameraControl : MonoBehaviour
     /// <summary>
     /// 経度
     /// </summary>
+    [SerializeField]
     float longitude = 180;
 
     private Vector3 oldPlayerPosition;
@@ -194,9 +195,23 @@ public class CameraControl : MonoBehaviour
         //アンカーのある方向を取得
         Vector3 vec = targetAnchor.transform.position - transform.position;
         //オブジェクトのある方向に合わせたカメラのポジション移動
-        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(0, VectorToAngle(vec.x, vec.z), 0), timer);
+        Vector3 playerPosition = player.transform.position + Vector3.up;
+        transform.position = playerPosition + PositionForAnchor(targetAnchor);
         //カメラの注視点を移動
         cameraObj.transform.LookAt(Vector3.Lerp(lookatPosition, targetAnchor.transform.position, timer));
+    }
+
+    /// <summary>
+    /// アンカーに合わせたカメラの座標を返します
+    /// </summary>
+    Vector3 PositionForAnchor(GameObject anchor)
+    {
+        Vector2 vec = new Vector2(anchor.transform.position.x - transform.position.x,
+            anchor.transform.position.z - transform.position.z);
+
+        float rot1 = Mathf.Atan2(vec.y, vec.x) * Mathf.Rad2Deg;
+        float rot2 = Mathf.Atan2(transform.forward.z, transform.forward.x) * Mathf.Rad2Deg;
+        return SphereCoordinate(longitude + (rot2 - rot1), 0);
     }
 
     /// <summary>
@@ -296,12 +311,12 @@ public class CameraControl : MonoBehaviour
 
         if(temp.Count != 0)
         {
-            //15度以内のアンカーのなかで一番近いアンカーを取得
+            //10度以内のアンカーのなかで一番近いアンカーを取得
             targetAnchor = GetNearAnchor(temp);
         }
         else
         {
-            //15度以内にアンカーが存在しなかったら一番角度の低いアンカーを取得
+            //10度以内にアンカーが存在しなかったら一番角度の低いアンカーを取得
             targetAnchor = GetLowAngleAnchor(anchorList);
         }
 
@@ -342,7 +357,7 @@ public class CameraControl : MonoBehaviour
     }
 
     /// <summary>
-    /// 見ている可能性の高い(15度以内)アンカーをすべて返します
+    /// 見ている可能性の高い(10度以内)アンカーをすべて返します
     /// </summary>
     List<GameObject> GetShouldLookAnchor(List<GameObject> anchorList)
     {
@@ -354,7 +369,7 @@ public class CameraControl : MonoBehaviour
 
             float tmpAngle = Vector2.Angle(vec, originAnchorVec);
 
-            //15度以内のアンカーを検索
+            //10度以内のアンカーを検索
             return tmpAngle < 10;
         });
         
