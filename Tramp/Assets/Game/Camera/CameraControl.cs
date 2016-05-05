@@ -79,6 +79,8 @@ public class CameraControl : MonoBehaviour
             return;
         }
         LockonDecision = false;
+        //照準を元に戻す
+        AlignmentImage(1);
         targetAnchor = null;
         timer = Mathf.Max(timer - Time.deltaTime, 0);
 
@@ -326,7 +328,7 @@ public class CameraControl : MonoBehaviour
         return a.x * b.y - a.y * b.x;
     }
 
-    GameObject GetTargetAnchor()
+    public GameObject GetTargetAnchor()
     {
         GameObject targetAnchor = null;
 
@@ -346,7 +348,10 @@ public class CameraControl : MonoBehaviour
         {
             //10度以内にアンカーが存在しなかったら一番角度の低いアンカーを取得
             targetAnchor = GetLowAngleAnchor(anchorList);
+            //todo:一番角度の低いアンカーが取得できない場合があるっぽい
         }
+
+
 
         return targetAnchor;
     }

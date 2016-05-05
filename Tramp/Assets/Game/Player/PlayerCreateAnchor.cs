@@ -48,8 +48,18 @@ public class PlayerCreateAnchor : NetworkBehaviour
 
     void GetTargetAnchor()
     {
-        targetAnchor = GameObject.Find("Camera1").GetComponent<CameraControl>().targetAnchor;
+        CameraControl camControl = GameObject.Find("Camera1").GetComponent<CameraControl>();
+        targetAnchor = camControl.targetAnchor;
         float distance = 1000000;
+        if (targetAnchor != null)
+        {
+            targetPosition = targetAnchor.transform.position;
+            flowVector = targetPosition - CreatePosition;
+            distance = flowVector.magnitude;
+            return;
+        }
+
+        targetAnchor = camControl.GetTargetAnchor();
         if (targetAnchor != null)
         {
             targetPosition = targetAnchor.transform.position;

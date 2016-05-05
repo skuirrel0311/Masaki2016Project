@@ -6,7 +6,7 @@ using GamepadInput;
 public class PlayerControl : NetworkBehaviour
 {
     [SerializeField]
-    private float moveSpeed = 5;         //移動速度
+    private float moveSpeed = 1000;         //移動速度
     private float rotationSpeed = 360;   //振り向きの際数値が大きいとゆっくりになる
 
     private Animator animator;
@@ -78,6 +78,7 @@ public class PlayerControl : NetworkBehaviour
     /// <param name="movement">移動量</param>
     void Move(Vector3 movement)
     {
+        body.velocity = new Vector3(0,body.velocity.y,0);
         //カメラの角度のx､zは見ない
         Quaternion cameraRotation = mainCamera.transform.rotation;
         cameraRotation.x = 0;
@@ -86,7 +87,10 @@ public class PlayerControl : NetworkBehaviour
         movement = cameraRotation * movement;
 
         //移動していなかったら終了
-        if (movement == Vector3.zero) return;
+        if (movement == Vector3.zero)
+        {
+            return;
+        }
 
         //弧を描くように移動
         Vector3 forward = Vector3.Slerp(
@@ -97,7 +101,7 @@ public class PlayerControl : NetworkBehaviour
         //向きを変える
         transform.LookAt(transform.position + forward);
 
-        transform.Translate(movement * moveSpeed * Time.deltaTime, Space.World);
+        body.AddForce(movement * moveSpeed * Time.deltaTime,ForceMode.VelocityChange);
     }
 
     void Jump()
@@ -109,7 +113,8 @@ public class PlayerControl : NetworkBehaviour
             atJumpPosition = transform.position;
             IsJumping = true;
             IsOnGround = false;
-            body.isKinematic = true;
+            //body.isKinematic = true;
+            body.AddForce(jumpVec,ForceMode.VelocityChange);
         }
 
         //ジャンプキー長押し中
@@ -119,16 +124,13 @@ public class PlayerControl : NetworkBehaviour
             if (transform.position.y >= atJumpPosition.y + jumpLimitPositionY)
             {
                 Isfalling = true;
-                body.isKinematic = false;
             }
-            transform.position += jumpVec;
         }
 
         //ジャンプキーを離した
         if (GamePad.GetButtonUp(GamePad.Button.A, (GamePad.Index)playerNum) && IsJumping == true)
         {
             Isfalling = true;
-            body.isKinematic = false;
         }
     }
 
