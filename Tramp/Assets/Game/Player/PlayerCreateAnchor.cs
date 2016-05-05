@@ -41,7 +41,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
 
                 GetTargetAnchor();
 
-                CmdCreateFlowObject(targetAnchor.transform.position,CreatePosition,flowVector);
+                CmdCreateFlowObject(targetPosition, CreatePosition,flowVector);
             }
         }
     }
