@@ -168,19 +168,15 @@ public class CameraControl : MonoBehaviour
     private void CameraLockOnStart()
     {
         targetAnchor = GetTargetAnchor();
-        InitLookatPosition();
+        InitLookatPosition(targetAnchor);
         timer = 0;
     }
 
-    private void InitLookatPosition()
+    private void InitLookatPosition(GameObject targetAnchor)
     {
-        //Camera cam = cameraObj.GetComponent<Camera>();
-        //lookatPosition = cam.ScreenToWorldPoint(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, cam.nearClipPlane));
-
         float len = (targetAnchor.transform.position - transform.position).magnitude;
 
         lookatPosition = transform.position + (transform.forward * len);
-
     }
 
     /// <summary>
@@ -206,8 +202,8 @@ public class CameraControl : MonoBehaviour
         Vector3 playerPosition = player.transform.position + Vector3.up;
         transform.position = playerPosition + PositionForLockOnAnchor(targetAnchor);
         //カメラの注視点を移動
-        cameraObj.transform.LookAt(targetAnchor.transform);
-        //cameraObj.transform.LookAt(Vector3.Lerp(lookatPosition, targetAnchor.transform.position, timer));
+        //cameraObj.transform.LookAt(targetAnchor.transform);
+        cameraObj.transform.LookAt(Vector3.Lerp(lookatPosition, targetAnchor.transform.position, timer));
     }
 
     /// <summary>
@@ -220,11 +216,12 @@ public class CameraControl : MonoBehaviour
             anchor.transform.position.z - transform.position.z);
 
         //縦方向
-        float rot3 = DifferenceLatitude(targetAnchor.transform.position);
+        float rot3 = -DifferenceLatitude(targetAnchor.transform.position);
+        rot3 = Mathf.Clamp(rot3, -90, 90);
 
         float rot1 = Mathf.Atan2(vec.y, vec.x) * Mathf.Rad2Deg;
         float rot2 = Mathf.Atan2(transform.forward.z, transform.forward.x) * Mathf.Rad2Deg;
-        return SphereCoordinate(longitude + (rot2 - rot1), -rot3);
+        return SphereCoordinate(longitude + (rot2 - rot1), rot3);
     }
 
     /// <summary>
@@ -238,10 +235,7 @@ public class CameraControl : MonoBehaviour
         //rightは(1,0,0)
         Vector3 vec = Vector3.right * len;
 
-        vec.y = anchor.y;
-        //(1,1)だと45となる。
-        //Debug.Log("(1,1) = " + Mathf.Atan2(1,1) * Mathf.Rad2Deg);
-
+        vec.y = anchor.y - transform.position.y;
         return Mathf.Atan2(vec.y, vec.x) * Mathf.Rad2Deg;
     }
 
@@ -301,7 +295,7 @@ public class CameraControl : MonoBehaviour
 
         else
         {
-            InitLookatPosition();
+            InitLookatPosition(nextAnchor);
             timer = 0;
         }
 
