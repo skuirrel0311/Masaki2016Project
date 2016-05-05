@@ -174,9 +174,10 @@ public class CameraControl : MonoBehaviour
 
     private void InitLookatPosition(GameObject targetAnchor)
     {
-        float len = (targetAnchor.transform.position - transform.position).magnitude;
+        Transform child = transform.FindChild("ThirdPersonCamera");
+        float len = (targetAnchor.transform.position - child.position).magnitude;
 
-        lookatPosition = transform.position + (transform.forward * len);
+        lookatPosition = transform.position + (child.forward * len);
     }
 
     /// <summary>
