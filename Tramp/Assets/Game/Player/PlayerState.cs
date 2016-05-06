@@ -135,13 +135,11 @@ public class PlayerState : NetworkBehaviour
         Initialize();
     }
 
-    //void OnCollisionEnter(Collision collision)
-    //{
-    //    if (collision.gameObject.tag != "Ammo") return;
-    //    if (!IsAlive) return;
-    //    if (!isLocalPlayer) return;
-    //    Damege();
-    //}
+    public override void OnStartLocalPlayer()
+    {
+        GetComponent<NetworkAnimator>().SetParameterAutoSend(0, true);
+        base.OnStartLocalPlayer();
+    }
 
     public void Damege()
     {
