@@ -172,6 +172,7 @@ public class CameraControl : MonoBehaviour
     private void CameraLockOnStart()
     {
         targetAnchor = GetTargetAnchor();
+        if (targetAnchor == null) return;
         InitLookatPosition(targetAnchor);
         timer = 0;
     }
