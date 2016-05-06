@@ -19,11 +19,12 @@ public class throughPlane : MonoBehaviour {
 
     void OnTriggerEnter(Collider col)
     {
-        Debug.Log("Plane Col in");
-        if (col.transform.tag != "Player") return;
-        //床の座標よりもプレイヤーの座標が高ければ戻る
-        if (col.transform.position.y > transform.position.y) return;
 
+        if (col.transform.tag != "Player") return;
+        if (meshCollider.isTrigger) return;
+        //床の座標よりもプレイヤーの座標が高ければ戻る
+        if ((col.gameObject.transform.position.y > transform.position.y)) return;
+        Debug.Log("Plane Col in");
         meshCollider.isTrigger = true;
     }
 

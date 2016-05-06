@@ -100,8 +100,7 @@ public class PlayerControl : NetworkBehaviour
             );
         //向きを変える
         transform.LookAt(transform.position + forward);
-
-        body.AddForce(movement * moveSpeed * Time.deltaTime,ForceMode.VelocityChange);
+        body.AddForce(movement * moveSpeed,ForceMode.VelocityChange);
     }
 
     void Jump()
@@ -117,36 +116,33 @@ public class PlayerControl : NetworkBehaviour
             body.AddForce(jumpVec,ForceMode.VelocityChange);
         }
 
-        //ジャンプキー長押し中
-        if (GamePad.GetButton(GamePad.Button.A, (GamePad.Index)playerNum) && Isfalling == false && IsJumping == true)
-        {
-            //最高地点に達した
-            if (transform.position.y >= atJumpPosition.y + jumpLimitPositionY)
-            {
-                Isfalling = true;
-            }
-        }
+        ////ジャンプキー長押し中
+        //if (GamePad.GetButton(GamePad.Button.A, (GamePad.Index)playerNum) && Isfalling == false && IsJumping == true)
+        //{
+        //    //最高地点に達した
+        //    if (transform.position.y >= atJumpPosition.y + jumpLimitPositionY)
+        //    {
+        //        Isfalling = true;
+        //    }
+        //}
 
-        //ジャンプキーを離した
-        if (GamePad.GetButtonUp(GamePad.Button.A, (GamePad.Index)playerNum) && IsJumping == true)
-        {
-            Isfalling = true;
-        }
+        ////ジャンプキーを離した
+        //if (GamePad.GetButtonUp(GamePad.Button.A, (GamePad.Index)playerNum) && IsJumping == true)
+        //{
+        //    Isfalling = true;
+        //}
     }
 
     void OnCollisionEnter(Collision collision)
     {
+        Debug.Log("Player Control hit");
         //地面にいたらダメ
         if (IsOnGround) return;
 
         //Areaはトリガーなのでヒットしないが
         //どうやら親のタグを取得しているみたい
         if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Anchor" && collision.gameObject.tag != "Area") return;
-
-        //ジャンプ中で落ちていない
-        if (!Isfalling && IsJumping)    SlipThrough();
-        //ジャンプ中で落ちている
-        if (Isfalling && IsJumping)     Landed();
+        Landed();
     }
 
     //着地した
