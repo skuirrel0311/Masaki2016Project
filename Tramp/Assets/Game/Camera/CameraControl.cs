@@ -44,7 +44,11 @@ public class CameraControl : MonoBehaviour
     private GameObject cameraObj;
     private Vector3 lookatPosition;
     private float timer;
+    /// <summary>
+    /// ロックオンの処理が終わったか(アンカーにカメラが向き終わったか？)
+    /// </summary>
     private bool LockonDecision;
+    private bool IsLockOn;
 
     private int playerNum = 1;
     #endregion
@@ -69,9 +73,10 @@ public class CameraControl : MonoBehaviour
         //ロックオンの処理押された時と押している時で処理を分ける
         if (GamePad.GetButtonDown(GamePad.Button.Y, (GamePad.Index)playerNum))
         {
-            CameraLockOnStart();
+            if (!IsLockOn) CameraLockOnStart();
+            else IsLockOn = false;
         }
-        if (GamePad.GetButton(GamePad.Button.Y, (GamePad.Index)playerNum) && targetAnchor != null)
+        if (IsLockOn && targetAnchor != null)
         {
             PlayerTrace();
             oldPlayerPosition = player.transform.position;
@@ -175,6 +180,7 @@ public class CameraControl : MonoBehaviour
         if (targetAnchor == null) return;
         InitLookatPosition(targetAnchor);
         timer = 0;
+        IsLockOn = true;
     }
 
     private void InitLookatPosition(GameObject targetAnchor)
