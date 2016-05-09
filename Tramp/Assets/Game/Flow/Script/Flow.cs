@@ -4,6 +4,7 @@ using System.Collections;
 
 public class Flow : NetworkBehaviour{
 
+    [SerializeField]
     private float speed=10;
 
     public Vector3 FlowVector
@@ -59,6 +60,12 @@ public class Flow : NetworkBehaviour{
             Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
             body.isKinematic = true;
             col.gameObject.transform.Translate(PlayerVector*Time.deltaTime*speed,Space.World);
+
+            //ターゲットから一定の距離
+            if (Vector3.Distance(targetPosition, col.gameObject.transform.position) < 2)
+            {
+                Destroy(gameObject); return;
+            }
         }
     }
 
@@ -66,7 +73,9 @@ public class Flow : NetworkBehaviour{
     {
         if (col.tag == "Player")
         {
-            if (isDestory) { Destroy(gameObject); }
+            if (isDestory) { Destroy(gameObject); return; }
+
+
         }
     }
 }

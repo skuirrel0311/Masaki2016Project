@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections;
 
 /// <summary>
@@ -23,7 +24,7 @@ public class throughPlane : MonoBehaviour {
         if (col.transform.tag != "Player") return;
         if (meshCollider.isTrigger) return;
         //床の座標よりもプレイヤーの座標が高ければ戻る
-        if ((col.gameObject.transform.position.y > transform.position.y)) return;
+        if ((col.gameObject.transform.position.y+0.5f > transform.position.y)) return;
         Debug.Log("Plane Col in");
         meshCollider.isTrigger = true;
     }
