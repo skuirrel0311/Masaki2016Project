@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿/*PlayerShot.cs すべて */
+
+using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections;
 using GamepadInput;
@@ -10,6 +12,12 @@ public class PlayerShot : NetworkBehaviour
 
     GameObject cameraObj;
     Camera cam;
+
+    /// <summary>
+    /// 弾を自動で補正する範囲
+    /// </summary>
+    [SerializeField]
+    float playerLodkonAngle = 10;
 
     private PlayerState playerState;
     private int playerNum;
@@ -55,31 +63,16 @@ public class PlayerShot : NetworkBehaviour
         //ストックを減らす
         stock--;
 
-        //カメラの中心座標からレイを飛ばす
-        Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
-        RaycastHit hit;
-        Vector3 targetPosition = Vector3.zero;
+        //ターゲットを取得
+        Vector3 targetPosition = GetTargetPosition();
 
-        //先にプレイヤーをカメラと同じ方向に向ける
-        Quaternion cameraRotation = cameraObj.transform.rotation;
-        cameraRotation.x = 0;
-        cameraRotation.z = 0;
-        transform.rotation = cameraRotation;
+        Vector2 vec = new Vector2(targetPosition.x - transform.position.x, targetPosition.z - transform.position.z);
+        float rotationY = Mathf.Atan2(vec.x, vec.y) * Mathf.Rad2Deg;
 
-        if(Physics.Raycast(ray,out hit,100))
-        {
-            //衝突点がカメラとプレイヤーの間にあるか判定
-            Vector3 temp = hit.point - shotPosition.position;
-            float angle = Vector3.Angle(ray.direction,temp);
+        //ターゲットのほうを向く
+        transform.rotation = Quaternion.Euler(0, rotationY, 0);
 
-            if(angle < 90) targetPosition = hit.point;                  //９０度以内
-            else targetPosition = ray.origin + (ray.direction * 100);   //角度がありすぎる
-        }
-        else
-        {
-            targetPosition = ray.origin + (ray.direction * 100);
-        }
-
+        //弾の方向ベクトルを決定する
         shotPosition.LookAt(targetPosition);
 
         if (isServer)
@@ -89,16 +82,77 @@ public class PlayerShot : NetworkBehaviour
         }
         else
         {
-            GameObject go = Instantiate(Ammo,shotPosition.position, shotPosition.rotation) as GameObject;
+            GameObject go = Instantiate(Ammo, shotPosition.position, shotPosition.rotation) as GameObject;
             CmdAmmoSpawn(shotPosition.position, shotPosition.rotation);
         }
 
     }
 
-    [Command]
-    public void CmdAmmoSpawn(Vector3 shotposition,Quaternion shotrotation)
+    /// <summary>
+    /// 弾を撃つ時の目的地を返す
+    /// </summary>
+    Vector3 GetTargetPosition()
     {
-        GameObject go = Instantiate(Ammo, shotposition,shotrotation) as GameObject;
+        //プレイヤーが見えていたらプレイヤーの座標がターゲット
+        if (LookPlayer()) return GetAdversary().transform.position + Vector3.up;
+
+        //カメラの中心座標からレイを飛ばす
+        Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+        RaycastHit hit;
+        Vector3 targetPosition = Vector3.zero;
+
+        if (Physics.Raycast(ray, out hit, 100))
+        {
+            //衝突点がカメラとプレイヤーの間にあるか判定
+            Vector3 temp = hit.point - shotPosition.position;
+            float angle = Vector3.Angle(ray.direction, temp);
+
+            if (angle < 90) targetPosition = hit.point;                  //９０度以内
+            else targetPosition = ray.origin + (ray.direction * 100);   //角度がありすぎる
+        }
+        else
+        {
+            targetPosition = ray.origin + (ray.direction * 100);
+        }
+
+        return targetPosition;
+    }
+
+    /// <summary>
+    /// プレイヤーが見えるか？
+    /// </summary>
+    /// <returns></returns>
+    private bool LookPlayer()
+    {
+        GameObject obj = GetAdversary();
+        if (obj == null) return false;
+        Vector2 toPlayerVector = new Vector2(obj.transform.position.x - transform.position.x,
+            obj.transform.position.z - transform.position.z);
+        Vector2 cameraForward = new Vector2(cameraObj.transform.forward.x, cameraObj.transform.forward.z);
+
+        float angle = Vector2.Angle(toPlayerVector, cameraForward);
+
+        return angle < 10;
+    }
+
+    /// <summary>
+    /// 対戦プレイヤーを取得します
+    /// </summary>
+    GameObject GetAdversary()
+    {
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        foreach (GameObject obj in players)
+        {
+            if (obj.Equals(gameObject)) continue;
+            return obj;
+        }
+        return null;
+    }
+
+    [Command]
+    public void CmdAmmoSpawn(Vector3 shotposition, Quaternion shotrotation)
+    {
+        GameObject go = Instantiate(Ammo, shotposition, shotrotation) as GameObject;
         go.transform.rotation = shotrotation;
     }
 
@@ -110,6 +164,7 @@ public class PlayerShot : NetworkBehaviour
             {
                 while (true)
                 {
+                    //xを押すまで抜けられない
                     if (!GamePad.GetButtonDown(GamePad.Button.X, (GamePad.Index)playerNum)) yield return null;
                     else break;
                 }
