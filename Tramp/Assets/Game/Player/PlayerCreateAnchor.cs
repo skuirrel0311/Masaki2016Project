@@ -16,6 +16,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
     GameObject FlowEffect;
 
     private int playerNum;
+    GameObject cameraObj;
     GameObject targetAnchor=null;
     Vector3 flowVector;
     Vector3 targetPosition;
@@ -26,6 +27,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
     void Start()
     {
         playerNum = GetComponentInParent<PlayerControl>().playerNum;
+        cameraObj = GameObject.Find("ThirdPersonCamera");
     }
 
     // Update is called once per frame
@@ -33,7 +35,6 @@ public class PlayerCreateAnchor : NetworkBehaviour
     {
         if (GamePad.GetButtonDown(GamePad.Button.B, (GamePad.Index)playerNum))
         {
-
             if (CheckNearAnchor())
             {
                 Debug.Log("start");
@@ -111,6 +112,8 @@ public class PlayerCreateAnchor : NetworkBehaviour
     [ClientCallback]
     void CreateAnchor()
     {
+        float rotationY = cameraObj.transform.eulerAngles.y;
+        transform.rotation = Quaternion.Euler(0, rotationY, 0);
         CreatePosition = transform.position + transform.forward * 2 + Vector3.up;
 
         Cmd_rezobjectonserver();
