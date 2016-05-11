@@ -2,7 +2,7 @@
 using UnityEngine.Networking;
 using System.Collections;
 
-public class Flow : NetworkBehaviour{
+public class LocalFlow : MonoBehaviour{
 
     [SerializeField]
     private float speed=10;
@@ -14,7 +14,7 @@ public class Flow : NetworkBehaviour{
         get { return flowVector; }
         set { flowVector = value; isCalc = true; }
     }
-    [SyncVar]
+    
     private Vector3 flowVector;
 
     private Vector3 PlayerVector;
@@ -24,7 +24,10 @@ public class Flow : NetworkBehaviour{
         get { return targetPosition; }
         set { targetPosition = value; isCalc = true; }
     }
-    [SyncVar]
+
+    [SerializeField]
+    Transform target;
+
     private Vector3 targetPosition;
 
     private bool isCalc = true;
@@ -41,6 +44,8 @@ public class Flow : NetworkBehaviour{
     {
         isCalc = false;
         isDestory = false;
+        flowVector = new Vector3(0,35,0);
+        targetPosition = target.position;
     }
     void Update()
     {
