@@ -13,11 +13,14 @@ public class MyNetworkManager : NetworkManager
     public string IpAddress;
     SoundManager soundManager;
 
+    public bool isStarted = false;
+
     // Use this for initialization
     void Start()
     {
         discovery = GetComponent<MyNetworkDiscovery>();
         soundManager = GetComponent<SoundManager>();
+        isStarted = false;
     }
 
     void Update()
@@ -28,21 +31,36 @@ public class MyNetworkManager : NetworkManager
         }
     }
 
+    int count = 0;
+
     public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId)
     {
-        if (numPlayers == 1)
-        {
-            soundManager.PlayMusic(true);
-        }
         base.OnServerAddPlayer(conn, playerControllerId);
     }
 
-    public override void OnClientConnect(NetworkConnection conn)
+    public override void OnServerConnect(NetworkConnection conn)
     {
-        if (!GetComponent<NetworkDiscovery>().isServer)
-            soundManager.PlayMusic(false);
+        count++;
+        if (count >= 3)
+        {
+            isStarted = true;
+        }
+        base.OnServerConnect(conn);
+    }
 
-        base.OnClientConnect(conn);
+    public override void OnClientSceneChanged(NetworkConnection conn)
+    {
+        if (networkSceneName == "main")
+        {
+            autoCreatePlayer = true;
+            if (!GetComponent<NetworkDiscovery>().isServer)
+                soundManager.PlayMusic(false);
+        }
+        else
+        {
+            autoCreatePlayer = false;
+        }
+        base.OnClientSceneChanged(conn);
     }
 
     //ButtonStartHostボタンを押した時に実行
