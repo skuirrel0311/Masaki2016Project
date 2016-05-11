@@ -29,7 +29,7 @@ public class AnchorHit : MonoBehaviour {
                 Destroy(FlowEffect);
             }
         }
-        else if (col.gameObject.tag=="Player")
+        else if (col.gameObject.tag=="Player" || col.gameObject.name == "AppealArea")
         {
             if (FlowEffect!=null)
             {
@@ -37,7 +37,7 @@ public class AnchorHit : MonoBehaviour {
                 FlowEffect.GetComponent<Flow>().isDestory = true;
             }
             Destroy(gameObject);
-            col.gameObject.GetComponent<FeverGauge>().CmdAddPoint(10);
+            if(col.gameObject.tag == "Player") col.gameObject.GetComponent<FeverGauge>().CmdAddPoint(10);
             Instantiate(HitEffect,transform.position,Quaternion.identity);
         }
     }

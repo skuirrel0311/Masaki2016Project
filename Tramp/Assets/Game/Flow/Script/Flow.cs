@@ -60,8 +60,18 @@ public class Flow : NetworkBehaviour{
             body.isKinematic = true;
             col.gameObject.transform.Translate(PlayerVector*Time.deltaTime*speed,Space.World);
         }
-    }
 
+        if (col.gameObject.name == "AppealArea")
+        {
+            AppealAreaMove appealArea = col.gameObject.GetComponent<AppealAreaMove>();
+            if (appealArea.flowObj == null) appealArea.flowObj = gameObject;
+
+            if (appealArea.OnAnchor) return;
+            //流れに乗る
+            Vector3 toAnchorVector = (targetPosition - col.transform.position).normalized;
+            col.gameObject.transform.Translate(toAnchorVector * Time.deltaTime * speed, Space.World);       
+        }
+    }
     void OnTriggerExit(Collider col)
     {
         if (col.tag == "Player")
