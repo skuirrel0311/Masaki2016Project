@@ -44,7 +44,11 @@ public class CameraControl : MonoBehaviour
     private GameObject cameraObj;
     private Vector3 lookatPosition;
     private float timer;
+    /// <summary>
+    /// ロックオンの処理が終わったか(アンカーにカメラが向き終わったか？)
+    /// </summary>
     private bool LockonDecision;
+    private bool IsLockOn;
 
     private int playerNum = 1;
     #endregion
@@ -69,9 +73,10 @@ public class CameraControl : MonoBehaviour
         //ロックオンの処理押された時と押している時で処理を分ける
         if (GamePad.GetButtonDown(GamePad.Button.Y, (GamePad.Index)playerNum))
         {
-            CameraLockOnStart();
+            if (!IsLockOn) CameraLockOnStart();
+            else IsLockOn = false;
         }
-        if (GamePad.GetButton(GamePad.Button.Y, (GamePad.Index)playerNum) && targetAnchor != null)
+        if (IsLockOn && targetAnchor != null)
         {
             PlayerTrace();
             oldPlayerPosition = player.transform.position;
@@ -175,6 +180,7 @@ public class CameraControl : MonoBehaviour
         if (targetAnchor == null) return;
         InitLookatPosition(targetAnchor);
         timer = 0;
+        IsLockOn = true;
     }
 
     private void InitLookatPosition(GameObject targetAnchor)
@@ -222,8 +228,8 @@ public class CameraControl : MonoBehaviour
             anchor.transform.position.z - transform.position.z);
 
         //縦方向
-        float rot3 = -DifferenceLatitude(targetAnchor.transform.position);
-        rot3 = Mathf.Clamp(rot3, -90, 90);
+        Vector3 toAnchorVector = targetAnchor.transform.position - cameraObj.transform.position;
+        float rot3 = -DifferenceLatitude(toAnchorVector, Vector3.right);
 
         float rot1 = Mathf.Atan2(vec.y, vec.x) * Mathf.Rad2Deg;
         float rot2 = Mathf.Atan2(transform.forward.z, transform.forward.x) * Mathf.Rad2Deg;
@@ -231,18 +237,26 @@ public class CameraControl : MonoBehaviour
     }
 
     /// <summary>
-    /// 緯度の差を返す
+    /// 2つのベクトルの緯度の差を返す
     /// </summary>
-    float DifferenceLatitude(Vector3 anchor)
+    float DifferenceLatitude(Vector3 vec1, Vector3 vec2)
     {
-        float len = (anchor - transform.position).magnitude;
+        float len1 = vec1.magnitude;
+        float len2 = vec2.magnitude;
 
-        //単一方向に変換して傾きを出す
-        //rightは(1,0,0)
-        Vector3 vec = Vector3.right * len;
+        //X方向だけのベクトルに変換
+        Vector3 temp1 = Vector3.right * len1;
+        Vector3 temp2 = Vector3.right * len2;
 
-        vec.y = anchor.y - transform.position.y;
-        return Mathf.Atan2(vec.y, vec.x) * Mathf.Rad2Deg;
+        //Y座標を代入
+        temp1.y = vec1.y;
+        temp2.y = vec2.y;
+
+        //それぞれの角度を求める
+        float rot1 = Mathf.Atan2(temp1.y, temp1.x) * Mathf.Rad2Deg;
+        float rot2 = Mathf.Atan2(temp2.y, temp2.x) * Mathf.Rad2Deg;
+
+        return rot1 - rot2;
     }
 
     /// <summary>
@@ -342,12 +356,12 @@ public class CameraControl : MonoBehaviour
 
         if(temp.Count != 0)
         {
-            //10度以内のアンカーのなかで一番近いアンカーを取得
+            //5度以内のアンカーのなかで一番近いアンカーを取得
             targetAnchor = GetNearAnchor(temp);
         }
         else
         {
-            //10度以内にアンカーが存在しなかったら一番角度の低いアンカーを取得
+            //5度以内にアンカーが存在しなかったら一番角度の低いアンカーを取得
             targetAnchor = GetLowAngleAnchor(anchorList);
             //todo:一番角度の低いアンカーが取得できない場合があるっぽい
         }
@@ -391,20 +405,25 @@ public class CameraControl : MonoBehaviour
     }
 
     /// <summary>
-    /// 見ている可能性の高い(10度以内)アンカーをすべて返します
+    /// 見ている可能性の高い(5度以内)アンカーをすべて返します
     /// </summary>
     List<GameObject> GetShouldLookAnchor(List<GameObject> anchorList)
     {
-        Vector2 originAnchorVec = new Vector2(transform.forward.x, transform.forward.z);
+        Vector2 originAnchorVec = new Vector2(transform.forward.x, cameraObj.transform.forward.z);
         anchorList = anchorList.FindAll(n =>
         {
-            Vector2 vec = new Vector2(n.transform.position.x - transform.position.x
-                                         , n.transform.position.z - transform.position.z);
+            Vector2 vec = new Vector2(n.transform.position.x - cameraObj.transform.position.x
+                                         , n.transform.position.z - cameraObj.transform.position.z);
 
-            float tmpAngle = Vector2.Angle(vec, originAnchorVec);
+            //左右の角度
+            float tmpAngleW = Vector2.Angle(vec, originAnchorVec);
+            //上下の角度
+            Vector3 toAnchorVector = n.transform.position - cameraObj.transform.position;
+            float tmpAngleH = DifferenceLatitude(toAnchorVector,cameraObj.transform.forward);
+            tmpAngleH = Mathf.Abs(tmpAngleH);
 
-            //10度以内のアンカーを検索
-            return tmpAngle < 10;
+            //5度以内のアンカーを検索
+            return tmpAngleW < 5 && tmpAngleH < 5;
         });
 
         return anchorList;
@@ -417,12 +436,12 @@ public class CameraControl : MonoBehaviour
     {
         GameObject anchor = null;
         float angle = 360;
-        Vector2 originAnchorVec = new Vector2(transform.forward.x, transform.forward.z);
+        Vector2 originAnchorVec = new Vector2(cameraObj.transform.forward.x, cameraObj.transform.forward.z);
 
         anchorList.ForEach(n =>
         {
-            Vector2 vec = new Vector2(n.transform.position.x - transform.position.x
-                             , n.transform.position.z - transform.position.z);
+            Vector2 vec = new Vector2(n.transform.position.x - cameraObj.transform.position.x
+                             , n.transform.position.z - cameraObj.transform.position.z);
 
             float tmpAngle = Vector2.Angle(vec, originAnchorVec);
 
