@@ -4,7 +4,10 @@ using System.Collections;
 
 public class Flow : NetworkBehaviour{
 
+    [SerializeField]
     private float speed=10;
+    [SerializeField]
+    bool nonDestroy;
 
     public Vector3 FlowVector
     {
@@ -26,6 +29,8 @@ public class Flow : NetworkBehaviour{
 
     private bool isCalc = true;
 
+    public bool isDestory;
+
     void Awake()
     {
         CreateFlow.flowEffectCount++;
@@ -35,10 +40,11 @@ public class Flow : NetworkBehaviour{
     void Start()
     {
         isCalc = false;
+        isDestory = false;
     }
     void Update()
     {
-       // if (!isCalc) return;
+        // if (!isCalc) return;
         transform.localScale = new Vector3(2, flowVector.magnitude * 0.5f, 2);
         //CapsuleColliderをアタッチする
         CapsuleCollider capcol = GetComponent<CapsuleCollider>();
@@ -47,31 +53,34 @@ public class Flow : NetworkBehaviour{
         capcol.isTrigger = true;
     }
 
-    void OnTriggerEnter(Collider col)
-    {
-        if (col.tag == "Player")
-        {
-            PlayerVector = targetPosition - (col.transform.position+Vector3.up);
-            PlayerVector.Normalize();
-        }
-    }
-
     void OnTriggerStay(Collider col)
     {
+
         if (col.tag == "Player")
         {
+            PlayerVector = targetPosition - (col.transform.position + Vector3.up);
+            PlayerVector.Normalize();
             Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
-            body.useGravity = false;
+            body.isKinematic = true;
             col.gameObject.transform.Translate(PlayerVector*Time.deltaTime*speed,Space.World);
+
+            if (nonDestroy) return;
+            //ターゲットから一定の距離
+            if (Vector3.Distance(targetPosition, col.gameObject.transform.position) < 2)
+            {
+                Destroy(gameObject); return;
+            }
         }
     }
 
     void OnTriggerExit(Collider col)
     {
+        if (nonDestroy) return;
         if (col.tag == "Player")
         {
-            Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
-            body.useGravity = true;
+            if (isDestory) { Destroy(gameObject); return; }
+
+
         }
     }
 }

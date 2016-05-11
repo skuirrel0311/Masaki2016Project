@@ -87,6 +87,8 @@ public class PlayerState : NetworkBehaviour
                 StartCoroutine("IsDead");
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.A)) animator.SetTrigger("Dead");
     }
 
     void Initialize()
@@ -125,6 +127,7 @@ public class PlayerState : NetworkBehaviour
 
         //操作できないようにする。
         GetComponent<PlayerControl>().enabled = false;
+        animator.SetTrigger("Dead");
 
         yield return new WaitForSeconds(TimeToReturn);
         //3秒後に復活
@@ -132,18 +135,16 @@ public class PlayerState : NetworkBehaviour
         Initialize();
     }
 
-    //void OnCollisionEnter(Collision collision)
-    //{
-    //    if (collision.gameObject.tag != "Ammo") return;
-    //    if (!IsAlive) return;
-    //    if (!isLocalPlayer) return;
-    //    Damege();
-    //}
+    public override void OnStartLocalPlayer()
+    {
+        GetComponent<NetworkAnimator>().SetParameterAutoSend(0, true);
+        base.OnStartLocalPlayer();
+    }
 
     public void Damege()
     {
         CmdHpDamage();
-        
+
         if (!IsPossessionOfItem || appealItem == null) return;
 
         //アイテムを所持していたら
@@ -167,4 +168,16 @@ public class PlayerState : NetworkBehaviour
         //hpを減らす
         hp = hp <= 0 ? 0 : hp - 1;
     }
+
+    void OnGUI()
+    {
+
+        if (!isLocalPlayer) return;
+        GUIStyle style = new GUIStyle();
+        style.fontSize = 30;
+        style.fontStyle = FontStyle.Bold;
+        GUI.TextArea(new Rect(800,0,400,200),"残HP："+hp,style);
+    }
+
+
 }

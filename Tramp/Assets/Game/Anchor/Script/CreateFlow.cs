@@ -2,7 +2,7 @@
 using UnityEngine.Networking;
 using System.Collections;
 
-public class CreateFlow :NetworkBehaviour
+public class CreateFlow : NetworkBehaviour
 {
 
     [SerializeField]
@@ -17,7 +17,7 @@ public class CreateFlow :NetworkBehaviour
     Vector3 flowVector;
     float collsionRadius = 1;
 
-    float PlayerIndex=1;
+    float PlayerIndex = 1;
 
     public static int flowEffectCount = 0;
 
@@ -29,16 +29,15 @@ public class CreateFlow :NetworkBehaviour
 
         GetNearAnchor();
 
-        CmdCreateFlowObject();
-
         //アンカーとしてセットする
         gameObject.tag = "Anchor";
     }
 
     public void SetCreatePlayerIndex(int index)
     {
-         PlayerIndex = index;
+        PlayerIndex = index;
     }
+
 
     void GetNearAnchor()
     {
@@ -65,34 +64,8 @@ public class CreateFlow :NetworkBehaviour
                 distance = flowVector.magnitude;
             }
         }
-
-
     }
-    [Command]
-    void CmdCreateFlowObject()
-    {
-        //流れのコリジョン用オブジェクト
-        GameObject boxCol = Instantiate(FlowEffect);
-        boxCol.transform.localScale = new Vector3(2,flowVector.magnitude*0.5f,2);
 
-        //CapsuleColliderをアタッチする
-        CapsuleCollider capcol = boxCol.GetComponent<CapsuleCollider>();
-        capcol.height = flowVector.magnitude/ (flowVector.magnitude*0.5f);
-        capcol.radius = collsionRadius/2;
-        capcol.isTrigger = true;
-
-        //FlowScriptをアタッチする
-        Flow flow = boxCol.GetComponent<Flow>();
-        flow.FlowVector = flowVector;
-        flow.TargetPosition = targetPosition;
-        //流れのベクトルに合わせて回転させる
-        float leapPosition = 0.6f;//このくらいがバグりにくいと思われる
-        boxCol.transform.position = Vector3.Lerp(targetPosition, transform.position, leapPosition);
-        boxCol.transform.rotation = Quaternion.FromToRotation(Vector3.up, flowVector.normalized);
-        NetworkServer.Spawn(boxCol);
-        //流れのパーティクル
-        CreateFlowParticle();
-    }
 
     void CreateFlowParticle()
     {

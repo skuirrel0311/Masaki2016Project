@@ -6,7 +6,7 @@ using GamepadInput;
 public class PlayerControl : NetworkBehaviour
 {
     [SerializeField]
-    private float moveSpeed = 5;         //移動速度
+    private float moveSpeed = 1000;         //移動速度
     private float rotationSpeed = 360;   //振り向きの際数値が大きいとゆっくりになる
 
     private Animator animator;
@@ -22,16 +22,19 @@ public class PlayerControl : NetworkBehaviour
     /// <summary>
     /// 地上にいる
     /// </summary>
+    [SerializeField]
     private bool IsOnGround;
 
     /// <summary>
     /// ジャンプ中
     /// </summary>
+    [SerializeField]
     private bool IsJumping;
 
     /// <summary>
     /// 落下中
     /// </summary>
+    [SerializeField]
     private bool Isfalling;
 
     /// <summary>
@@ -41,10 +44,12 @@ public class PlayerControl : NetworkBehaviour
     
     public int playerNum;
 
+    private Rigidbody body;
+
     void Start()
     {
         animator = GetComponentInChildren<Animator>();
-        
+        body = GetComponent<Rigidbody>();
         atJumpPosition = Vector3.zero;
         IsOnGround = true;
         if (isLocalPlayer)
@@ -56,6 +61,7 @@ public class PlayerControl : NetworkBehaviour
 
     void Update()
     {
+        body.isKinematic = false;
         Vector2 leftStick = GamePad.GetAxis(GamePad.Axis.LeftStick, (GamePad.Index)playerNum);
         Vector3 direction = new Vector3(leftStick.x,0,leftStick.y);
         Move(direction);
@@ -72,6 +78,7 @@ public class PlayerControl : NetworkBehaviour
     /// <param name="movement">移動量</param>
     void Move(Vector3 movement)
     {
+        body.velocity = new Vector3(0,body.velocity.y,0);
         //カメラの角度のx､zは見ない
         Quaternion cameraRotation = mainCamera.transform.rotation;
         cameraRotation.x = 0;
@@ -80,7 +87,10 @@ public class PlayerControl : NetworkBehaviour
         movement = cameraRotation * movement;
 
         //移動していなかったら終了
-        if (movement == Vector3.zero) return;
+        if (movement == Vector3.zero)
+        {
+            return;
+        }
 
         //弧を描くように移動
         Vector3 forward = Vector3.Slerp(
@@ -90,8 +100,7 @@ public class PlayerControl : NetworkBehaviour
             );
         //向きを変える
         transform.LookAt(transform.position + forward);
-
-        transform.Translate(movement * moveSpeed * Time.deltaTime, Space.World);
+        body.AddForce(movement * moveSpeed,ForceMode.VelocityChange);
     }
 
     void Jump()
@@ -103,41 +112,51 @@ public class PlayerControl : NetworkBehaviour
             atJumpPosition = transform.position;
             IsJumping = true;
             IsOnGround = false;
+            //body.isKinematic = true;
+            body.AddForce(jumpVec,ForceMode.VelocityChange);
         }
 
-        //ジャンプキー長押し中
-        if (GamePad.GetButton(GamePad.Button.A, (GamePad.Index)playerNum) && Isfalling == false && IsJumping == true)
-        {
-            //最高地点に達した
-            if (transform.position.y >= atJumpPosition.y + jumpLimitPositionY)
-            {
-                Isfalling = true;
-            }
-            transform.position += jumpVec;
-        }
+        ////ジャンプキー長押し中
+        //if (GamePad.GetButton(GamePad.Button.A, (GamePad.Index)playerNum) && Isfalling == false && IsJumping == true)
+        //{
+        //    //最高地点に達した
+        //    if (transform.position.y >= atJumpPosition.y + jumpLimitPositionY)
+        //    {
+        //        Isfalling = true;
+        //    }
+        //}
 
-        //ジャンプキーを離した
-        if (GamePad.GetButtonUp(GamePad.Button.A, (GamePad.Index)playerNum) && IsJumping == true)
-        {
-            Isfalling = true;
-        }
+        ////ジャンプキーを離した
+        //if (GamePad.GetButtonUp(GamePad.Button.A, (GamePad.Index)playerNum) && IsJumping == true)
+        //{
+        //    Isfalling = true;
+        //}
     }
 
     void OnCollisionEnter(Collision collision)
     {
-        Landed(collision);
+        Debug.Log("Player Control hit");
+        //地面にいたらダメ
+        if (IsOnGround) return;
+
+        //Areaはトリガーなのでヒットしないが
+        //どうやら親のタグを取得しているみたい
+        if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Anchor" && collision.gameObject.tag != "Area") return;
+        Landed();
     }
 
     //着地した
-    void Landed(Collision collision)
+    void Landed()
     {
-        //ジャンプして落ちていなかったら
-        if (IsOnGround) return;
-        if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Anchor" && collision.gameObject.tag != "Area") return;
-        //Areaはトリガーなのでここでは呼ばれない。したがってscaffoldである。
-
         IsJumping = false;
         Isfalling = false;
         IsOnGround = true;
+        body.isKinematic = false;
+    }
+
+    //上昇中はすり抜ける
+    void SlipThrough()
+    {
+        body.isKinematic = true;
     }
 }

@@ -6,14 +6,19 @@ using UnityEngine.Networking.Match;
 using UnityEngine.UI;
 using System.Collections.Generic;
 
-public class MyNetworkManager : NetworkManager {
+public class MyNetworkManager : NetworkManager
+{
 
     MyNetworkDiscovery discovery;
     public string IpAddress;
+    SoundManager soundManager;
+
     // Use this for initialization
-    void Start () {
+    void Start()
+    {
         discovery = GetComponent<MyNetworkDiscovery>();
-	}
+        soundManager = GetComponent<SoundManager>();
+    }
 
     void Update()
     {
@@ -23,14 +28,21 @@ public class MyNetworkManager : NetworkManager {
         }
     }
 
-    public override void OnStartHost()
+    public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId)
     {
-
+        if (numPlayers == 1)
+        {
+            soundManager.PlayMusic(true);
+        }
+        base.OnServerAddPlayer(conn, playerControllerId);
     }
 
-    public override void OnStartClient(NetworkClient client)
+    public override void OnClientConnect(NetworkConnection conn)
     {
+        if (!GetComponent<NetworkDiscovery>().isServer)
+            soundManager.PlayMusic(false);
 
+        base.OnClientConnect(conn);
     }
 
     //ButtonStartHostボタンを押した時に実行
@@ -42,35 +54,19 @@ public class MyNetworkManager : NetworkManager {
         discovery.StartAsServer();
         StartHost();
     }
-    
+
     //ButtonJoinGameボタンを押した時に実行
     //IPアドレスとポートを設定し、クライアントとして接続
     public void JoinGame()
     {
-        SetIPAddress();
         SetPort();
-        //NetworkManager.singleton.StartClient();
         discovery.Initialize();
         discovery.StartAsClient();
-    }
-
-    void SetIPAddress()
-    {
-        //Input Fieldに記入されたIPアドレスを取得し、接続する
-       // string ipAddress = GameObject.Find("InputFieldIPAddress").transform.FindChild("Text").GetComponent<Text>().text;
-        //NetworkManager.singleton.networkAddress = ipAddress;
     }
 
     //ポートの設定
     void SetPort()
     {
         NetworkManager.singleton.networkPort = 7777;
-    }
-
-
-    public override void OnStopClient()
-    {
-        discovery.StopBroadcast();
-        discovery.showGUI = true;
     }
 }

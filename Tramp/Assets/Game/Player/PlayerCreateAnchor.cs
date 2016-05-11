@@ -12,7 +12,15 @@ public class PlayerCreateAnchor : NetworkBehaviour
     [SerializeField]
     float UncreateDistance = 3;
 
+    [SerializeField]
+    GameObject FlowEffect;
+
     private int playerNum;
+    GameObject targetAnchor=null;
+    Vector3 flowVector;
+    Vector3 targetPosition;
+    Vector3 CreatePosition;
+    float collsionRadius = 1;
 
     // Use this for initialization
     void Start()
@@ -28,40 +36,54 @@ public class PlayerCreateAnchor : NetworkBehaviour
 
             if (CheckNearAnchor())
             {
-                //GameObject obj;
-                //obj = (GameObject)Instantiate(InstanceAnchor, transform.position + transform.forward*2+Vector3.up, transform.rotation);
-                //obj.GetComponent<CreateFlow>().SetCreatePlayerIndex(1);
-                //NetworkServer.Spawn(obj);
                 Debug.Log("start");
                 CreateAnchor();
+
+                GetTargetAnchor();
+
+                CmdCreateFlowObject(targetPosition, CreatePosition,flowVector);
             }
         }
     }
 
-    [ClientCallback]
-    void CreateAnchor()
+    void GetTargetAnchor()
     {
-        Debug.Log("clientCall");
-        if (InstanceAnchor == null)
+        CameraControl camControl = GameObject.Find("Camera1").GetComponent<CameraControl>();
+        targetAnchor = camControl.targetAnchor;
+        float distance = 1000000;
+        if (targetAnchor != null)
         {
-            Debug.Log("anchor null");
+            targetPosition = targetAnchor.transform.position;
+            flowVector = targetPosition - CreatePosition;
+            distance = flowVector.magnitude;
+            return;
         }
-        Cmd_rezobjectonserver();
-        Debug.Log("clientCallend");
+
+        targetAnchor = camControl.GetTargetAnchor();
+        if (targetAnchor != null)
+        {
+            targetPosition = targetAnchor.transform.position;
+            flowVector = targetPosition - CreatePosition;
+            distance = flowVector.magnitude;
+            return;
+        }
+
+        //一番近いアンカーを探す
+        GameObject[] objects = GameObject.FindGameObjectsWithTag("Anchor");
+        if (objects.Length <= 0) return;
+        foreach (GameObject obj in objects)
+        {
+            if (Vector3.Distance(transform.position, obj.transform.position) < distance)
+            {
+                targetPosition = obj.transform.position;
+                flowVector = targetPosition - CreatePosition;
+                distance = flowVector.magnitude;
+            }
+        }
     }
 
-    [Command]
-    public void Cmd_rezobjectonserver()
-    {
-        Debug.Log("end1");
-        GameObject obj;
-        obj = Instantiate(InstanceAnchor,transform.position + transform.forward * 2 + Vector3.up, transform.rotation) as GameObject;
-        obj.GetComponent<CreateFlow>().SetCreatePlayerIndex(1);
-        NetworkServer.Spawn(obj);
-        Debug.Log("end2");
-    }
-        //他のアンカーが近すぎないかチェック
-        bool CheckNearAnchor()
+    //他のアンカーが近すぎないかチェック
+    bool CheckNearAnchor()
     {
         //一番近いアンカーを探す
         GameObject[] objects = GameObject.FindGameObjectsWithTag("Anchor");
@@ -83,6 +105,53 @@ public class PlayerCreateAnchor : NetworkBehaviour
             return false;
         }
         return true;
-       
+
     }
+
+    [ClientCallback]
+    void CreateAnchor()
+    {
+        CreatePosition = transform.position + transform.forward * 2 + Vector3.up;
+
+        Cmd_rezobjectonserver();
+        Debug.Log("clientCallend");
+    }
+
+    [Command]
+    public void Cmd_rezobjectonserver()
+    {
+        Debug.Log("end1");
+        GameObject obj;
+        obj = Instantiate(InstanceAnchor,transform.position + transform.forward * 2 + Vector3.up, transform.rotation) as GameObject;
+        obj.GetComponent<CreateFlow>().SetCreatePlayerIndex(1);
+        NetworkServer.Spawn(obj);
+        Debug.Log("end2");
+    }
+
+    [Command]
+    void CmdCreateFlowObject(Vector3 tpos,Vector3 thisPositon, Vector3 flowvec)
+    {
+        if (!isServer) return;
+        //流れのコリジョン用オブジェクト
+        GameObject boxCol = Instantiate(FlowEffect);
+        boxCol.transform.localScale = new Vector3(2, flowvec.magnitude * 0.5f, 2);
+
+        //CapsuleColliderをアタッチする
+        CapsuleCollider capcol = boxCol.GetComponent<CapsuleCollider>();
+        capcol.height = flowvec.magnitude / (flowvec.magnitude * 0.5f);
+        capcol.radius = collsionRadius / 2;
+        capcol.isTrigger = true;
+
+        //FlowScriptをアタッチする
+        Flow flow = boxCol.GetComponent<Flow>();
+        flow.FlowVector = flowvec;
+        flow.TargetPosition = tpos;
+        //流れのベクトルに合わせて回転させる
+        float dist = Vector3.Distance(tpos, thisPositon);
+        float leap = ((1.5f + dist) / dist) * 0.5f;//少し出す位置をずらす
+        boxCol.transform.position = Vector3.Lerp(tpos, thisPositon, leap);
+        boxCol.transform.rotation = Quaternion.FromToRotation(Vector3.up,flowvec.normalized);
+        NetworkServer.Spawn(boxCol);
+    }
+
 }
