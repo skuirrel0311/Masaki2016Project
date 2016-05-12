@@ -24,6 +24,9 @@ public class AppealAreaMove : MonoBehaviour
     /// </summary>
     public GameObject flowObj = null;
 
+    /// <summary>
+    /// アンカーに触れているか？
+    /// </summary>
     public bool OnAnchor;
 
     void Start()
@@ -39,7 +42,9 @@ public class AppealAreaMove : MonoBehaviour
 
     void OnCollisionEnter(Collision col)
     {
-        if(col.gameObject.tag == "Anchor")
+        if (col.gameObject.tag != "Anchor") return;
+
+        if (flowObj != null && col.transform.position.Equals(flowObj.GetComponent<Flow>().TargetPosition))
         {
             Destroy(flowObj);
             flowObj = null;
@@ -48,10 +53,13 @@ public class AppealAreaMove : MonoBehaviour
 
     void OnCollisionStay(Collision col)
     {
-        if (col.gameObject.tag == "Anchor")
-        {
+        if (col.gameObject.tag != "Anchor") return;
+
+        //流れの終点と同じアンカーであったら
+        if (flowObj != null && col.transform.position.Equals(flowObj.GetComponent<Flow>().TargetPosition))
             OnAnchor = true;
-        }
+        else
+            OnAnchor = false;
     }
 
     void OnCollisionExit(Collision col)
