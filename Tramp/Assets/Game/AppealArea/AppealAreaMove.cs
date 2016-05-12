@@ -13,11 +13,13 @@ public class AppealAreaMove : MonoBehaviour
     /// <summary>
     /// 流れているか？
     /// </summary>
-    bool IsFlowing;
+    public bool IsFlowing;
     /// <summary>
     /// プレイヤーに乗られているか？
     /// </summary>
-    bool IsRidden;
+    public bool IsRidden { get { return isRidden; } }
+
+    private bool isRidden;
 
     /// <summary>
     /// 現在乗っている流れ
@@ -32,23 +34,37 @@ public class AppealAreaMove : MonoBehaviour
     void Start()
     {
         IsFlowing = false;
-        IsRidden = false;
+        isRidden = false;
         OnAnchor = false;
     }
     
     void Update()
     {
+        if(isRidden)
+        {
+
+        }
     }
 
     void OnCollisionEnter(Collision col)
     {
-        if (col.gameObject.tag != "Anchor") return;
+        if (col.gameObject.tag == "Anchor") AnchorHit(col);
 
+        if (col.gameObject.tag == "Player") PlayerHit(col);
+    }
+
+    void AnchorHit(Collision col)
+    {
         if (flowObj != null && col.transform.position.Equals(flowObj.GetComponent<Flow>().TargetPosition))
         {
             Destroy(flowObj);
             flowObj = null;
         }
+    }
+
+    void PlayerHit(Collision col)
+    {
+        isRidden = true;
     }
 
     void OnCollisionStay(Collision col)
@@ -64,5 +80,9 @@ public class AppealAreaMove : MonoBehaviour
 
     void OnCollisionExit(Collision col)
     {
+        if(col.gameObject.tag == "Player")
+        {
+            isRidden = false;
+        }
     }
 }

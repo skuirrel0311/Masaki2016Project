@@ -68,6 +68,7 @@ public class Flow : NetworkBehaviour{
 
             if (appealArea.OnAnchor) return;
             //流れに乗る
+            appealArea.IsFlowing = true;
             Vector3 toAnchorVector = (targetPosition - col.transform.position).normalized;
             col.gameObject.transform.Translate(toAnchorVector * Time.deltaTime * speed, Space.World);       
         }
