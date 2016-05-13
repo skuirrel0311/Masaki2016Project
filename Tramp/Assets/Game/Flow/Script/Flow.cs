@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
-using System.Collections;
+using System.Collections.Generic;
 
 public class Flow : NetworkBehaviour{
 
@@ -64,13 +64,26 @@ public class Flow : NetworkBehaviour{
         if (col.gameObject.name == "AppealArea")
         {
             AppealAreaMove appealArea = col.gameObject.GetComponent<AppealAreaMove>();
-            if (appealArea.flowObj == null) appealArea.flowObj = gameObject;
 
-            if (appealArea.OnAnchor) return;
+            //すでに流れていたら
+            if (appealArea.IsFlowing)
+            {
+                //違う流れに入った場合はこのながれの終点を除外する
+                if (!appealArea.flowObj.Equals(gameObject)) appealArea.OnAnchorList.Add(FindAnchorToPosition(targetPosition)); 
+            }
+            else  appealArea.flowObj = gameObject;
+
+
+            //流れの終点アンカーとアピールエリアが触れているアンカーが同じだったら流れない
+            foreach(GameObject anchor in appealArea.OnAnchorList)
+            {
+                if (anchor.transform.position.Equals(targetPosition)) return;
+            }
+
             //流れに乗る
             appealArea.IsFlowing = true;
             Vector3 toAnchorVector = (targetPosition - col.transform.position).normalized;
-            col.gameObject.transform.Translate(toAnchorVector * Time.deltaTime * speed, Space.World);       
+            col.gameObject.transform.Translate(toAnchorVector * Time.deltaTime * (speed * 0.5f), Space.World);       
         }
     }
     void OnTriggerExit(Collider col)
@@ -79,5 +92,22 @@ public class Flow : NetworkBehaviour{
         {
             if (isDestory) { Destroy(gameObject); }
         }
+
+        if(col.name == "AppealArea")
+        {
+            col.gameObject.GetComponent<AppealAreaMove>().IsFlowing = false;
+            Destroy(gameObject);
+        }
+    }
+
+    /// <summary>
+    /// ポジションを元にアンカーをさがす
+    /// </summary>
+    GameObject FindAnchorToPosition(Vector3 position)
+    {
+        List<GameObject> anchorList = new List<GameObject>();
+        anchorList.AddRange(GameObject.FindGameObjectsWithTag("Anchor"));
+
+        return anchorList.Find(n => n.transform.position.Equals(position));
     }
 }

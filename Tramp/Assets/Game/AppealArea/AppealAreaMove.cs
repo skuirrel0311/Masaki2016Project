@@ -35,15 +35,14 @@ public class AppealAreaMove : MonoBehaviour
     public GameObject flowObj = null;
 
     /// <summary>
-    /// アンカーに触れているか？
+    /// 触れているアンカー
     /// </summary>
-    public bool OnAnchor;
+    public List<GameObject> OnAnchorList = new List<GameObject>();
 
     void Start()
     {
         IsFlowing = false;
         isRidden = false;
-        OnAnchor = false;
         oldPosition = transform.position;
     }
     
@@ -53,6 +52,7 @@ public class AppealAreaMove : MonoBehaviour
         movement = transform.position - oldPosition;
         oldPosition = transform.position;
 
+        //乗っているプレイヤーは一緒に動く
         if(ridingPlayer.Count == 0 || movement == Vector3.zero) return;
         foreach(GameObject obj in ridingPlayer)
         {
@@ -62,43 +62,13 @@ public class AppealAreaMove : MonoBehaviour
 
     void OnTriggerEnter(Collider col)
     {
-        if (col.tag == "Player") PlayerHit(col);
-    }
-
-    void OnCollisionEnter(Collision col)
-    {
-        if (col.gameObject.tag == "Anchor") AnchorHit(col);
-    }
-
-    void AnchorHit(Collision col)
-    {
-        if (flowObj != null && col.transform.position.Equals(flowObj.GetComponent<Flow>().TargetPosition))
+        if (col.tag == "Player")
         {
-            Destroy(flowObj);
-            flowObj = null;
+            isRidden = true;
+            if (ridingPlayer.Find(n => n.Equals(col.gameObject)) != null) return;
+            //リストにいなかったら追加
+            ridingPlayer.Add(col.gameObject);
         }
-    }
-
-    void PlayerHit(Collider col)
-    {
-        isRidden = true;
-        if (ridingPlayer.Find(n => n.Equals(col.gameObject)) != null) return;
-        //リストにいなかったら追加
-        ridingPlayer.Add(col.gameObject);
-    }
-
-    void OnCollisionStay(Collision col)
-    {
-        if (col.gameObject.tag == "Anchor") StayAnchor(col);
-    }
-
-    void StayAnchor(Collision col)
-    {
-        //流れの終点と同じアンカーであったら
-        if (flowObj != null && col.transform.position.Equals(flowObj.GetComponent<Flow>().TargetPosition))
-            OnAnchor = true;
-        else
-            OnAnchor = false;
     }
 
     void OnTriggerExit(Collider col)
@@ -109,4 +79,35 @@ public class AppealAreaMove : MonoBehaviour
             isRidden = false;
         }
     }
+
+    void OnCollisionEnter(Collision col)
+    {
+        if (col.gameObject.tag != "Anchor") return;
+
+        if (flowObj != null && col.transform.position.Equals(flowObj.GetComponent<Flow>().TargetPosition))
+        {
+            Destroy(flowObj);
+            flowObj = null;
+        }
+    }
+
+    void OnCollisionStay(Collision col)
+    {
+        if (col.gameObject.tag != "Anchor") return;
+
+        //既に追加されてたら追加しない
+        foreach(GameObject anchor in OnAnchorList)
+        {
+            if (col.gameObject.Equals(anchor)) return;
+        }
+        OnAnchorList.Add(col.gameObject);
+    }
+
+    void OnCollisionExit(Collision col)
+    {
+        if (col.gameObject.tag != "Anchor") return;
+
+        OnAnchorList.Remove(col.gameObject);
+    }
+
 }
