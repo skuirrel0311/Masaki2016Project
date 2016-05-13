@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: 2b6d0942b135e814abd94fb677f757ce
-timeCreated: 1463105566
+guid: ea58d9300adbe9c458bb4125edb23f56
+timeCreated: 1463105570
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
@@ -177,7 +177,7 @@ ModelImporter:
     400166: Spine
     400168: Spine1
     400170: //RootNode
-    7400000: tooru_run
+    7400000: tooru_jump_landing
     9500000: //RootNode
   materials:
     importMaterials: 1

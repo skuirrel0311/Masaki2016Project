@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 2b6d0942b135e814abd94fb677f757ce
+guid: 1e4ed641cc3bbe5448cfb8c85e01105b
 timeCreated: 1463105566
 licenseType: Free
 ModelImporter:
@@ -177,7 +177,7 @@ ModelImporter:
     400166: Spine
     400168: Spine1
     400170: //RootNode
-    7400000: tooru_run
+    7400000: tooru_damage
     9500000: //RootNode
   materials:
     importMaterials: 1
