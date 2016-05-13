@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 /*
     ★アピールエリアの動き★
@@ -12,12 +12,12 @@ public class AppealAreaMove : MonoBehaviour
 {
     Vector3 oldPosition;
     //移動量
-    public Vector3 Movement { get; private set; }
+    public Vector3 movement;
 
     /// <summary>
     /// 乗っているプレイヤー(いないときはnull)
     /// </summary>
-    GameObject ridingPlayer = null;
+    List<GameObject> ridingPlayer = new List<GameObject>();
 
     /// <summary>
     /// 流れているか？
@@ -50,8 +50,14 @@ public class AppealAreaMove : MonoBehaviour
     void Update()
     {
         //衝突判定はアップデートの前に呼ばれる
-        Movement = transform.position - oldPosition;
+        movement = transform.position - oldPosition;
         oldPosition = transform.position;
+
+        if(ridingPlayer.Count == 0 || movement == Vector3.zero) return;
+        foreach(GameObject obj in ridingPlayer)
+        {
+            obj.transform.position += movement;
+        }
     }
 
     void OnTriggerEnter(Collider col)
@@ -76,8 +82,9 @@ public class AppealAreaMove : MonoBehaviour
     void PlayerHit(Collider col)
     {
         isRidden = true;
-        //先に乗っていたほうが優先される
-        if(ridingPlayer == null) ridingPlayer = col.gameObject;
+        if (ridingPlayer.Find(n => n.Equals(col.gameObject)) != null) return;
+        //リストにいなかったら追加
+        ridingPlayer.Add(col.gameObject);
     }
 
     void OnCollisionStay(Collision col)
@@ -98,7 +105,7 @@ public class AppealAreaMove : MonoBehaviour
     {
         if (col.gameObject.tag == "Player")
         {
-            ridingPlayer = null;
+            ridingPlayer.Remove(col.gameObject);
             isRidden = false;
         }
     }
