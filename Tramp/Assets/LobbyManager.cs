@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using UnityEngine.Networking;
 using System.Collections;
 
@@ -50,5 +51,23 @@ public class LobbyManager : MonoBehaviour {
     public  void OnMoveNextScene()
     {
         myNetManager.ServerChangeScene(NextSceneName); 
+    }
+
+    public void OnDesConnect()
+    {
+        MyNetworkDiscovery netMana = networkManager.GetComponent<MyNetworkDiscovery>();
+        netMana.StopAllCoroutines();
+        netMana.StopBroadcast();
+        if (netMana.isServer)
+        {
+            networkManager.GetComponent<MyNetworkManager>().StopHost();
+        }
+        else
+        {
+            networkManager.GetComponent<MyNetworkManager>().StopClient();
+        }
+        
+        Destroy(networkManager);
+        SceneManager.LoadScene("Menu");
     }
 }

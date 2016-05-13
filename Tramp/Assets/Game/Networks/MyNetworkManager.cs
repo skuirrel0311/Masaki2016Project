@@ -78,9 +78,15 @@ public class MyNetworkManager : NetworkManager
         discovery.StartAsClient();
     }
 
+    public override void OnStopHost()
+    {
+        networkPort = 0;
+        base.OnStopHost();
+    }
+
     //ポートの設定
     void SetPort()
     {
-        NetworkManager.singleton.networkPort = 7777;
+        networkPort = 7777;
     }
 }
