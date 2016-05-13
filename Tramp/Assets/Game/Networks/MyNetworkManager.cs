@@ -25,10 +25,6 @@ public class MyNetworkManager : NetworkManager
 
     void Update()
     {
-        if (IsClientConnected())
-        {
-            Debug.Log("isConnet");
-        }
     }
 
     int count = 0;

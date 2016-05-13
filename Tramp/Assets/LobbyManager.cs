@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.Networking;
 using System.Collections;
 
@@ -10,13 +11,19 @@ public class LobbyManager : MonoBehaviour {
     [SerializeField]
     GameObject NextButton;
 
+    [SerializeField]
+    GameObject _2PSprite;
+
+    Text _2pText;
+
+
     GameObject networkManager=null;
     MyNetworkManager myNetManager;
     MyNetworkDiscovery myNetDiscoverry;
 	// Use this for initialization
 	void Start ()
     {
-
+        _2pText = _2PSprite.transform.FindChild("Text").GetComponent<Text>();
     }
 
     void Update()
@@ -26,6 +33,12 @@ public class LobbyManager : MonoBehaviour {
             networkManager = GameObject.FindGameObjectWithTag("NetworkManager");
             myNetManager = networkManager.GetComponent<MyNetworkManager>();
             myNetDiscoverry = networkManager.GetComponent<MyNetworkDiscovery>();
+        }
+
+        if (myNetManager.isStarted||!myNetDiscoverry.isServer)
+        {
+            _2pText.text = "2P接続";
+            _2PSprite.GetComponent<Image>().color = Color.white;
         }
 
         if (myNetManager.isStarted&&myNetDiscoverry.isServer)
