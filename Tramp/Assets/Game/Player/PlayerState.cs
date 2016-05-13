@@ -8,10 +8,11 @@ public class PlayerState : NetworkBehaviour
     [SerializeField]
     int maxHp = 10;
     public int Hp { get { return hp; }private set { hp = value; }}
+    /// <summary>
+    /// 体力
+    /// </summary>
     [SerializeField][SyncVar]
     private int hp;
-
-
 
     /// <summary>
     /// 復活にかかる時間
@@ -19,7 +20,6 @@ public class PlayerState : NetworkBehaviour
     [SerializeField]
     float TimeToReturn = 3;
     
-
     public GameObject appealItem;
 
     /// <summary>
@@ -51,6 +51,11 @@ public class PlayerState : NetworkBehaviour
     /// アピール中か？
     /// </summary>
     public bool IsAppealing{ get; private set; }
+
+    /// <summary>
+    /// アピールエリアにいるか？
+    /// </summary>
+    public bool IsOnAppealArea;
 
     private int playerIndex = 1;
 
@@ -179,5 +184,20 @@ public class PlayerState : NetworkBehaviour
         GUI.TextArea(new Rect(800,0,400,200),"残HP："+hp,style);
     }
 
+    void OnTriggerEnter(Collider col)
+    {
+        if(col.gameObject.name == "AppealAreaCollider")
+        {
+            IsOnAppealArea = true;
+        }
+    }
+
+    void OnTriggerExit(Collider col)
+    {
+        if (col.gameObject.name == "AppealAreaCollider")
+        {
+            IsOnAppealArea = false;
+        }
+    }
 
 }

@@ -10,6 +10,15 @@ using System.Collections;
 
 public class AppealAreaMove : MonoBehaviour
 {
+    Vector3 oldPosition;
+    //移動量
+    public Vector3 Movement { get; private set; }
+
+    /// <summary>
+    /// 乗っているプレイヤー(いないときはnull)
+    /// </summary>
+    GameObject ridingPlayer = null;
+
     /// <summary>
     /// 流れているか？
     /// </summary>
@@ -18,7 +27,6 @@ public class AppealAreaMove : MonoBehaviour
     /// プレイヤーに乗られているか？
     /// </summary>
     public bool IsRidden { get { return isRidden; } }
-
     private bool isRidden;
 
     /// <summary>
@@ -36,21 +44,24 @@ public class AppealAreaMove : MonoBehaviour
         IsFlowing = false;
         isRidden = false;
         OnAnchor = false;
+        oldPosition = transform.position;
     }
     
     void Update()
     {
-        if(isRidden)
-        {
+        //衝突判定はアップデートの前に呼ばれる
+        Movement = transform.position - oldPosition;
+        oldPosition = transform.position;
+    }
 
-        }
+    void OnTriggerEnter(Collider col)
+    {
+        if (col.tag == "Player") PlayerHit(col);
     }
 
     void OnCollisionEnter(Collision col)
     {
         if (col.gameObject.tag == "Anchor") AnchorHit(col);
-
-        if (col.gameObject.tag == "Player") PlayerHit(col);
     }
 
     void AnchorHit(Collision col)
@@ -62,15 +73,20 @@ public class AppealAreaMove : MonoBehaviour
         }
     }
 
-    void PlayerHit(Collision col)
+    void PlayerHit(Collider col)
     {
         isRidden = true;
+        //先に乗っていたほうが優先される
+        if(ridingPlayer == null) ridingPlayer = col.gameObject;
     }
 
     void OnCollisionStay(Collision col)
     {
-        if (col.gameObject.tag != "Anchor") return;
+        if (col.gameObject.tag == "Anchor") StayAnchor(col);
+    }
 
+    void StayAnchor(Collision col)
+    {
         //流れの終点と同じアンカーであったら
         if (flowObj != null && col.transform.position.Equals(flowObj.GetComponent<Flow>().TargetPosition))
             OnAnchor = true;
@@ -78,10 +94,11 @@ public class AppealAreaMove : MonoBehaviour
             OnAnchor = false;
     }
 
-    void OnCollisionExit(Collision col)
+    void OnTriggerExit(Collider col)
     {
-        if(col.gameObject.tag == "Player")
+        if (col.gameObject.tag == "Player")
         {
+            ridingPlayer = null;
             isRidden = false;
         }
     }

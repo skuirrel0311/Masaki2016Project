@@ -43,7 +43,7 @@ public class Flow : NetworkBehaviour{
     {
        // if (!isCalc) return;
         transform.localScale = new Vector3(2, flowVector.magnitude * 0.5f, 2);
-        //CapsuleColliderをアタッチする
+
         CapsuleCollider capcol = GetComponent<CapsuleCollider>();
         capcol.height = flowVector.magnitude / (flowVector.magnitude * 0.5f);
         capcol.radius = 0.5f;

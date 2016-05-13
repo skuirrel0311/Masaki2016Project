@@ -16,18 +16,25 @@ public class PlayerCreateAnchor : NetworkBehaviour
     GameObject FlowEffect;
 
     private int playerNum;
+    PlayerState playerState;
+    GameObject appealArea;
+
     GameObject cameraObj;
     GameObject targetAnchor=null;
+    
     Vector3 flowVector;
     Vector3 targetPosition;
     Vector3 CreatePosition;
+    
     float collsionRadius = 1;
 
     // Use this for initialization
     void Start()
     {
         playerNum = GetComponentInParent<PlayerControl>().playerNum;
+        playerState = GetComponent<PlayerState>();
         cameraObj = GameObject.Find("ThirdPersonCamera");
+        appealArea = GameObject.Find("AppealArea");
     }
 
     // Update is called once per frame
@@ -35,15 +42,18 @@ public class PlayerCreateAnchor : NetworkBehaviour
     {
         if (GamePad.GetButtonDown(GamePad.Button.B, (GamePad.Index)playerNum))
         {
-            if (CheckNearAnchor())
-            {
-                Debug.Log("start");
-                CreateAnchor();
+            if (!CheckNearAnchor()) return;
 
-                GetTargetAnchor();
+            Debug.Log("start");
+            
+            //アンカーを置く
+            CreateAnchor();
 
-                CmdCreateFlowObject(targetPosition, CreatePosition,flowVector);
-            }
+            //流れを繋ぐ先を取得する
+            GetTargetAnchor();
+
+            //流れを生成する
+            CmdCreateFlowObject(targetPosition, CreatePosition, flowVector);
         }
     }
 
@@ -112,11 +122,18 @@ public class PlayerCreateAnchor : NetworkBehaviour
     [ClientCallback]
     void CreateAnchor()
     {
+        //カメラの向いている方向にプレイヤーを向ける
         float rotationY = cameraObj.transform.eulerAngles.y;
         transform.rotation = Quaternion.Euler(0, rotationY, 0);
-        CreatePosition = transform.position + transform.forward * 2 + Vector3.up;
 
-        Cmd_rezobjectonserver();
+        if (playerState.IsOnAppealArea)
+            CreatePosition = appealArea.transform.position;
+        else
+        {
+            CreatePosition = transform.position + transform.forward * 2 + Vector3.up;
+            //アンカーを置く
+            Cmd_rezobjectonserver();
+        }
         Debug.Log("clientCallend");
     }
 
