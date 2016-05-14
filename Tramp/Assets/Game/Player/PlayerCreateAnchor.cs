@@ -166,6 +166,8 @@ public class PlayerCreateAnchor : NetworkBehaviour
         Flow flow = boxCol.GetComponent<Flow>();
         flow.FlowVector = flowvec;
         flow.TargetPosition = tpos;
+        flow.targetAnchor = targetAnchor;
+
         //流れのベクトルに合わせて回転させる
         float dist = Vector3.Distance(tpos, thisPositon);
         float leap = ((1.5f + dist) / dist) * 0.5f;//少し出す位置をずらす

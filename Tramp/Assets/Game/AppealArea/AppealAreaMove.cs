@@ -48,6 +48,8 @@ public class AppealAreaMove : MonoBehaviour
     
     void Update()
     {
+        //if (flowObj == null) IsFlowing = false;
+
         //衝突判定はアップデートの前に呼ばれる
         movement = transform.position - oldPosition;
         oldPosition = transform.position;
@@ -87,6 +89,7 @@ public class AppealAreaMove : MonoBehaviour
         if (flowObj != null && col.transform.position.Equals(flowObj.GetComponent<Flow>().TargetPosition))
         {
             Destroy(flowObj);
+            IsFlowing = false;
             flowObj = null;
         }
     }

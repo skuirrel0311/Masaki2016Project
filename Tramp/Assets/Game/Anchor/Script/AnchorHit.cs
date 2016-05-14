@@ -35,6 +35,13 @@ public class AnchorHit : MonoBehaviour {
             {
                 FlowEffect.transform.parent = null;
                 FlowEffect.GetComponent<Flow>().isDestory = true;
+                if (col.gameObject.name == "AppealArea")
+                {
+                    AppealAreaMove appealArea = col.gameObject.GetComponent<AppealAreaMove>();
+                    appealArea.IsFlowing = false;
+                    appealArea.OnAnchorList.Remove(gameObject);
+
+                }
             }
             Destroy(gameObject);
             if(col.gameObject.tag == "Player") col.gameObject.GetComponent<FeverGauge>().CmdAddPoint(10);

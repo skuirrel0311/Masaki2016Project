@@ -24,6 +24,8 @@ public class Flow : NetworkBehaviour{
     [SyncVar]
     private Vector3 targetPosition;
 
+    public GameObject targetAnchor;
+
     private bool isCalc = true;
 
     public bool isDestory;
@@ -41,13 +43,39 @@ public class Flow : NetworkBehaviour{
     }
     void Update()
     {
-       // if (!isCalc) return;
+        // if (!isCalc) return;
+
+        if (targetAnchor == null) Destroy(gameObject);
         transform.localScale = new Vector3(2, flowVector.magnitude * 0.5f, 2);
 
         CapsuleCollider capcol = GetComponent<CapsuleCollider>();
         capcol.height = flowVector.magnitude / (flowVector.magnitude * 0.5f);
         capcol.radius = 0.5f;
         capcol.isTrigger = true;
+    }
+
+    void OnTriggerEnter(Collider col)
+    {
+        if (col.gameObject.name == "AppealArea")
+        {
+            AppealAreaMove appealArea = col.gameObject.GetComponent<AppealAreaMove>();
+
+            if (!appealArea.IsFlowing)
+            {
+                //アピールエリアのflowObjをこの流れに設定して終了
+                appealArea.flowObj = gameObject;
+                return;
+            }
+
+            //Enterなので同じ流れになることは無いが一応
+            if (appealArea.flowObj.Equals(gameObject)) return;
+
+            //違う流れに入った
+            //違う流れのほうに流れるので今流れているほうは除外する
+            //appealArea.OnAnchorList.Add(appealArea.flowObj.GetComponent<Flow>().targetAnchor);
+            Destroy(appealArea.flowObj);
+            appealArea.flowObj = gameObject;
+        }
     }
 
     void OnTriggerStay(Collider col)
@@ -65,19 +93,13 @@ public class Flow : NetworkBehaviour{
         {
             AppealAreaMove appealArea = col.gameObject.GetComponent<AppealAreaMove>();
 
-            //すでに流れていたら
-            if (appealArea.IsFlowing)
-            {
-                //違う流れに入った場合はこのながれの終点を除外する
-                if (!appealArea.flowObj.Equals(gameObject)) appealArea.OnAnchorList.Add(FindAnchorToPosition(targetPosition)); 
-            }
-            else  appealArea.flowObj = gameObject;
-
+            //まだ流れていなかったら
+            if (!appealArea.IsFlowing) appealArea.flowObj = gameObject;
 
             //流れの終点アンカーとアピールエリアが触れているアンカーが同じだったら流れない
             foreach(GameObject anchor in appealArea.OnAnchorList)
             {
-                if (anchor.transform.position.Equals(targetPosition)) return;
+                if (anchor.Equals(targetAnchor)) return;
             }
 
             //流れに乗る
@@ -96,18 +118,7 @@ public class Flow : NetworkBehaviour{
         if(col.name == "AppealArea")
         {
             col.gameObject.GetComponent<AppealAreaMove>().IsFlowing = false;
-            Destroy(gameObject);
+            if(isDestory) Destroy(gameObject);
         }
-    }
-
-    /// <summary>
-    /// ポジションを元にアンカーをさがす
-    /// </summary>
-    GameObject FindAnchorToPosition(Vector3 position)
-    {
-        List<GameObject> anchorList = new List<GameObject>();
-        anchorList.AddRange(GameObject.FindGameObjectsWithTag("Anchor"));
-
-        return anchorList.Find(n => n.transform.position.Equals(position));
     }
 }
