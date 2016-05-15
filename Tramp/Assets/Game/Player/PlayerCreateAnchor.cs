@@ -17,7 +17,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
 
     private int playerNum;
     PlayerState playerState;
-    GameObject appealArea;
+    AppealAreaState appealArea;
 
     GameObject cameraObj;
     GameObject targetAnchor=null;
@@ -34,7 +34,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
         playerNum = GetComponentInParent<PlayerControl>().playerNum;
         playerState = GetComponent<PlayerState>();
         cameraObj = GameObject.Find("ThirdPersonCamera");
-        appealArea = GameObject.Find("AppealArea");
+        appealArea = GameObject.Find("AppealArea").GetComponent<AppealAreaState>();
     }
 
     // Update is called once per frame
@@ -127,7 +127,10 @@ public class PlayerCreateAnchor : NetworkBehaviour
         transform.rotation = Quaternion.Euler(0, rotationY, 0);
 
         if (playerState.IsOnAppealArea)
-            CreatePosition = appealArea.transform.position;
+        {
+            if (appealArea.IsFlowing) playerState.IsAreaOwner = true;
+            if(playerState.IsAreaOwner) CreatePosition = appealArea.gameObject.transform.position;
+        }
         else
         {
             CreatePosition = transform.position + transform.forward * 2 + Vector3.up;
@@ -174,6 +177,12 @@ public class PlayerCreateAnchor : NetworkBehaviour
         boxCol.transform.position = Vector3.Lerp(tpos, thisPositon, leap);
         boxCol.transform.rotation = Quaternion.FromToRotation(Vector3.up,flowvec.normalized);
         NetworkServer.Spawn(boxCol);
+
+        if(playerState.IsOnAppealArea)
+        {
+            //エリアの所有権を持っていたら
+            if(playerState.IsAreaOwner) appealArea.flowObj = boxCol;
+        }
     }
 
 }

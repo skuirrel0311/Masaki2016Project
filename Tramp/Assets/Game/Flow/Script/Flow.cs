@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
-using System.Collections.Generic;
 
 public class Flow : NetworkBehaviour{
 
@@ -58,7 +57,7 @@ public class Flow : NetworkBehaviour{
     {
         if (col.gameObject.name == "AppealArea")
         {
-            AppealAreaMove appealArea = col.gameObject.GetComponent<AppealAreaMove>();
+            AppealAreaState appealArea = col.gameObject.GetComponent<AppealAreaState>();
 
             if (!appealArea.IsFlowing)
             {
@@ -67,14 +66,13 @@ public class Flow : NetworkBehaviour{
                 return;
             }
 
-            //Enterなので同じ流れになることは無いが一応
-            if (appealArea.flowObj.Equals(gameObject)) return;
+            ////Enterなので同じ流れになることは無いが一応
+            //if (appealArea.flowObj.Equals(gameObject)) return;
 
-            //違う流れに入った
-            //違う流れのほうに流れるので今流れているほうは除外する
-            //appealArea.OnAnchorList.Add(appealArea.flowObj.GetComponent<Flow>().targetAnchor);
-            Destroy(appealArea.flowObj);
-            appealArea.flowObj = gameObject;
+            ////違う流れに入った
+            ////違う流れのほうに流れるので今流れているほうは除外する
+            //Destroy(appealArea.flowObj);
+            //appealArea.flowObj = gameObject;
         }
     }
 
@@ -91,7 +89,7 @@ public class Flow : NetworkBehaviour{
 
         if (col.gameObject.name == "AppealArea")
         {
-            AppealAreaMove appealArea = col.gameObject.GetComponent<AppealAreaMove>();
+            AppealAreaState appealArea = col.gameObject.GetComponent<AppealAreaState>();
 
             //まだ流れていなかったら
             if (!appealArea.IsFlowing) appealArea.flowObj = gameObject;
@@ -101,6 +99,9 @@ public class Flow : NetworkBehaviour{
             {
                 if (anchor.Equals(targetAnchor)) return;
             }
+
+            //違う流れには乗らない
+            if (!appealArea.flowObj.Equals(gameObject)) return;
 
             //流れに乗る
             appealArea.IsFlowing = true;
@@ -117,7 +118,8 @@ public class Flow : NetworkBehaviour{
 
         if(col.name == "AppealArea")
         {
-            col.gameObject.GetComponent<AppealAreaMove>().IsFlowing = false;
+            col.gameObject.GetComponent<AppealAreaState>().IsFlowing = false;
+
             if(isDestory) Destroy(gameObject);
         }
     }

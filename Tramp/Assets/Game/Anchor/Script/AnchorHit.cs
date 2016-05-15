@@ -38,8 +38,10 @@ public class AnchorHit : MonoBehaviour {
                 if (col.gameObject.name == "AppealArea")
                 {
                     AppealAreaMove appealArea = col.gameObject.GetComponent<AppealAreaMove>();
-                    appealArea.IsFlowing = false;
-                    appealArea.OnAnchorList.Remove(gameObject);
+                    AppealAreaState areaState = col.gameObject.GetComponent<AppealAreaState>();
+
+                    areaState.IsFlowing = false;
+                    areaState.OnAnchorList.Remove(gameObject);
 
                 }
             }

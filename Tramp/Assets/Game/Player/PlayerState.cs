@@ -57,6 +57,11 @@ public class PlayerState : NetworkBehaviour
     /// </summary>
     public bool IsOnAppealArea;
 
+    /// <summary>
+    /// アピールエリアの所有権を持っているか？
+    /// </summary>
+    public bool IsAreaOwner;
+
     private int playerIndex = 1;
 
     void Awake()
@@ -99,11 +104,10 @@ public class PlayerState : NetworkBehaviour
     void Initialize()
     {
         hp = maxHp;
-        //transform.position = Vector3.zero;
-        //transform.rotation = Quaternion.Euler(Vector3.zero);
         PlayerControl playerControl = GetComponent<PlayerControl>();
         playerControl.enabled = true;
         IsAppealing = false;
+        IsAreaOwner = false;
         IsPossessionOfItem = false;
     }
 
