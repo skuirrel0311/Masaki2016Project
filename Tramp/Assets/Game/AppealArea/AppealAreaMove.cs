@@ -16,10 +16,14 @@ public class AppealAreaMove : MonoBehaviour
 
     AppealAreaState areaState;
 
+    NavMeshAgent nav;
+
     void Start()
     {
         oldPosition = transform.position;
         areaState = GetComponent<AppealAreaState>();
+        nav = GetComponent<NavMeshAgent>();
+        nav.destination = Vector3.zero;
     }
     
     void Update()
@@ -27,10 +31,23 @@ public class AppealAreaMove : MonoBehaviour
         //衝突判定はアップデートの前に呼ばれる
         movement = transform.position - oldPosition;
         oldPosition = transform.position;
+        WithPlayer();
 
+        if(!areaState.IsFlowing && !areaState.IsRidden)
+        {
+            nav.Resume();
+        }
+        else
+        {
+            nav.Stop();
+        }
+    }
+
+    void WithPlayer()
+    {
         //乗っているプレイヤーは一緒に動く
-        if(!areaState.IsRidden || movement == Vector3.zero) return;
-        foreach(GameObject obj in areaState.RidingPlayer)
+        if (!areaState.IsRidden || movement == Vector3.zero) return;
+        foreach (GameObject obj in areaState.RidingPlayer)
         {
             obj.transform.position += movement;
         }

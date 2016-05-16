@@ -48,6 +48,8 @@ public class PlayerCreateAnchor : NetworkBehaviour
             
             //アンカーを置く
             CreateAnchor();
+            //アピールエリアにいるが所有権を持っていなかったらリターン
+            if (!playerState.IsAreaOwner && playerState.IsOnAppealArea) return;
 
             //流れを繋ぐ先を取得する
             GetTargetAnchor();
@@ -128,8 +130,8 @@ public class PlayerCreateAnchor : NetworkBehaviour
 
         if (playerState.IsOnAppealArea)
         {
-            if (appealArea.IsFlowing) playerState.IsAreaOwner = true;
-            if(playerState.IsAreaOwner) CreatePosition = appealArea.gameObject.transform.position;
+            if (!appealArea.IsFlowing) playerState.IsAreaOwner = true;
+            if (playerState.IsAreaOwner) CreatePosition = appealArea.gameObject.transform.position;
         }
         else
         {
