@@ -52,6 +52,8 @@ public class PlayerState : NetworkBehaviour
     /// </summary>
     public bool IsAppealing{ get; private set; }
 
+    public AppealAreaState AppealArea { get; private set; }
+
     /// <summary>
     /// アピールエリアにいるか？
     /// </summary>
@@ -68,6 +70,7 @@ public class PlayerState : NetworkBehaviour
     {
         playerIndex = GetComponent<PlayerControl>().playerNum;
         animator = GetComponentInChildren<Animator>();
+        AppealArea = GameObject.Find("AppealArea").GetComponent<AppealAreaState>();
         Initialize();
     }
 

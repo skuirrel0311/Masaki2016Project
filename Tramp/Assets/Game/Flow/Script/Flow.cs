@@ -80,6 +80,10 @@ public class Flow : NetworkBehaviour{
     {
         if (col.tag == "Player")
         {
+            //アピールエリアのFlowObjectと同じだったら流れない
+            GameObject flowObj = col.gameObject.GetComponent<PlayerState>().AppealArea.flowObj;
+            if (flowObj.Equals(gameObject)) return;
+
             PlayerVector = targetPosition - (col.transform.position + Vector3.up);
             PlayerVector.Normalize();
             Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
