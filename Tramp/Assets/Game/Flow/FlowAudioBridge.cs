@@ -8,7 +8,7 @@ public class FlowAudioBridge : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        audioAnalyze = GameObject.Find("networkmanager(Clone)").GetComponent<AudioAnalyzer>();
+        audioAnalyze = GameObject.FindGameObjectWithTag("NetworkManager").GetComponent<AudioAnalyzer>();
 
         if (audioAnalyze == null)
         {

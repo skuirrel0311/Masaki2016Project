@@ -78,6 +78,10 @@ public class PlayerControl : NetworkBehaviour
     /// <param name="movement">移動量</param>
     void Move(Vector3 movement)
     {
+
+        //移動していなかったら終了
+        if (movement == Vector3.zero) return;
+
         body.velocity = new Vector3(0,body.velocity.y,0);
         //カメラの角度のx､zは見ない
         Quaternion cameraRotation = mainCamera.transform.rotation;
@@ -86,11 +90,7 @@ public class PlayerControl : NetworkBehaviour
         //入力の角度をカメラの角度に曲げる
         movement = cameraRotation * movement;
 
-        //移動していなかったら終了
-        if (movement == Vector3.zero)
-        {
-            return;
-        }
+        
 
         //弧を描くように移動
         Vector3 forward = Vector3.Slerp(

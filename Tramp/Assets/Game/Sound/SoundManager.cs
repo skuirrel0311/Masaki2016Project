@@ -49,7 +49,7 @@ public class SoundManager : MonoBehaviour
             }
 
             MyNetworkDiscovery netMana = GetComponent<MyNetworkDiscovery>();
-            netMana.StopBroadcast();
+            netMana.StopAllCoroutines();
             if (netMana.isServer)
             {
                 GetComponent<MyNetworkManager>().StopServer();

@@ -43,6 +43,7 @@ public class CameraControl : MonoBehaviour
     public GameObject player;
     private GameObject cameraObj;
     private Vector3 lookatPosition;
+    private Transform ChiledCamera;
     private float timer;
     /// <summary>
     /// ロックオンの処理が終わったか(アンカーにカメラが向き終わったか？)
@@ -185,10 +186,7 @@ public class CameraControl : MonoBehaviour
 
     private void InitLookatPosition(GameObject targetAnchor)
     {
-        Transform child = transform.FindChild("ThirdPersonCamera");
-        float len = (targetAnchor.transform.position - child.position).magnitude;
-
-        lookatPosition = transform.position + (child.forward * len);
+         ChiledCamera = transform.FindChild("ThirdPersonCamera");
     }
 
     /// <summary>
@@ -196,6 +194,10 @@ public class CameraControl : MonoBehaviour
     /// </summary>
     private void AnchorLockOn()
     {
+        float len = (targetAnchor.transform.position - ChiledCamera.position).magnitude;
+
+        lookatPosition = transform.position + (ChiledCamera.forward * len);
+
         timer = Mathf.Min(timer + Time.deltaTime, 1);
 
         if (timer == 1) LockonDecision = true;
@@ -215,7 +217,7 @@ public class CameraControl : MonoBehaviour
         transform.position = playerPosition + PositionForLockOnAnchor(targetAnchor);
         //カメラの注視点を移動
         //cameraObj.transform.LookAt(targetAnchor.transform);
-        cameraObj.transform.LookAt(Vector3.Lerp(lookatPosition, targetAnchor.transform.position, timer));
+        cameraObj.transform.LookAt(Vector3.Lerp(lookatPosition, targetAnchor.transform.position, timer*10));
     }
 
     /// <summary>
