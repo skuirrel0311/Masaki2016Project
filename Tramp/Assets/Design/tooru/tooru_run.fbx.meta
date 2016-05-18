@@ -178,6 +178,7 @@ ModelImporter:
     400168: Spine1
     400170: //RootNode
     7400000: tooru_run
+    7400002: Take 001
     9500000: //RootNode
   materials:
     importMaterials: 1
