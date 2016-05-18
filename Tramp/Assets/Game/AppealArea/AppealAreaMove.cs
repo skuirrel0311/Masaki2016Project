@@ -14,18 +14,26 @@ public class AppealAreaMove : MonoBehaviour
     //移動量
     Vector3 movement;
 
+    [SerializeField]
+    float moveSpeed = 3.5f;
+
     AppealAreaState areaState;
 
-    NavMeshAgent nav;
+    //初期地に戻ろうとするか？
+    bool IsGoHome = false;
+
+    [SerializeField]
+    Vector3 homePosition = Vector3.up;
+
+    [SerializeField]
+    float distance = 5;
 
     void Start()
     {
         oldPosition = transform.position;
         areaState = GetComponent<AppealAreaState>();
-        nav = GetComponent<NavMeshAgent>();
-        nav.destination = Vector3.zero;
     }
-    
+
     void Update()
     {
         //衝突判定はアップデートの前に呼ばれる
@@ -33,14 +41,9 @@ public class AppealAreaMove : MonoBehaviour
         oldPosition = transform.position;
         WithPlayer();
 
-        if(!areaState.IsFlowing && !areaState.IsRidden)
-        {
-            nav.Resume();
-        }
-        else
-        {
-            nav.Stop();
-        }
+        IsGoHome = (!areaState.IsFlowing && !areaState.IsRidden);
+
+        if (IsGoHome) GoHome();
     }
 
     void WithPlayer()
@@ -50,6 +53,50 @@ public class AppealAreaMove : MonoBehaviour
         foreach (GameObject obj in areaState.RidingPlayer)
         {
             obj.transform.position += movement;
+        }
+    }
+
+    /// <summary>
+    /// おうちかえる
+    /// </summary>
+    void GoHome()
+    {
+        movement = (homePosition - transform.position).normalized * moveSpeed;
+
+        Ray ray = new Ray(transform.position, movement);
+        RaycastHit hit;
+
+        if (Physics.SphereCast(ray, 3, out hit,distance))
+        {
+            //w = movement - (Dot(movement,hit.normal) * hit.normal)
+            Vector2 vec1 = new Vector2(movement.x, movement.z);
+            Vector2 vec2 = new Vector2(hit.normal.x, hit.normal.z);
+
+            Vector2 vec3 = vec1 + (vec2 * -DotProduct(vec1, vec2));
+            movement = new Vector3(vec3.x, movement.y, vec3.y) * 1.5f;
+        }
+        transform.Translate(movement * Time.deltaTime, Space.World);
+    }
+
+    float DotProduct(Vector2 vec1, Vector2 vec2)
+    {
+        return (vec1.x * vec2.x) + (vec1.y * vec2.y);
+    }
+
+    void OnDrawGizmos()
+    {
+        float radius = 3f;
+        RaycastHit hit;
+        Vector3 movement = (homePosition - transform.position).normalized * moveSpeed;
+        Ray ray = new Ray(transform.position, movement);
+        if (Physics.SphereCast(ray, radius, out hit,distance))
+        {
+            Gizmos.DrawRay(ray.origin, ray.direction * hit.distance);
+            Gizmos.DrawWireSphere(ray.origin + ray.direction * (hit.distance), radius);
+        }
+        else
+        {
+            Gizmos.DrawRay(ray.origin, ray.direction);
         }
     }
 }

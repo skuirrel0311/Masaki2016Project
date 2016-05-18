@@ -84,9 +84,12 @@ public class Flow : NetworkBehaviour{
 
         if (col.tag == "Player")
         {
+            PlayerState state = col.gameObject.GetComponent<PlayerState>();
             //アピールエリアのFlowObjectと同じだったら流れない
-            GameObject flowObj = col.gameObject.GetComponent<PlayerState>().AppealArea.flowObj;
-            if (flowObj.Equals(gameObject)) return;
+            GameObject flowObj = state.AppealArea.flowObj;
+            if (flowObj != null && flowObj.Equals(gameObject)) return;
+            //アピールエリアにいたら流れない
+            if (state.IsOnAppealArea) return;
 
             PlayerVector = targetPosition - (col.transform.position + Vector3.up);
             PlayerVector.Normalize();
@@ -121,7 +124,7 @@ public class Flow : NetworkBehaviour{
             //流れに乗る
             appealArea.IsFlowing = true;
             Vector3 toAnchorVector = (targetPosition - col.transform.position).normalized;
-            col.gameObject.transform.Translate(toAnchorVector * Time.deltaTime * (speed * 0.5f), Space.World);       
+            col.gameObject.transform.Translate(toAnchorVector * Time.deltaTime * (speed * 0.1f), Space.World);       
         }
     }
     void OnTriggerExit(Collider col)
