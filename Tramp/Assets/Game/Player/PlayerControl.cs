@@ -68,8 +68,8 @@ public class PlayerControl : NetworkBehaviour
         Jump();
 
         //アニメーターにパラメータを送る
-        animator.SetFloat("Speed", direction.magnitude);
-        animator.SetBool("Jump", IsJumping);
+        //animator.SetFloat("Speed", direction.magnitude);
+        //animator.SetBool("Jump", IsJumping);
     }
 
     /// <summary>
@@ -78,7 +78,6 @@ public class PlayerControl : NetworkBehaviour
     /// <param name="movement">移動量</param>
     void Move(Vector3 movement)
     {
-
         //移動していなかったら終了
         if (movement == Vector3.zero) return;
 
@@ -89,8 +88,6 @@ public class PlayerControl : NetworkBehaviour
         cameraRotation.z = 0;
         //入力の角度をカメラの角度に曲げる
         movement = cameraRotation * movement;
-
-        
 
         //弧を描くように移動
         Vector3 forward = Vector3.Slerp(
@@ -113,24 +110,9 @@ public class PlayerControl : NetworkBehaviour
             IsJumping = true;
             IsOnGround = false;
             //body.isKinematic = true;
-            body.AddForce(jumpVec,ForceMode.VelocityChange);
+            body.AddForce(jumpVec*100,ForceMode.Impulse);
         }
 
-        ////ジャンプキー長押し中
-        //if (GamePad.GetButton(GamePad.Button.A, (GamePad.Index)playerNum) && Isfalling == false && IsJumping == true)
-        //{
-        //    //最高地点に達した
-        //    if (transform.position.y >= atJumpPosition.y + jumpLimitPositionY)
-        //    {
-        //        Isfalling = true;
-        //    }
-        //}
-
-        ////ジャンプキーを離した
-        //if (GamePad.GetButtonUp(GamePad.Button.A, (GamePad.Index)playerNum) && IsJumping == true)
-        //{
-        //    Isfalling = true;
-        //}
     }
 
     void OnCollisionEnter(Collision collision)
@@ -152,11 +134,5 @@ public class PlayerControl : NetworkBehaviour
         Isfalling = false;
         IsOnGround = true;
         body.isKinematic = false;
-    }
-
-    //上昇中はすり抜ける
-    void SlipThrough()
-    {
-        body.isKinematic = true;
     }
 }

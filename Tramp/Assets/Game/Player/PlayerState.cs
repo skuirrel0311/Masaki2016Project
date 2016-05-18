@@ -63,7 +63,7 @@ public class PlayerState : NetworkBehaviour
 
     void Update()
     {
-        animator.SetBool("HaveItem", IsPossessionOfItem);
+        //animator.SetBool("HaveItem", IsPossessionOfItem);
 
         //アイテムを所持していたら
         if(IsPossessionOfItem)
@@ -127,7 +127,7 @@ public class PlayerState : NetworkBehaviour
 
         //操作できないようにする。
         GetComponent<PlayerControl>().enabled = false;
-        animator.SetTrigger("Dead");
+        //animator.SetTrigger("Dead");
 
         yield return new WaitForSeconds(TimeToReturn);
         //3秒後に復活
