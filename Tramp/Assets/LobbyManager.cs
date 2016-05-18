@@ -33,7 +33,7 @@ public class LobbyManager : MonoBehaviour {
         {
             networkManager = GameObject.FindGameObjectWithTag("NetworkManager");
             myNetManager = networkManager.GetComponent<MyNetworkManager>();
-            myNetDiscoverry = networkManager.GetComponent<MyNetworkDiscovery>();
+            myNetDiscoverry = MyNetworkManager.discovery ;
         }
 
         if (myNetManager.isStarted||!myNetDiscoverry.isServer)
@@ -42,9 +42,19 @@ public class LobbyManager : MonoBehaviour {
             _2PSprite.GetComponent<Image>().color = Color.white;
         }
 
+        if (!myNetManager.isStarted)
+        {
+            _2pText.text = "2P未接続";
+            _2PSprite.GetComponent<Image>().color = Color.gray;
+        }
+
         if (myNetManager.isStarted&&myNetDiscoverry.isServer)
         {
             NextButton.SetActive(true);
+        }
+        else
+        {
+            NextButton.SetActive(false);
         }
     }
 
@@ -55,19 +65,17 @@ public class LobbyManager : MonoBehaviour {
 
     public void OnDesConnect()
     {
-        MyNetworkDiscovery netMana = networkManager.GetComponent<MyNetworkDiscovery>();
-        netMana.StopAllCoroutines();
-        netMana.StopBroadcast();
-        if (netMana.isServer)
+
+        if (myNetDiscoverry.isServer)
         {
             networkManager.GetComponent<MyNetworkManager>().StopHost();
+            networkManager.GetComponent<MyNetworkManager>().StopServer() ;
         }
         else
         {
             networkManager.GetComponent<MyNetworkManager>().StopClient();
         }
-        
-        Destroy(networkManager);
-        SceneManager.LoadScene("Menu");
+        myNetManager.DiscoveryShutdown();
+        myNetManager.ServerChangeScene("Menu");
     }
 }

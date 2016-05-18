@@ -7,7 +7,7 @@ using System;
 public class MyNetworkDiscovery : NetworkDiscovery {
 
     MyNetworkManager networkManager;
-    bool isStartClient;
+    public bool isStartClient;
     void Start()
     {
         networkManager = GetComponent<MyNetworkManager>();
