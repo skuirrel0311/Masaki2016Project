@@ -1,15 +1,22 @@
 fileFormatVersion: 2
-guid: 142606280bd4cf0439f285ab0cd0fdb4
-timeCreated: 1463050800
+guid: a3bb4fe792dbb9a4891d867fcd756511
+timeCreated: 1463535582
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
   fileIDToRecycleName:
     100000: //RootNode
+    100002: mic
+    100004: stage_base
     400000: //RootNode
-    2300000: //RootNode
-    3300000: //RootNode
-    4300000: pCylinder5
+    400002: mic
+    400004: stage_base
+    2300000: mic
+    2300002: stage_base
+    3300000: mic
+    3300002: stage_base
+    4300000: stage_base
+    4300002: mic
     9500000: //RootNode
   materials:
     importMaterials: 1
