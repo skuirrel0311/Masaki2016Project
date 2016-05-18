@@ -3,7 +3,10 @@ using UnityEngine.Networking;
 
 public class Flow : NetworkBehaviour{
 
+    [SerializeField]
     private float speed=10;
+    [SerializeField]
+    bool nonDestroy;
 
     public Vector3 FlowVector
     {
@@ -78,6 +81,7 @@ public class Flow : NetworkBehaviour{
 
     void OnTriggerStay(Collider col)
     {
+
         if (col.tag == "Player")
         {
             //アピールエリアのFlowObjectと同じだったら流れない
@@ -89,6 +93,13 @@ public class Flow : NetworkBehaviour{
             Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
             body.isKinematic = true;
             col.gameObject.transform.Translate(PlayerVector*Time.deltaTime*speed,Space.World);
+
+            if (nonDestroy) return;
+            //ターゲットから一定の距離
+            if (Vector3.Distance(targetPosition, col.gameObject.transform.position) < 2)
+            {
+                Destroy(gameObject); return;
+            }
         }
 
         if (col.gameObject.name == "AppealArea")
@@ -115,9 +126,10 @@ public class Flow : NetworkBehaviour{
     }
     void OnTriggerExit(Collider col)
     {
+        if (nonDestroy) return;
         if (col.tag == "Player")
         {
-            if (isDestory) { Destroy(gameObject); }
+            if (isDestory) { Destroy(gameObject); return; }
         }
 
         if(col.name == "AppealArea")
