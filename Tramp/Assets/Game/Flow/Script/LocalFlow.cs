@@ -37,6 +37,7 @@ public class LocalFlow : MonoBehaviour{
         if (col.tag == "Player")
         {
             Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
+            col.gameObject.GetComponent<Animator>().CrossFadeInFixedTime("ride",0.1f);
             //body.isKinematic = true;
             //col.gameObject.transform.Translate(transform.up*Time.deltaTime*speed,Space.World);
             body.AddForce(transform.up * Time.deltaTime * speed*100, ForceMode.Impulse);

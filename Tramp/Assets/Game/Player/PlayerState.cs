@@ -27,7 +27,7 @@ public class PlayerState : NetworkBehaviour
     /// </summary>
     public Transform LeftHand;
 
-    Animator animator;
+    public Animator animator;
 
     /// <summary>
     /// 生きているか？

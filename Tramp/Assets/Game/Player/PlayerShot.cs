@@ -52,6 +52,7 @@ public class PlayerShot : NetworkBehaviour
 
     void Shot()
     {
+        playerState.animator.CrossFadeInFixedTime("rightgun",0.1f);
         //ストックを減らす
         stock--;
 

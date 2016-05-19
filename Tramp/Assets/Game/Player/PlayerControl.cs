@@ -26,7 +26,7 @@ public class PlayerControl : NetworkBehaviour
     private bool IsOnGround;
 
     [SerializeField]
-    private float EndArea=59;
+    private float EndArea = 59;
 
     /// <summary>
     /// ジャンプ中
@@ -44,10 +44,11 @@ public class PlayerControl : NetworkBehaviour
     /// ジャンプキーが押された時の座標
     /// </summary>
     private Vector3 atJumpPosition;
-    
+
     public int playerNum;
 
     private Rigidbody body;
+    bool isRun = false;
 
     void Start()
     {
@@ -55,6 +56,7 @@ public class PlayerControl : NetworkBehaviour
         body = GetComponent<Rigidbody>();
         atJumpPosition = Vector3.zero;
         IsOnGround = true;
+        isRun = false;
         if (isLocalPlayer)
         {
             GameObject.Find("Camera1").GetComponent<CameraControl>().SetPlayer(gameObject);
@@ -66,30 +68,38 @@ public class PlayerControl : NetworkBehaviour
     {
         body.isKinematic = false;
         Vector2 leftStick = GamePad.GetAxis(GamePad.Axis.LeftStick, (GamePad.Index)playerNum);
-        Vector3 direction = new Vector3(leftStick.x,0,leftStick.y);
+        Vector3 direction = new Vector3(leftStick.x, 0, leftStick.y);
         Move(direction);
         Jump();
 
         //アニメーターにパラメータを送る
-        //animator.SetFloat("Speed", direction.magnitude);
-        //animator.SetBool("Jump", IsJumping);
+        if (!ChackCurrentAnimatorName(animator, "wait")&&!Move(direction))
+        {
+            isRun = false;
+            animator.SetBool("IsRun",isRun);
+        }
 
         Vector3 c = new Vector3(transform.position.x, 0, transform.position.z);
         if (c.magnitude > EndArea)
         {
             c.Normalize();
-            transform.position = new Vector3(c.x*EndArea,transform.position.y,c.z*EndArea);
+            transform.position = new Vector3(c.x * EndArea, transform.position.y, c.z * EndArea);
         }
+    }
+
+    static bool ChackCurrentAnimatorName(Animator animator, string name)
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsName(name);
     }
 
     /// <summary>
     /// 移動
     /// </summary>
     /// <param name="movement">移動量</param>
-    void Move(Vector3 movement)
+    bool  Move(Vector3 movement)
     {
 
-       // body.velocity = new Vector3(0,body.velocity.y,0);
+        // body.velocity = new Vector3(0,body.velocity.y,0);
         //カメラの角度のx､zは見ない
         Quaternion cameraRotation = mainCamera.transform.rotation;
         cameraRotation.x = 0;
@@ -98,7 +108,14 @@ public class PlayerControl : NetworkBehaviour
         movement = cameraRotation * movement;
 
         //移動していなかったら終了
-        if (movement == Vector3.zero) return;
+        if (movement == Vector3.zero) return false;
+
+        //アニメーションの再生
+        if (!ChackCurrentAnimatorName(animator, "Take 001"))
+        {
+            isRun = true;
+            animator.SetBool("IsRun", isRun);
+        }
 
         //弧を描くように移動
         Vector3 forward = Vector3.Slerp(
@@ -109,7 +126,8 @@ public class PlayerControl : NetworkBehaviour
         //向きを変える
         transform.LookAt(transform.position + forward);
         //body.AddForce(movement * moveSpeed,ForceMode.VelocityChange);
-        transform.Translate(movement * Time.deltaTime*moveSpeed,Space.World);
+        transform.Translate(movement * Time.deltaTime * moveSpeed, Space.World);
+        return true;
     }
 
     void Jump()
@@ -121,8 +139,9 @@ public class PlayerControl : NetworkBehaviour
             atJumpPosition = transform.position;
             IsJumping = true;
             IsOnGround = false;
+            animator.CrossFadeInFixedTime("jump",0.5f);
             //body.isKinematic = true;
-            body.AddForce(jumpVec*100,ForceMode.Impulse);
+            body.AddForce(jumpVec * 100, ForceMode.Impulse);
         }
 
     }
