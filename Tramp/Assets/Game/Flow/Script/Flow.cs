@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 using UnityEngine.Networking;
 
 public class Flow : NetworkBehaviour{
@@ -47,13 +48,21 @@ public class Flow : NetworkBehaviour{
     {
         // if (!isCalc) return;
 
-        if (targetAnchor == null) Destroy(gameObject);
+        if (targetAnchor == null) GetTargetAnchor();
         transform.localScale = new Vector3(2, flowVector.magnitude * 0.5f, 2);
 
         CapsuleCollider capcol = GetComponent<CapsuleCollider>();
         capcol.height = flowVector.magnitude / (flowVector.magnitude * 0.5f);
         capcol.radius = 0.5f;
         capcol.isTrigger = true;
+    }
+
+    void GetTargetAnchor()
+    {
+        List<GameObject> anchor = new List<GameObject>();
+        anchor.AddRange(GameObject.FindGameObjectsWithTag("Anchor"));
+
+        targetAnchor = anchor.Find(n => n.transform.position.Equals(targetPosition));
     }
 
     void OnTriggerEnter(Collider col)

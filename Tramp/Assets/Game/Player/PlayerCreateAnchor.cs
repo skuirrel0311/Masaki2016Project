@@ -49,7 +49,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
             //アンカーを置く
             CreateAnchor();
             //アピールエリアにいるが所有権を持っていなかったらリターン
-            if (!playerState.IsAreaOwner && playerState.IsOnAppealArea) return;
+            if (playerState.IsOnAppealArea && !playerState.IsAreaOwner) return;
 
             //流れを繋ぐ先を取得する
             GetTargetAnchor();
@@ -137,17 +137,17 @@ public class PlayerCreateAnchor : NetworkBehaviour
         {
             CreatePosition = transform.position + transform.forward * 2 + Vector3.up;
             //アンカーを置く
-            Cmd_rezobjectonserver();
+            Cmd_rezobjectonserver(CreatePosition);
         }
         Debug.Log("clientCallend");
     }
 
     [Command]
-    public void Cmd_rezobjectonserver()
+    public void Cmd_rezobjectonserver(Vector3 createPosition)
     {
         Debug.Log("end1");
         GameObject obj;
-        obj = Instantiate(InstanceAnchor,transform.position + transform.forward * 2 + Vector3.up, transform.rotation) as GameObject;
+        obj = Instantiate(InstanceAnchor,createPosition, transform.rotation) as GameObject;
         obj.GetComponent<CreateFlow>().SetCreatePlayerIndex(1);
         NetworkServer.Spawn(obj);
         Debug.Log("end2");
@@ -171,7 +171,6 @@ public class PlayerCreateAnchor : NetworkBehaviour
         Flow flow = boxCol.GetComponent<Flow>();
         flow.FlowVector = flowvec;
         flow.TargetPosition = tpos;
-        flow.targetAnchor = targetAnchor;
 
         //流れのベクトルに合わせて回転させる
         float dist = Vector3.Distance(tpos, thisPositon);
@@ -179,12 +178,6 @@ public class PlayerCreateAnchor : NetworkBehaviour
         boxCol.transform.position = Vector3.Lerp(tpos, thisPositon, leap);
         boxCol.transform.rotation = Quaternion.FromToRotation(Vector3.up,flowvec.normalized);
         NetworkServer.Spawn(boxCol);
-
-        if(playerState.IsOnAppealArea)
-        {
-            //エリアの所有権を持っていたら
-            if(playerState.IsAreaOwner) appealArea.flowObj = boxCol;
-        }
     }
 
 }

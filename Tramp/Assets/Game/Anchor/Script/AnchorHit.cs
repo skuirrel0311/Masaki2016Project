@@ -19,7 +19,41 @@ public class AnchorHit : MonoBehaviour {
 
     void OnCollisionEnter(Collision col)
     {
-        if (col.gameObject.tag=="Ammo")
+        if (col.gameObject.tag == "Ammo") AmmoHit(col);
+        if (col.gameObject.tag == "Player") PlayerHit(col);
+        if(col.gameObject.name == "AppealArea") AreaHit(col);
+    }
+    
+    void PlayerHit(Collision col)
+    {
+        if (FlowEffect != null)
+        {
+            FlowEffect.transform.parent = null;
+            FlowEffect.GetComponent<Flow>().isDestory = true;
+        }
+        Destroy(gameObject);
+        col.gameObject.GetComponent<FeverGauge>().CmdAddPoint(10);
+        Instantiate(HitEffect, transform.position, Quaternion.identity);
+    }
+
+    void AreaHit(Collision col)
+    {
+        if (FlowEffect != null)
+        {
+            FlowEffect.transform.parent = null;
+            FlowEffect.GetComponent<Flow>().isDestory = true;
+            AppealAreaState areaState = col.gameObject.GetComponent<AppealAreaState>();
+
+            areaState.IsFlowing = false;
+            areaState.OnAnchorList.Remove(gameObject);
+        }
+        Destroy(gameObject);
+        Instantiate(HitEffect, transform.position, Quaternion.identity);
+    }
+
+    void AmmoHit(Collision col)
+    {
+        if (col.gameObject.tag == "Ammo")
         {
             Hp--;
             //Hpが0になったらDestroy
@@ -29,26 +63,5 @@ public class AnchorHit : MonoBehaviour {
                 Destroy(FlowEffect);
             }
         }
-        else if (col.gameObject.tag=="Player" || col.gameObject.name == "AppealArea")
-        {
-            if (FlowEffect!=null)
-            {
-                FlowEffect.transform.parent = null;
-                FlowEffect.GetComponent<Flow>().isDestory = true;
-                if (col.gameObject.name == "AppealArea")
-                {
-                    AppealAreaMove appealArea = col.gameObject.GetComponent<AppealAreaMove>();
-                    AppealAreaState areaState = col.gameObject.GetComponent<AppealAreaState>();
-
-                    areaState.IsFlowing = false;
-                    areaState.OnAnchorList.Remove(gameObject);
-
-                }
-            }
-            Destroy(gameObject);
-            if(col.gameObject.tag == "Player") col.gameObject.GetComponent<FeverGauge>().CmdAddPoint(10);
-            Instantiate(HitEffect,transform.position,Quaternion.identity);
-        }
     }
-
 }
