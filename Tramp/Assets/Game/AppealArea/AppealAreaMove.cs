@@ -28,6 +28,8 @@ public class AppealAreaMove : MonoBehaviour
     [SerializeField]
     float distance = 5;
 
+    float stopDistance = 0.3f;
+
     void Start()
     {
         oldPosition = transform.position;
@@ -61,7 +63,11 @@ public class AppealAreaMove : MonoBehaviour
     /// </summary>
     void GoHome()
     {
-        movement = (homePosition - transform.position).normalized * moveSpeed;
+        movement = (homePosition - transform.position);
+        float distance = movement.magnitude;
+        if (distance < stopDistance) return; //ある程度近づいたらストップ
+
+        movement = movement.normalized * moveSpeed;
 
         Ray ray = new Ray(transform.position, movement);
         RaycastHit hit;
