@@ -15,6 +15,8 @@ public class PlayerCreateAnchor : NetworkBehaviour
     [SerializeField]
     GameObject FlowEffect;
 
+    GameObject camera;
+
     private int playerNum;
     GameObject targetAnchor=null;
     Vector3 flowVector;
@@ -26,16 +28,18 @@ public class PlayerCreateAnchor : NetworkBehaviour
     void Start()
     {
         playerNum = GetComponentInParent<PlayerControl>().playerNum;
+        camera = GameObject.Find("Camera1");
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (GamePad.GetButtonDown(GamePad.Button.B, (GamePad.Index)playerNum))
+        if (GamePad.GetTrigger(GamePad.Trigger.LeftTrigger,GamePad.Index.One)==1.0f&&camera.GetComponent<CameraControl>().IsLockOn)
         {
-
+           
             if (CheckNearAnchor())
             {
+                camera.GetComponent<CameraControl>().IsLockOn = false;
                 Debug.Log("start");
                 CreateAnchor();
 
@@ -48,7 +52,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
 
     void GetTargetAnchor()
     {
-        CameraControl camControl = GameObject.Find("Camera1").GetComponent<CameraControl>();
+        CameraControl camControl = camera.GetComponent<CameraControl>();
         targetAnchor = camControl.targetAnchor;
         float distance = 1000000;
         if (targetAnchor != null)

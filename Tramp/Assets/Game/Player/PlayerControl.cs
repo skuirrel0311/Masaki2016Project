@@ -25,6 +25,9 @@ public class PlayerControl : NetworkBehaviour
     [SerializeField]
     private bool IsOnGround;
 
+    [SerializeField]
+    private float EndArea=59;
+
     /// <summary>
     /// ジャンプ中
     /// </summary>
@@ -70,6 +73,13 @@ public class PlayerControl : NetworkBehaviour
         //アニメーターにパラメータを送る
         //animator.SetFloat("Speed", direction.magnitude);
         //animator.SetBool("Jump", IsJumping);
+
+        Vector3 c = new Vector3(transform.position.x, 0, transform.position.z);
+        if (c.magnitude > EndArea)
+        {
+            c.Normalize();
+            transform.position = new Vector3(c.x*EndArea,transform.position.y,c.z*EndArea);
+        }
     }
 
     /// <summary>
@@ -78,16 +88,17 @@ public class PlayerControl : NetworkBehaviour
     /// <param name="movement">移動量</param>
     void Move(Vector3 movement)
     {
-        //移動していなかったら終了
-        if (movement == Vector3.zero) return;
 
-        body.velocity = new Vector3(0,body.velocity.y,0);
+       // body.velocity = new Vector3(0,body.velocity.y,0);
         //カメラの角度のx､zは見ない
         Quaternion cameraRotation = mainCamera.transform.rotation;
         cameraRotation.x = 0;
         cameraRotation.z = 0;
         //入力の角度をカメラの角度に曲げる
         movement = cameraRotation * movement;
+
+        //移動していなかったら終了
+        if (movement == Vector3.zero) return;
 
         //弧を描くように移動
         Vector3 forward = Vector3.Slerp(
@@ -97,7 +108,8 @@ public class PlayerControl : NetworkBehaviour
             );
         //向きを変える
         transform.LookAt(transform.position + forward);
-        body.AddForce(movement * moveSpeed,ForceMode.VelocityChange);
+        //body.AddForce(movement * moveSpeed,ForceMode.VelocityChange);
+        transform.Translate(movement * Time.deltaTime*moveSpeed,Space.World);
     }
 
     void Jump()

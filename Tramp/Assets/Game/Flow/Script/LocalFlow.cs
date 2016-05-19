@@ -50,6 +50,7 @@ public class LocalFlow : MonoBehaviour{
         {
             Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
             body.AddForce(transform.up * Time.deltaTime * speed,ForceMode.Acceleration);
+            
         }
     }
 
@@ -58,7 +59,7 @@ public class LocalFlow : MonoBehaviour{
         if (col.tag == "Player")
         {
             Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
-            body.velocity = Vector3.zero;
+           // body.velocity = Vector3.zero;
         }
     }
 }

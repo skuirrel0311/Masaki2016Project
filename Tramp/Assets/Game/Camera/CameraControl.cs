@@ -49,9 +49,11 @@ public class CameraControl : MonoBehaviour
     /// ロックオンの処理が終わったか(アンカーにカメラが向き終わったか？)
     /// </summary>
     private bool LockonDecision;
-    private bool IsLockOn;
+    public  bool IsLockOn;
 
     private int playerNum = 1;
+
+    private float  oldInputVec=0;
     #endregion
 
     void Start()
@@ -72,7 +74,7 @@ public class CameraControl : MonoBehaviour
     void Update()
     {
         //ロックオンの処理押された時と押している時で処理を分ける
-        if (GamePad.GetButtonDown(GamePad.Button.Y, (GamePad.Index)playerNum))
+        if (GamePad.GetButtonDown(GamePad.Button.LeftShoulder, (GamePad.Index)playerNum))
         {
             if (!IsLockOn) CameraLockOnStart();
             else IsLockOn = false;
@@ -206,10 +208,14 @@ public class CameraControl : MonoBehaviour
         else
             AlignmentImage(timer);
 
-        if (GamePad.GetButtonDown(GamePad.Button.LeftShoulder, (GamePad.Index)playerNum)) targetAnchor = GetSideAnchor(Side.Left);
+        Vector2 inputVec = GamePad.GetAxis(GamePad.Axis.RightStick, GamePad.Index.One);
+        if (oldInputVec == 0)
+        {
+            if (inputVec.x < 0) targetAnchor = GetSideAnchor(Side.Left);
 
-        if (GamePad.GetButtonDown(GamePad.Button.RightShoulder, (GamePad.Index)playerNum)) targetAnchor = GetSideAnchor(Side.Right);
-
+            if (inputVec.x > 0) targetAnchor = GetSideAnchor(Side.Right);
+        }
+        oldInputVec = inputVec.x;
         //アンカーのある方向を取得
         Vector3 vec = targetAnchor.transform.position - transform.position;
         //オブジェクトのある方向に合わせたカメラのポジション移動
