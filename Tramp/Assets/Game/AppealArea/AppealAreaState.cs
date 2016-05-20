@@ -23,18 +23,20 @@ public class AppealAreaState : MonoBehaviour
     ///<summary>
     ///プレイヤーに乗られているか？
     ///</summary>
-    public bool IsRidden { get { return isRidden; } }
-    [SerializeField]
-    private bool isRidden;
+    public bool IsRidden { get { return RidingPlayer.Count != 0; } }
 
     ///<summary>
     ///流れているか？
     ///</summary>
     public bool IsFlowing;
 
+    /// <summary>
+    /// アピールエリアの所有者
+    /// </summary>
+    public GameObject Owner = null;
+
     void Start()
     {
-        isRidden = false;
         IsFlowing = false;
     }
 
@@ -45,13 +47,18 @@ public class AppealAreaState : MonoBehaviour
             flowObj = null;
             IsFlowing = false;
         }
+
+        if (Owner != null && !IsFlowing && !IsRidden)
+        {
+            Owner.GetComponent<PlayerState>().IsAreaOwner = false;
+            Owner = null;
+        }
     }
 
     //プレイヤーが乗った
     void OnTriggerEnter(Collider col)
     {
         if (col.tag != "Player") return;
-        isRidden = true;
         if (ridingPlayer.Find(n => n.Equals(col.gameObject)) != null) return;
         //リストにいなかったら追加
         ridingPlayer.Add(col.gameObject);
@@ -61,7 +68,6 @@ public class AppealAreaState : MonoBehaviour
     {
         if (col.gameObject.tag != "Player") return;
         ridingPlayer.Remove(col.gameObject);
-        isRidden = false;
     }
     //流れに乗っているときにアンカーに触れた
     void OnCollisionEnter(Collision col)

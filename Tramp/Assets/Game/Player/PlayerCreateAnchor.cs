@@ -28,6 +28,11 @@ public class PlayerCreateAnchor : NetworkBehaviour
     
     float collsionRadius = 1;
 
+    /// <summary>
+    /// アピールエリアに繋がっている流れか？
+    /// </summary>
+    public bool IsFromArea = false;
+
     // Use this for initialization
     void Start()
     {
@@ -128,13 +133,25 @@ public class PlayerCreateAnchor : NetworkBehaviour
         float rotationY = cameraObj.transform.eulerAngles.y;
         transform.rotation = Quaternion.Euler(0, rotationY, 0);
 
+        //アピールエリアに乗っていた場合の処理
         if (playerState.IsOnAppealArea)
         {
-            if (!appealArea.IsFlowing) playerState.IsAreaOwner = true;
-            if (playerState.IsAreaOwner) CreatePosition = appealArea.gameObject.transform.position;
+            //まだ流れに繋がっていなかったら所有権を得る
+            if (!appealArea.IsFlowing)
+            {
+                appealArea.Owner = gameObject;
+                playerState.IsAreaOwner = true;
+            }
+            //所有者だったら流れを生成することが出来る
+            if (playerState.IsAreaOwner)
+            {
+                IsFromArea = true;
+                CreatePosition = appealArea.gameObject.transform.position;
+            }
         }
         else
         {
+            IsFromArea = false;
             CreatePosition = transform.position + transform.forward * 2 + Vector3.up;
             //アンカーを置く
             Cmd_rezobjectonserver(CreatePosition);
@@ -171,6 +188,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
         Flow flow = boxCol.GetComponent<Flow>();
         flow.FlowVector = flowvec;
         flow.TargetPosition = tpos;
+        flow.IsFromArea = IsFromArea;
 
         //流れのベクトルに合わせて回転させる
         float dist = Vector3.Distance(tpos, thisPositon);

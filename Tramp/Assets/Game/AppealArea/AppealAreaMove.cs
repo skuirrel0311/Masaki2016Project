@@ -45,7 +45,11 @@ public class AppealAreaMove : MonoBehaviour
 
         IsGoHome = (!areaState.IsFlowing && !areaState.IsRidden);
 
-        if (IsGoHome) GoHome();
+        if (IsGoHome)
+        {
+            areaState.Owner = null;
+            GoHome();
+        }
     }
 
     void WithPlayer()
@@ -72,6 +76,7 @@ public class AppealAreaMove : MonoBehaviour
         Ray ray = new Ray(transform.position, movement);
         RaycastHit hit;
 
+        //真っ直ぐおうちに帰れなかったら移動量を修正
         if (Physics.SphereCast(ray, 3, out hit,distance))
         {
             //w = movement - (Dot(movement,hit.normal) * hit.normal)
