@@ -1,0 +1,158 @@
+fileFormatVersion: 2
+guid: 55da974e9573f08498382e91912a5603
+timeCreated: 1463702457
+licenseType: Free
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: Head
+    100002: hear
+    100004: hear1
+    100006: hear2
+    100008: Hips
+    100010: joint13
+    100012: joint13 1
+    100014: joint16
+    100016: joint21
+    100018: joint5
+    100020: joint5 1
+    100022: Leftarm
+    100024: Leftfoot
+    100026: Leftforearm
+    100028: Leftforearm2
+    100030: Lefthand
+    100032: lefthandindex1
+    100034: lefthandindex2
+    100036: Leftleg
+    100038: Leftshoulder
+    100040: Lefttoebase
+    100042: Leftupleg
+    100044: n1
+    100046: n2
+    100048: n3
+    100050: n4
+    100052: Neck
+    100054: polySurface20
+    100056: Rightarm
+    100058: Rightferearm2
+    100060: Rightfoot
+    100062: Rightforearm
+    100064: Righthand
+    100066: Righthandindex1
+    100068: Righthandindex2
+    100070: Rightleg
+    100072: Rightshoulder
+    100074: Righttoebase
+    100076: Rightupleg
+    100078: Spine
+    100080: Spine1
+    100082: //RootNode
+    400000: Head
+    400002: hear
+    400004: hear1
+    400006: hear2
+    400008: Hips
+    400010: joint13
+    400012: joint13 1
+    400014: joint16
+    400016: joint21
+    400018: joint5
+    400020: joint5 1
+    400022: Leftarm
+    400024: Leftfoot
+    400026: Leftforearm
+    400028: Leftforearm2
+    400030: Lefthand
+    400032: lefthandindex1
+    400034: lefthandindex2
+    400036: Leftleg
+    400038: Leftshoulder
+    400040: Lefttoebase
+    400042: Leftupleg
+    400044: n1
+    400046: n2
+    400048: n3
+    400050: n4
+    400052: Neck
+    400054: polySurface20
+    400056: Rightarm
+    400058: Rightferearm2
+    400060: Rightfoot
+    400062: Rightforearm
+    400064: Righthand
+    400066: Righthandindex1
+    400068: Righthandindex2
+    400070: Rightleg
+    400072: Rightshoulder
+    400074: Righttoebase
+    400076: Rightupleg
+    400078: Spine
+    400080: Spine1
+    400082: //RootNode
+    4300000: polySurface20
+    9500000: //RootNode
+    13700000: polySurface20
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleRotations: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
