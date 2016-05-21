@@ -36,7 +36,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
     {
         if (GamePad.GetTrigger(GamePad.Trigger.LeftTrigger,GamePad.Index.One)==1.0f&&camera.GetComponent<CameraControl>().IsLockOn)
         {
-           
+            if (MainGameManager.IsPause) return;
             if (CheckNearAnchor())
             {
                 camera.GetComponent<CameraControl>().IsLockOn = false;

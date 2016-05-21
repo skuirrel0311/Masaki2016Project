@@ -66,6 +66,20 @@ public class MyNetworkManager : NetworkManager
         }
     }
 
+    public override void ServerChangeScene(string newSceneName)
+    {
+        if (newSceneName == "Menu")
+        {
+            discovery.isStartClient = false;
+            soundManager.GameEnd();
+            isStarted = false;
+            isJoin = false;
+            joinTimer = 0;
+        }
+
+        base.ServerChangeScene(newSceneName);
+    }
+
 
     public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId)
     {
@@ -82,6 +96,13 @@ public class MyNetworkManager : NetworkManager
     {
         isJoin = false;
         base.OnClientConnect(conn);
+    }
+
+    public override void OnClientDisconnect(NetworkConnection conn)
+    {
+        StopClient();
+        DiscoveryShutdown();
+        base.OnClientDisconnect(conn);
     }
 
     public override void OnServerDisconnect(NetworkConnection conn)

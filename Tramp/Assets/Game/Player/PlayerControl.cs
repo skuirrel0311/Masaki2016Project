@@ -87,7 +87,7 @@ public class PlayerControl : NetworkBehaviour
         }
     }
 
-    static bool ChackCurrentAnimatorName(Animator animator, string name)
+    static public  bool ChackCurrentAnimatorName(Animator animator, string name)
     {
         return animator.GetCurrentAnimatorStateInfo(0).IsName(name);
     }
@@ -98,6 +98,8 @@ public class PlayerControl : NetworkBehaviour
     /// <param name="movement">移動量</param>
     bool  Move(Vector3 movement)
     {
+        //ポーズ中だったら終了
+        if (MainGameManager.IsPause) return false;
 
         // body.velocity = new Vector3(0,body.velocity.y,0);
         //カメラの角度のx､zは見ない
@@ -109,6 +111,7 @@ public class PlayerControl : NetworkBehaviour
 
         //移動していなかったら終了
         if (movement == Vector3.zero) return false;
+
 
         //アニメーションの再生
         if (!ChackCurrentAnimatorName(animator, "Take 001"))
@@ -133,7 +136,7 @@ public class PlayerControl : NetworkBehaviour
     void Jump()
     {
         //プレイヤーがジャンプをしようとしたとき
-        if (GamePad.GetButtonDown(GamePad.Button.A, (GamePad.Index)playerNum) && IsOnGround)
+        if (GamePad.GetButtonDown(GamePad.Button.A, (GamePad.Index)playerNum) && IsOnGround&&!MainGameManager.IsPause)
         {
             //ジャンプ時の地点を保持
             atJumpPosition = transform.position;
@@ -165,5 +168,6 @@ public class PlayerControl : NetworkBehaviour
         Isfalling = false;
         IsOnGround = true;
         body.isKinematic = false;
+        animator.CrossFadeInFixedTime("jump_landing",0.1f);
     }
 }

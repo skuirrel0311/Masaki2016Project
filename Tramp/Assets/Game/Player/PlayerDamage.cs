@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
+using UnityStandardAssets.ImageEffects;
 using System.Collections;
 
 public class PlayerDamage : NetworkBehaviour
@@ -8,9 +9,30 @@ public class PlayerDamage : NetworkBehaviour
     GameObject HitEffect;
     private PlayerState state;
 
+    GameObject camera;
+
+    NoiseAndGrain noise;
+
+    bool isdameged;
+
     void Start()
     {
         state = gameObject.GetComponent<PlayerState>();
+        camera = GameObject.FindGameObjectWithTag("MainCamera");
+        noise = camera.GetComponent<NoiseAndGrain>();
+        isdameged = false;
+    }
+    void Update()
+    {
+        if (isdameged)
+        {
+            //ダメージエフェクト
+            noise.intensityMultiplier += 20.0f * Time.deltaTime;
+            if (noise.intensityMultiplier < 10) return;
+            noise.intensityMultiplier = 0;
+            isdameged = false;
+
+        }
     }
 
     void OnCollisionEnter(Collision col)
@@ -18,10 +40,11 @@ public class PlayerDamage : NetworkBehaviour
         if (!isLocalPlayer) return;
         if (col.gameObject.tag == "Ammo")
         {
-            Debug.Log("Hit");
-                CmdHitEffect(col.gameObject.transform.position);
-                state.Damege();
-            
+            CmdHitEffect(col.gameObject.transform.position);
+            state.animator.CrossFadeInFixedTime("damage",0.1f);
+            state.Damege();
+            isdameged = true;
+            noise.intensityMultiplier = 0;
         }
     }
     [Command]

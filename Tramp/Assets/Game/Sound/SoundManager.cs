@@ -48,20 +48,29 @@ public class SoundManager : MonoBehaviour
                 return;
             }
 
-            MyNetworkDiscovery netMana = GetComponent<MyNetworkDiscovery>();
-            netMana.StopAllCoroutines();
-            if (netMana.isServer)
+            GameObject go = GameObject.FindGameObjectWithTag("NetworkManager");
+            MyNetworkDiscovery dis = go.GetComponent<MyNetworkDiscovery>();
+            MyNetworkManager man = go.GetComponent<MyNetworkManager>();
+            if (dis.isServer)
             {
-                GetComponent<MyNetworkManager>().StopServer();
-                GetComponent<MyNetworkManager>().StopHost();
+                man.GetComponent<MyNetworkManager>().StopHost();
+                man.GetComponent<MyNetworkManager>().StopServer();
             }
             else
             {
-                GetComponent<MyNetworkManager>().StopClient();
+                man.GetComponent<MyNetworkManager>().StopClient();
             }
-            SceneManager.LoadScene("Menu");
+            man.DiscoveryShutdown();
+            man.ServerChangeScene("Menu");
         }
 
+    }
+
+    public  void GameEnd()
+    {
+        isEnd = false;
+        isWin = false;
+        mainMusic.Stop();
     }
 
     void OnGUI()

@@ -7,8 +7,9 @@ public class PlayerState : NetworkBehaviour
 {
     [SerializeField]
     int maxHp = 10;
-    public int Hp { get { return hp; }private set { hp = value; }}
-    [SerializeField][SyncVar]
+    public int Hp { get { return hp; } private set { hp = value; } }
+    [SerializeField]
+    [SyncVar]
     private int hp;
 
 
@@ -18,7 +19,7 @@ public class PlayerState : NetworkBehaviour
     /// </summary>
     [SerializeField]
     float TimeToReturn = 3;
-    
+
 
     public GameObject appealItem;
 
@@ -50,7 +51,7 @@ public class PlayerState : NetworkBehaviour
     /// <summary>
     /// アピール中か？
     /// </summary>
-    public bool IsAppealing{ get; private set; }
+    public bool IsAppealing { get; private set; }
 
     private int playerIndex = 1;
 
@@ -66,7 +67,7 @@ public class PlayerState : NetworkBehaviour
         //animator.SetBool("HaveItem", IsPossessionOfItem);
 
         //アイテムを所持していたら
-        if(IsPossessionOfItem)
+        if (IsPossessionOfItem)
         {
             if (GamePad.GetButtonDown(GamePad.Button.RightShoulder, (GamePad.Index)playerIndex))
             {
@@ -75,7 +76,7 @@ public class PlayerState : NetworkBehaviour
             }
         }
 
-        if(!IsAlive)
+        if (!IsAlive)
         {
             //操作できない
             PlayerControl playerControl = GetComponent<PlayerControl>();
@@ -108,17 +109,17 @@ public class PlayerState : NetworkBehaviour
     IEnumerator IsDead()
     {
         //フィーバーゲージ減少
-        GetComponent<FeverGauge>().KilledInPlayer();
+        //GetComponent<FeverGauge>().KilledInPlayer();
 
         GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("Player");
-        foreach (GameObject playerObj in playerObjects)
-        {
-            //自分以外のプレイヤーのフィーバーゲージを増加させる
-            if (gameObject.Equals(playerObj) == false) playerObj.GetComponent<FeverGauge>().KillPlayer();
-        }
+        //foreach (GameObject playerObj in playerObjects)
+        //{
+        //    //自分以外のプレイヤーのフィーバーゲージを増加させる
+        //    if (gameObject.Equals(playerObj) == false) playerObj.GetComponent<FeverGauge>().KillPlayer();
+        //}
 
         //アイテムを所持していたら
-        if(IsPossessionOfItem)
+        if (IsPossessionOfItem)
         {
             //親子関係をはずしランダムに再設置。
             appealItem.transform.parent = null;
@@ -151,7 +152,7 @@ public class PlayerState : NetworkBehaviour
         int firstHp = appealItem.GetComponent<AppealItem>().FirstHp;
 
         //hpがアイテムを所持したときのhpよりも３小さかったら
-        if(hp <= firstHp - 3)
+        if (hp <= firstHp - 3)
         {
             //親子関係を解除
             appealItem.transform.parent = null;
@@ -176,7 +177,7 @@ public class PlayerState : NetworkBehaviour
         GUIStyle style = new GUIStyle();
         style.fontSize = 30;
         style.fontStyle = FontStyle.Bold;
-        GUI.TextArea(new Rect(800,0,400,200),"残HP："+hp,style);
+        GUI.TextArea(new Rect(800, 0, 400, 200), "残HP：" + hp, style);
     }
 
 

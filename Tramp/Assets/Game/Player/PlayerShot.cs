@@ -33,6 +33,8 @@ public class PlayerShot : NetworkBehaviour
     int stockMax = 30;
     [SerializeField]
     int stock;
+    //弾を連射中か
+    bool isShot;
 
     /// <summary>
     /// リロードする必要があるか？
@@ -48,11 +50,15 @@ public class PlayerShot : NetworkBehaviour
         StartCoroutine("LongTriggerDown");
         stock = stockMax;
         IsReload = false;
+        isShot = false;
     }
+
 
     void Shot()
     {
-        playerState.animator.CrossFadeInFixedTime("rightgun",0.1f);
+        isShot = true;
+        if (!PlayerControl.ChackCurrentAnimatorName(playerState.animator, "run_rightgun"))
+            playerState.animator.CrossFadeInFixedTime("run_rightgun", 0.1f);
         //ストックを減らす
         stock--;
 
@@ -67,13 +73,13 @@ public class PlayerShot : NetworkBehaviour
         cameraRotation.z = 0;
         transform.rotation = cameraRotation;
 
-        if(Physics.Raycast(ray,out hit,100))
+        if (Physics.Raycast(ray, out hit, 100))
         {
             //衝突点がカメラとプレイヤーの間にあるか判定
             Vector3 temp = hit.point - shotPosition.position;
-            float angle = Vector3.Angle(ray.direction,temp);
+            float angle = Vector3.Angle(ray.direction, temp);
 
-            if(angle < 90) targetPosition = hit.point;                  //９０度以内
+            if (angle < 90) targetPosition = hit.point;                  //９０度以内
             else targetPosition = ray.origin + (ray.direction * 100);   //角度がありすぎる
         }
         else
@@ -90,16 +96,25 @@ public class PlayerShot : NetworkBehaviour
         }
         else
         {
-            GameObject go = Instantiate(Ammo,shotPosition.position, shotPosition.rotation) as GameObject;
+            GameObject go = Instantiate(Ammo, shotPosition.position, shotPosition.rotation) as GameObject;
             CmdAmmoSpawn(shotPosition.position, shotPosition.rotation);
         }
 
     }
 
-    [Command]
-    public void CmdAmmoSpawn(Vector3 shotposition,Quaternion shotrotation)
+    void Update()
     {
-        GameObject go = Instantiate(Ammo, shotposition,shotrotation) as GameObject;
+        if (GamePad.GetTrigger(GamePad.Trigger.RightTrigger, (GamePad.Index)playerNum, true) <= 0 && isLocalPlayer)
+        {
+            playerState.animator.SetBool("RunShotEnd",true);
+            isShot = false;
+        }
+    }
+
+    [Command]
+    public void CmdAmmoSpawn(Vector3 shotposition, Quaternion shotrotation)
+    {
+        GameObject go = Instantiate(Ammo, shotposition, shotrotation) as GameObject;
         go.transform.rotation = shotrotation;
     }
 
@@ -128,12 +143,18 @@ public class PlayerShot : NetworkBehaviour
             }
 
             if (GamePad.GetTrigger(GamePad.Trigger.RightTrigger, (GamePad.Index)playerNum, true) > 0 && !playerState.IsAppealing && isLocalPlayer)
+            {
                 Shot();
+
+                playerState.animator.SetBool("RunShotEnd", false);
+            }
             else
                 yield return null;
 
-            //ストックが無くなった
-            if (stock < 0)
+
+
+                //ストックが無くなった
+                if (stock < 0)
             {
                 IsReload = true;
             }

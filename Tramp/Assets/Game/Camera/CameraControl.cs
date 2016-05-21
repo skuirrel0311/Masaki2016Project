@@ -74,7 +74,7 @@ public class CameraControl : MonoBehaviour
     void Update()
     {
         //ロックオンの処理押された時と押している時で処理を分ける
-        if (GamePad.GetButtonDown(GamePad.Button.LeftShoulder, (GamePad.Index)playerNum))
+        if (GamePad.GetButtonDown(GamePad.Button.LeftShoulder, (GamePad.Index)playerNum)&&!MainGameManager.IsPause)
         {
             if (!IsLockOn) CameraLockOnStart();
             else IsLockOn = false;
