@@ -54,7 +54,7 @@ public class AppealItem : MonoBehaviour
 
         int playerIndex = col.gameObject.GetComponent<PlayerControl>().playerNum;
 
-        if (GamePad.GetButtonDown(GamePad.Button.LeftShoulder, (GamePad.Index)playerIndex))
+        if (GamePadInput.GetButtonDown(GamePadInput.Button.LeftShoulder, (GamePadInput.Index)playerIndex))
         {
             EnterThePlayer(col.gameObject);
         }

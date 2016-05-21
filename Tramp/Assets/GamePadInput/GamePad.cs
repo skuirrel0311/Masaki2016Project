@@ -8,7 +8,7 @@ using System.Collections;
 namespace GamepadInput
 {
 
-    public static class GamePad
+    public static class GamePadInput
     {
 
         public enum Button { A, B, Y, X, RightShoulder, LeftShoulder, RightStick, LeftStick, Back, Start }
@@ -196,9 +196,9 @@ namespace GamepadInput
             return KeyCode.None;
         }
 
-        public static GamepadState GetState(Index controlIndex, bool raw = false)
+        public static GamepadInputState GetState(Index controlIndex, bool raw = false)
         {
-            GamepadState state = new GamepadState();
+            GamepadInputState state = new GamepadInputState();
 
             state.A = GetButton(Button.A, controlIndex);
             state.B = GetButton(Button.B, controlIndex);
@@ -230,7 +230,7 @@ namespace GamepadInput
 
     }
 
-    public class GamepadState
+    public class GamepadInputState
     {
         public bool A = false;
         public bool B = false;

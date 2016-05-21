@@ -2,6 +2,7 @@
 using UnityEngine.Networking;
 using System.Collections;
 using GamepadInput;
+using XInputDotNetPure;
 
 public class PlayerShot : NetworkBehaviour
 {
@@ -41,6 +42,8 @@ public class PlayerShot : NetworkBehaviour
     /// </summary>
     bool IsReload;
 
+    GamepadInputState padState;
+
     void Start()
     {
         playerNum = GetComponent<PlayerControl>().playerNum;
@@ -51,11 +54,22 @@ public class PlayerShot : NetworkBehaviour
         stock = stockMax;
         IsReload = false;
         isShot = false;
+        vibrationTimer = 0;
     }
 
+    float vibrationTimer;
 
     void Shot()
     {
+
+        GamePadState padState = GamePad.GetState(PlayerIndex.One);
+
+        if (vibrationTimer == -1)
+        {
+            GamePad.SetVibration(PlayerIndex.One, 0.2f, 0.2f);
+            vibrationTimer=0;
+        }
+
         isShot = true;
         if (!PlayerControl.ChackCurrentAnimatorName(playerState.animator, "run_rightgun"))
             playerState.animator.CrossFadeInFixedTime("run_rightgun", 0.1f);
@@ -99,15 +113,24 @@ public class PlayerShot : NetworkBehaviour
             GameObject go = Instantiate(Ammo, shotPosition.position, shotPosition.rotation) as GameObject;
             CmdAmmoSpawn(shotPosition.position, shotPosition.rotation);
         }
-
     }
 
     void Update()
     {
-        if (GamePad.GetTrigger(GamePad.Trigger.RightTrigger, (GamePad.Index)playerNum, true) <= 0 && isLocalPlayer)
+        if (GamePadInput.GetTrigger(GamePadInput.Trigger.RightTrigger, (GamePadInput.Index)playerNum, true) <= 0 && isLocalPlayer)
         {
-            playerState.animator.SetBool("RunShotEnd",true);
+            playerState.animator.SetBool("RunShotEnd", true);
             isShot = false;
+        }
+
+        if (vibrationTimer != -1)
+        {
+            vibrationTimer += Time.deltaTime;
+            if (vibrationTimer > 0.05f)
+            {
+                vibrationTimer = -1;
+                GamePad.SetVibration(PlayerIndex.One,0,0);
+            }
         }
     }
 
@@ -122,11 +145,12 @@ public class PlayerShot : NetworkBehaviour
     {
         while (true)
         {
+
             if (IsReload)
             {
                 while (true)
                 {
-                    if (!GamePad.GetButtonDown(GamePad.Button.X, (GamePad.Index)playerNum)) yield return null;
+                    if (!GamePadInput.GetButtonDown(GamePadInput.Button.X, (GamePadInput.Index)playerNum)) yield return null;
                     else break;
                 }
                 //ボタン押したら3秒待つ
@@ -142,7 +166,7 @@ public class PlayerShot : NetworkBehaviour
                 stock = stockMax;
             }
 
-            if (GamePad.GetTrigger(GamePad.Trigger.RightTrigger, (GamePad.Index)playerNum, true) > 0 && !playerState.IsAppealing && isLocalPlayer)
+            if (GamePadInput.GetTrigger(GamePadInput.Trigger.RightTrigger, (GamePadInput.Index)playerNum, true) > 0 && !playerState.IsAppealing && isLocalPlayer)
             {
                 Shot();
 
@@ -153,8 +177,8 @@ public class PlayerShot : NetworkBehaviour
 
 
 
-                //ストックが無くなった
-                if (stock < 0)
+            //ストックが無くなった
+            if (stock < 0)
             {
                 IsReload = true;
             }

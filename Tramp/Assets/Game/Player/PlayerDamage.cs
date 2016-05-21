@@ -37,14 +37,21 @@ public class PlayerDamage : NetworkBehaviour
 
     void OnCollisionEnter(Collision col)
     {
-        if (!isLocalPlayer) return;
         if (col.gameObject.tag == "Ammo")
         {
-            CmdHitEffect(col.gameObject.transform.position);
-            state.animator.CrossFadeInFixedTime("damage",0.1f);
-            state.Damege();
-            isdameged = true;
-            noise.intensityMultiplier = 0;
+            if (isLocalPlayer)
+            {
+                CmdHitEffect(col.gameObject.transform.position);
+                state.animator.CrossFadeInFixedTime("damage", 0.1f);
+                state.Damege();
+                isdameged = true;
+                noise.intensityMultiplier = 0;
+                Destroy(col.gameObject);
+            }
+            else
+            {
+                Destroy(col.gameObject);
+            }
         }
     }
     [Command]

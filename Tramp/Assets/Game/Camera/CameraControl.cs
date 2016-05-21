@@ -73,8 +73,9 @@ public class CameraControl : MonoBehaviour
 
     void Update()
     {
+        if (player == null) return;
         //ロックオンの処理押された時と押している時で処理を分ける
-        if (GamePad.GetButtonDown(GamePad.Button.LeftShoulder, (GamePad.Index)playerNum)&&!MainGameManager.IsPause)
+        if (GamePadInput.GetButtonDown(GamePadInput.Button.LeftShoulder, (GamePadInput.Index)playerNum)&&!MainGameManager.IsPause)
         {
             if (!IsLockOn) CameraLockOnStart();
             else IsLockOn = false;
@@ -92,7 +93,7 @@ public class CameraControl : MonoBehaviour
         targetAnchor = null;
         timer = Mathf.Max(timer - Time.deltaTime, 0);
 
-        Vector2 rightStick = GamePad.GetAxis(GamePad.Axis.RightStick, (GamePad.Index)playerNum);
+        Vector2 rightStick = GamePadInput.GetAxis(GamePadInput.Axis.RightStick, (GamePadInput.Index)playerNum);
 
 
         if (latitude < 0) latitude += -rightStick.y * (rotationSpeed * 1.5f) * Time.deltaTime;
@@ -208,7 +209,7 @@ public class CameraControl : MonoBehaviour
         else
             AlignmentImage(timer);
 
-        Vector2 inputVec = GamePad.GetAxis(GamePad.Axis.RightStick, GamePad.Index.One);
+        Vector2 inputVec = GamePadInput.GetAxis(GamePadInput.Axis.RightStick, GamePadInput.Index.One);
         if (oldInputVec == 0)
         {
             if (inputVec.x < 0) targetAnchor = GetSideAnchor(Side.Left);

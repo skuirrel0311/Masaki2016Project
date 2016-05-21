@@ -43,25 +43,9 @@ public class SoundManager : MonoBehaviour
         {
             isEnd = true;
 
-            if (!GamepadInput.GamePad.GetButtonDown(GamepadInput.GamePad.Button.A, GamepadInput.GamePad.Index.One))
-            {
-                return;
-            }
-
             GameObject go = GameObject.FindGameObjectWithTag("NetworkManager");
-            MyNetworkDiscovery dis = go.GetComponent<MyNetworkDiscovery>();
             MyNetworkManager man = go.GetComponent<MyNetworkManager>();
-            if (dis.isServer)
-            {
-                man.GetComponent<MyNetworkManager>().StopHost();
-                man.GetComponent<MyNetworkManager>().StopServer();
-            }
-            else
-            {
-                man.GetComponent<MyNetworkManager>().StopClient();
-            }
-            man.DiscoveryShutdown();
-            man.ServerChangeScene("Menu");
+            man.ServerChangeScene("Result");
         }
 
     }
@@ -78,6 +62,9 @@ public class SoundManager : MonoBehaviour
         GUIStyle style = new GUIStyle();
         style.fontSize = 70;
         style.fontStyle = FontStyle.Bold;
+
+        GUI.TextArea(new Rect(0, 0, 200, 100), "残り時間" + (int)(mainMusic.clip.length - mainMusic.time),style);
+
         if (isEnd)
         {
             if (isWin)

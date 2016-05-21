@@ -12,11 +12,11 @@ public class DemoScript : MonoBehaviour
 
     void Examples()
     {
-        GamePad.GetButtonDown (GamePad.Button.A, GamePad.Index.One);
-        GamePad.GetAxis(GamePad.Axis.LeftStick, GamePad.Index.One);
-        GamePad.GetTrigger(GamePad.Trigger.RightTrigger, GamePad.Index.One);
+        GamePadInput.GetButtonDown (GamePadInput.Button.A, GamePadInput.Index.One);
+        GamePadInput.GetAxis(GamePadInput.Axis.LeftStick, GamePadInput.Index.One);
+        GamePadInput.GetTrigger(GamePadInput.Trigger.RightTrigger, GamePadInput.Index.One);
 
-        GamepadState state = GamePad.GetState(GamePad.Index.One);
+        GamepadInputState state = GamePadInput.GetState(GamePadInput.Index.One);
 
         print("A: " + state.A);
     }
@@ -32,7 +32,7 @@ public class DemoScript : MonoBehaviour
         DrawLabels();
 
         for (int i = 0; i < 5; i++)
-            DrawState((GamePad.Index)i);
+            DrawState((GamePadInput.Index)i);
         GUILayout.FlexibleSpace();
 
         GUILayout.EndHorizontal();
@@ -42,14 +42,14 @@ public class DemoScript : MonoBehaviour
     }
 
 
-    void DrawState(GamePad.Index controller)
+    void DrawState(GamePadInput.Index controller)
     {
         GUILayout.Space(45);
 
         GUILayout.BeginVertical();
         
         
-        GamepadState state = GamePad.GetState(controller);
+        GamepadInputState state = GamePadInput.GetState(controller);
 
         // buttons
         GUILayout.Label("Gamepad " + controller);

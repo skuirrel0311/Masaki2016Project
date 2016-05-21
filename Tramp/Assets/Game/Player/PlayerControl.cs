@@ -61,13 +61,32 @@ public class PlayerControl : NetworkBehaviour
         {
             GameObject.Find("Camera1").GetComponent<CameraControl>().SetPlayer(gameObject);
             mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+            SetSratPosition();
+        }
+    }
+
+    void OnDestroy()
+    {
+        Debug.Log("Player Destory");
+    }
+
+    void SetSratPosition()
+    {
+        //スタート座標の設定
+        if (isServer)
+        {
+            transform.position = GameObject.Find("HostStart").transform.position;
+        }
+        else
+        {
+            transform.position = GameObject.Find("ClientStart").transform.position;
         }
     }
 
     void Update()
     {
         body.isKinematic = false;
-        Vector2 leftStick = GamePad.GetAxis(GamePad.Axis.LeftStick, (GamePad.Index)playerNum);
+        Vector2 leftStick = GamePadInput.GetAxis(GamePadInput.Axis.LeftStick, (GamePadInput.Index)playerNum);
         Vector3 direction = new Vector3(leftStick.x, 0, leftStick.y);
         Move(direction);
         Jump();
@@ -136,7 +155,7 @@ public class PlayerControl : NetworkBehaviour
     void Jump()
     {
         //プレイヤーがジャンプをしようとしたとき
-        if (GamePad.GetButtonDown(GamePad.Button.A, (GamePad.Index)playerNum) && IsOnGround&&!MainGameManager.IsPause)
+        if (GamePadInput.GetButtonDown(GamePadInput.Button.A, (GamePadInput.Index)playerNum) && IsOnGround&&!MainGameManager.IsPause)
         {
             //ジャンプ時の地点を保持
             atJumpPosition = transform.position;

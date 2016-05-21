@@ -69,7 +69,7 @@ public class PlayerState : NetworkBehaviour
         //アイテムを所持していたら
         if (IsPossessionOfItem)
         {
-            if (GamePad.GetButtonDown(GamePad.Button.RightShoulder, (GamePad.Index)playerIndex))
+            if (GamePadInput.GetButtonDown(GamePadInput.Button.RightShoulder, (GamePadInput.Index)playerIndex))
             {
                 //反転
                 IsAppealing = IsAppealing ? false : true;
