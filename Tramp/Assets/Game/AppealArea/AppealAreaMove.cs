@@ -23,6 +23,7 @@ public class AppealAreaMove : MonoBehaviour
     bool IsGoHome = false;
 
     //デバッグ用、trueにすると中心に戻ろうとしなくなります。
+    [SerializeField]
     bool IsNoMove = true;
 
     [SerializeField]
@@ -80,7 +81,7 @@ public class AppealAreaMove : MonoBehaviour
         RaycastHit hit;
 
         //真っ直ぐおうちに帰れなかったら移動量を修正
-        if (Physics.SphereCast(ray, 3, out hit,distance))
+        if (Physics.SphereCast(ray, 3, out hit,this.distance))
         {
             //w = movement - (Dot(movement,hit.normal) * hit.normal)
             Vector2 vec1 = new Vector2(movement.x, movement.z);

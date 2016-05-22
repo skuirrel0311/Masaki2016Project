@@ -86,7 +86,7 @@ public class AppealAreaState : MonoBehaviour
     void OnCollisionEnter(Collision col)
     {
         if (col.gameObject.tag == "Ammo") AmmoHit();
-        if (col.gameObject.tag != "Anchor") AnchorHit(col.gameObject);
+        if (col.gameObject.tag == "Anchor") AnchorHit(col.gameObject);
     }
     //流れていないときにアンカーに触れている
     void OnCollisionStay(Collision col)
