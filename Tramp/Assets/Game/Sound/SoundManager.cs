@@ -64,15 +64,6 @@ public class SoundManager : MonoBehaviour
         style.fontStyle = FontStyle.Bold;
 
         GUI.TextArea(new Rect(0, 0, 200, 100), "残り時間" + (int)(mainMusic.clip.length - mainMusic.time),style);
-
-        if (isEnd)
-        {
-            if (isWin)
-                GUI.Label(new Rect(400, 400, 1000, 200), "YOU WIN",style);
-            else
-                GUI.Label(new Rect(400, 400, 1000, 200), "YOU LOSE",style);
-        }
-
     }
 
 }
