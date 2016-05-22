@@ -35,6 +35,11 @@ public class AppealAreaState : MonoBehaviour
     /// </summary>
     public GameObject Owner = null;
 
+    /// <summary>
+    /// サーバー側が勝ったか？
+    /// </summary>
+    public Winner ServerWiner;
+
     //耐久値
     int maxHp = 10;
     public int hp;
@@ -64,6 +69,23 @@ public class AppealAreaState : MonoBehaviour
             Owner.GetComponent<PlayerState>().IsAreaOwner = false;
             Owner = null;
         }
+
+        if(transform.position.z < 0)
+        {
+            ServerWiner = Winner.win;
+            return;
+        }
+        if(transform.position.z == 0)
+        {
+            ServerWiner = Winner.draw;
+            return;
+        }
+        if(transform.position.z > 0)
+        {
+            ServerWiner = Winner.lose;
+            return;
+        }
+
     }
 
     //プレイヤーが乗った
@@ -71,6 +93,7 @@ public class AppealAreaState : MonoBehaviour
     {
         if (col.gameObject.tag == "Ammo") AmmoHit();
         if (col.gameObject.tag == "Anchor") AnchorHit(col.gameObject);
+        if (col.gameObject.name == "Goal") GoalHit();
         if (col.tag != "Player") return;
         if (ridingPlayer.Find(n => n.Equals(col.gameObject)) != null) return;
         //リストにいなかったら追加
@@ -87,6 +110,7 @@ public class AppealAreaState : MonoBehaviour
     {
         if (col.gameObject.tag == "Ammo") AmmoHit();
         if (col.gameObject.tag == "Anchor") AnchorHit(col.gameObject);
+        if (col.gameObject.name == "Goal") GoalHit();
     }
     //流れていないときにアンカーに触れている
     void OnCollisionStay(Collision col)
@@ -132,5 +156,25 @@ public class AppealAreaState : MonoBehaviour
             IsFlowing = false;
             flowObj = null;
         }
+    }
+
+    void GoalHit()
+    {
+        if (transform.position.z < 0)
+        {
+            ServerWiner = Winner.lose;
+        }
+        if (transform.position.z > 0)
+        {
+            ServerWiner = Winner.win;
+        }
+        if (transform.position.z == 0)
+        {
+            ServerWiner = Winner.draw;
+        }
+
+        GameObject go = GameObject.FindGameObjectWithTag("NetworkManager");
+        MyNetworkManager man = go.GetComponent<MyNetworkManager>();
+        man.ServerChangeScene("Result");
     }
 }

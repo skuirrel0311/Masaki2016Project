@@ -83,6 +83,22 @@ public class MyNetworkManager : NetworkManager
             isJoin = false;
             joinTimer = 0;
         }
+        if (newSceneName == "Result")
+        {
+            Winner serverWiner = GameObject.Find("AppealArea").GetComponent<AppealAreaState>().ServerWiner;
+            if(discovery.isServer)
+            {
+                winner = serverWiner;
+            }
+            else
+            {
+                if (serverWiner == Winner.draw) winner = Winner.draw;
+                else
+                {
+                    winner = serverWiner == Winner.win ? Winner.lose : Winner.win;
+                }
+            }
+        }
         base.ServerChangeScene(newSceneName);
     }
 
