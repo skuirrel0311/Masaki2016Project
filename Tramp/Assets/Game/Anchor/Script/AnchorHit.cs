@@ -10,6 +10,9 @@ public class AnchorHit : MonoBehaviour {
     [SerializeField]
     GameObject HitEffect;
 
+    /// <summary>
+    /// このアンカーから出ている流れ
+    /// </summary>
     GameObject FlowEffect;
 
     void Start()
@@ -44,7 +47,8 @@ public class AnchorHit : MonoBehaviour {
             FlowEffect.GetComponent<Flow>().isDestory = true;
             AppealAreaState areaState = col.gameObject.GetComponent<AppealAreaState>();
 
-            areaState.IsFlowing = false;
+            Destroy(areaState.flowObj);
+            areaState.flowObj = FlowEffect;
             areaState.OnAnchorList.Remove(gameObject);
         }
         Destroy(gameObject);

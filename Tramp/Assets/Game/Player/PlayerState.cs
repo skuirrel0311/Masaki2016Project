@@ -110,7 +110,9 @@ public class PlayerState : NetworkBehaviour
         PlayerControl playerControl = GetComponent<PlayerControl>();
         playerControl.enabled = true;
         IsAppealing = false;
+        if(IsAreaOwner) AppealArea.Owner = null;
         IsAreaOwner = false;
+        
         IsPossessionOfItem = false;
     }
 

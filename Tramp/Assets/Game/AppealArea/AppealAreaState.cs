@@ -35,9 +35,20 @@ public class AppealAreaState : MonoBehaviour
     /// </summary>
     public GameObject Owner = null;
 
+    //耐久値
+    int maxHp = 10;
+    public int hp;
+
     void Start()
     {
         IsFlowing = false;
+        hp = maxHp;
+    }
+
+    public void SetOwner(GameObject owner)
+    {
+        Owner = owner;
+        hp = maxHp;
     }
 
     void Update()
@@ -58,6 +69,7 @@ public class AppealAreaState : MonoBehaviour
     //プレイヤーが乗った
     void OnTriggerEnter(Collider col)
     {
+        if (col.gameObject.tag == "Ammo") AmmoHit();
         if (col.tag != "Player") return;
         if (ridingPlayer.Find(n => n.Equals(col.gameObject)) != null) return;
         //リストにいなかったら追加
@@ -72,6 +84,7 @@ public class AppealAreaState : MonoBehaviour
     //流れに乗っているときにアンカーに触れた
     void OnCollisionEnter(Collision col)
     {
+        if (col.gameObject.tag == "Ammo") AmmoHit();
         if (col.gameObject.tag != "Anchor") return;
 
         if (flowObj != null && col.gameObject.Equals(flowObj.GetComponent<Flow>().targetAnchor))
@@ -99,5 +112,21 @@ public class AppealAreaState : MonoBehaviour
         if (col.gameObject.tag != "Anchor") return;
 
         OnAnchorList.Remove(col.gameObject);
+    }
+
+    void AmmoHit()
+    {
+        if (Owner == null) return;
+        //所有者がいたら
+        hp = --hp > 0 ? hp-- : 0;
+
+        if(hp == 0)
+        {
+            Owner.GetComponent<PlayerState>().IsAreaOwner = false;
+            Owner = null;
+            IsFlowing = false;
+            Destroy(flowObj);
+        }
+
     }
 }

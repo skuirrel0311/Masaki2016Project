@@ -53,8 +53,11 @@ public class PlayerCreateAnchor : NetworkBehaviour
             
             //アンカーを置く
             CreateAnchor();
+
             //アピールエリアにいるが所有権を持っていなかったらリターン
             if (playerState.IsOnAppealArea && !playerState.IsAreaOwner) return;
+
+
 
             //流れを繋ぐ先を取得する
             GetTargetAnchor();
@@ -139,7 +142,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
             //まだ流れに繋がっていなかったら所有権を得る
             if (!appealArea.IsFlowing)
             {
-                appealArea.Owner = gameObject;
+                appealArea.SetOwner(gameObject);
                 playerState.IsAreaOwner = true;
             }
             //所有者だったら流れを生成することが出来る

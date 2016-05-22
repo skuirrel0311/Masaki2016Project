@@ -10,16 +10,19 @@ public class Shot : MonoBehaviour
     [SerializeField]
     GameObject HitEffect;
 
+    Rigidbody body;
+
     // Use this for initialization
     void Start()
     {
+        body = GetComponent<Rigidbody>();
         Destroy(gameObject, 10);
     }
 
     // Update is called once per frame
     void Update()
     {
-        transform.Translate(transform.forward * speed * Time.deltaTime, Space.World);
+        body.AddForce(transform.forward * speed * Time.deltaTime, ForceMode.VelocityChange);
     }
 
     void OnCollisionEnter(Collision col)
@@ -27,6 +30,14 @@ public class Shot : MonoBehaviour
         //if (col.gameObject.tag == "Player") return;
         Debug.Log("Ammohit");
         Instantiate(HitEffect,transform.position,Quaternion.identity);
+        Destroy(gameObject);
+    }
+
+    void OnCollisionStay(Collision col)
+    {
+        //if (col.gameObject.tag == "Player") return;
+        Debug.Log("Ammohit");
+        Instantiate(HitEffect, transform.position, Quaternion.identity);
         Destroy(gameObject);
     }
 }

@@ -85,6 +85,8 @@ public class Flow : NetworkBehaviour{
         anchor.AddRange(GameObject.FindGameObjectsWithTag("Anchor"));
 
         targetAnchor = anchor.Find(n => n.transform.position.Equals(targetPosition));
+
+        if (targetAnchor == null) Destroy(gameObject);
     }
 
     void OnTriggerStay(Collider col)

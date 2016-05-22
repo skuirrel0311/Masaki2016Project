@@ -84,7 +84,8 @@ public class AppealAreaMove : MonoBehaviour
             Vector2 vec2 = new Vector2(hit.normal.x, hit.normal.z);
 
             Vector2 vec3 = vec1 + (vec2 * -DotProduct(vec1, vec2));
-            movement = new Vector3(vec3.x, movement.y, vec3.y) * 1.5f;
+            movement = new Vector3(vec3.x, movement.y, vec3.y);
+            movement = movement.normalized* moveSpeed;
         }
         transform.Translate(movement * Time.deltaTime, Space.World);
     }
