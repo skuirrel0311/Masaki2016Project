@@ -56,11 +56,12 @@ public class PlayerCreateAnchor : NetworkBehaviour
 
             //アピールエリアにいるが所有権を持っていなかったらリターン
             if (playerState.IsOnAppealArea && !playerState.IsAreaOwner) return;
-
-
-
+            
             //流れを繋ぐ先を取得する
             GetTargetAnchor();
+
+            //アピールエリアに繋ぐ流れは壁をすり抜けない
+            if (playerState.IsAreaOwner && !IsPossibleCreateFlow()) return;
 
             //流れを生成する
             CmdCreateFlowObject(targetPosition, CreatePosition, flowVector);
@@ -96,6 +97,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
         {
             if (Vector3.Distance(transform.position, obj.transform.position) < distance)
             {
+                targetAnchor = obj;
                 targetPosition = obj.transform.position;
                 flowVector = targetPosition - CreatePosition;
                 distance = flowVector.magnitude;
@@ -199,6 +201,21 @@ public class PlayerCreateAnchor : NetworkBehaviour
         boxCol.transform.position = Vector3.Lerp(tpos, thisPositon, leap);
         boxCol.transform.rotation = Quaternion.FromToRotation(Vector3.up,flowvec.normalized);
         NetworkServer.Spawn(boxCol);
+    }
+
+    bool IsPossibleCreateFlow()
+    {
+        //アピールエリアに繋ぐ流れは壁をすり抜けない
+        Ray ray = new Ray(appealArea.transform.position, flowVector);
+        float radius = 2;
+        RaycastHit hit;
+        if(Physics.SphereCast(ray, radius, out hit))
+        {
+            //あたったのが床だったらダメ
+            if(hit.transform.gameObject.tag == "Plane") return false;
+        }
+
+        return true;
     }
 
 }

@@ -22,6 +22,9 @@ public class AppealAreaMove : MonoBehaviour
     //初期地に戻ろうとするか？
     bool IsGoHome = false;
 
+    //デバッグ用、trueにすると中心に戻ろうとしなくなります。
+    bool IsNoMove = true;
+
     [SerializeField]
     Vector3 homePosition = Vector3.up;
 
@@ -45,7 +48,7 @@ public class AppealAreaMove : MonoBehaviour
 
         IsGoHome = (!areaState.IsFlowing && !areaState.IsRidden);
 
-        if (IsGoHome)
+        if (IsGoHome && !IsNoMove)
         {
             areaState.Owner = null;
             GoHome();
