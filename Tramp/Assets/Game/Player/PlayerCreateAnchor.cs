@@ -51,21 +51,25 @@ public class PlayerCreateAnchor : NetworkBehaviour
         if (GamePadInput.GetTrigger(GamePadInput.Trigger.LeftTrigger,GamePadInput.Index.One)==1.0f&&camera.GetComponent<CameraControl>().IsLockOn)
         {
             if (MainGameManager.IsPause) return;
-            if (!CheckNearAnchor()) return;
-                camera.GetComponent<CameraControl>().IsLockOn = false;
+            if (!playerState.IsOnAppealArea && !CheckNearAnchor())
+                return;
+
+            camera.GetComponent<CameraControl>().IsLockOn = false;
             Debug.Log("start");
             
             //アンカーを置く
             CreateAnchor();
 
             //アピールエリアにいるが所有権を持っていなかったらリターン
-            if (playerState.IsOnAppealArea && !playerState.IsAreaOwner) return;
+            if (playerState.IsOnAppealArea && !playerState.IsAreaOwner)
+                return;
             
             //流れを繋ぐ先を取得する
             GetTargetAnchor();
 
             //アピールエリアに繋ぐ流れは壁をすり抜けない
-            if (playerState.IsAreaOwner && !IsPossibleCreateFlow()) return;
+            if (playerState.IsAreaOwner && !IsPossibleCreateFlow())
+                return;
 
             //流れを生成する
             CmdCreateFlowObject(targetPosition, CreatePosition, flowVector);
@@ -210,13 +214,14 @@ public class PlayerCreateAnchor : NetworkBehaviour
     bool IsPossibleCreateFlow()
     {
         //アピールエリアに繋ぐ流れは壁をすり抜けない
-        Ray ray = new Ray(appealArea.transform.position, flowVector);
-        float radius = 2;
+        Ray ray = new Ray(appealArea.transform.position + Vector3.up, flowVector);
+        float radius = 1;
         RaycastHit hit;
         if(Physics.SphereCast(ray, radius, out hit))
         {
             //あたったのが床だったらダメ
-            if(hit.transform.gameObject.tag == "Plane") return false;
+            if(hit.transform.gameObject.tag == "Plane")
+                return false;
         }
 
         return true;

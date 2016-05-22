@@ -70,6 +70,7 @@ public class AppealAreaState : MonoBehaviour
     void OnTriggerEnter(Collider col)
     {
         if (col.gameObject.tag == "Ammo") AmmoHit();
+        if (col.gameObject.tag == "Anchor") AnchorHit(col.gameObject);
         if (col.tag != "Player") return;
         if (ridingPlayer.Find(n => n.Equals(col.gameObject)) != null) return;
         //リストにいなかったら追加
@@ -85,14 +86,7 @@ public class AppealAreaState : MonoBehaviour
     void OnCollisionEnter(Collision col)
     {
         if (col.gameObject.tag == "Ammo") AmmoHit();
-        if (col.gameObject.tag != "Anchor") return;
-
-        if (flowObj != null && col.gameObject.Equals(flowObj.GetComponent<Flow>().targetAnchor))
-        {
-            Destroy(flowObj);
-            IsFlowing = false;
-            flowObj = null;
-        }
+        if (col.gameObject.tag != "Anchor") AnchorHit(col.gameObject);
     }
     //流れていないときにアンカーに触れている
     void OnCollisionStay(Collision col)
@@ -128,5 +122,15 @@ public class AppealAreaState : MonoBehaviour
             Destroy(flowObj);
         }
 
+    }
+
+    void AnchorHit(GameObject col)
+    {
+        if (flowObj != null && col.Equals(flowObj.GetComponent<Flow>().targetAnchor))
+        {
+            Destroy(flowObj);
+            IsFlowing = false;
+            flowObj = null;
+        }
     }
 }
