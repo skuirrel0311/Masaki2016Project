@@ -57,6 +57,7 @@ public class PlayerControl : NetworkBehaviour
         atJumpPosition = Vector3.zero;
         IsOnGround = true;
         isRun = false;
+
         if (isLocalPlayer)
         {
             GameObject.Find("Camera1").GetComponent<CameraControl>().SetPlayer(gameObject);
@@ -92,10 +93,10 @@ public class PlayerControl : NetworkBehaviour
         Jump();
 
         //アニメーターにパラメータを送る
-        if (!ChackCurrentAnimatorName(animator, "wait")&&!Move(direction))
+        if (!ChackCurrentAnimatorName(animator, "wait") && !Move(direction))
         {
             isRun = false;
-            animator.SetBool("IsRun",isRun);
+            animator.SetBool("IsRun", isRun);
         }
 
         Vector3 c = new Vector3(transform.position.x, 0, transform.position.z);
@@ -106,7 +107,7 @@ public class PlayerControl : NetworkBehaviour
         }
     }
 
-    static public  bool ChackCurrentAnimatorName(Animator animator, string name)
+    static public bool ChackCurrentAnimatorName(Animator animator, string name)
     {
         return animator.GetCurrentAnimatorStateInfo(0).IsName(name);
     }
@@ -115,7 +116,7 @@ public class PlayerControl : NetworkBehaviour
     /// 移動
     /// </summary>
     /// <param name="movement">移動量</param>
-    bool  Move(Vector3 movement)
+    bool Move(Vector3 movement)
     {
         //ポーズ中だったら終了
         if (MainGameManager.IsPause) return false;
@@ -125,6 +126,8 @@ public class PlayerControl : NetworkBehaviour
         Quaternion cameraRotation = mainCamera.transform.rotation;
         cameraRotation.x = 0;
         cameraRotation.z = 0;
+
+        Vector3 mov = movement;
         //入力の角度をカメラの角度に曲げる
         movement = cameraRotation * movement;
 
@@ -139,14 +142,29 @@ public class PlayerControl : NetworkBehaviour
             animator.SetBool("IsRun", isRun);
         }
 
-        //弧を描くように移動
-        Vector3 forward = Vector3.Slerp(
-            transform.forward,  //正面から
-            movement,          //入力の角度まで
-            rotationSpeed * Time.deltaTime / Vector3.Angle(transform.forward, movement)
-            );
+
         //向きを変える
-        transform.LookAt(transform.position + forward);
+        if (mov.z >= 0)
+        {
+            //弧を描くように移動
+            Vector3 forward = Vector3.Slerp(
+                transform.forward,  //正面から
+                movement,          //入力の角度まで
+                rotationSpeed * Time.deltaTime / Vector3.Angle(transform.forward, movement)
+                );
+            transform.LookAt(transform.position + forward);
+        }
+        else
+        {
+            //弧を描くように移動
+            Vector3 forward = Vector3.Slerp(
+                transform.forward,  //正面から
+                -movement,          //入力の角度まで
+                rotationSpeed * Time.deltaTime / Vector3.Angle(transform.forward, -movement)
+                );
+            transform.LookAt(transform.position + forward);
+        }
+
         //body.AddForce(movement * moveSpeed,ForceMode.VelocityChange);
         transform.Translate(movement * Time.deltaTime * moveSpeed, Space.World);
         return true;
@@ -155,13 +173,13 @@ public class PlayerControl : NetworkBehaviour
     void Jump()
     {
         //プレイヤーがジャンプをしようとしたとき
-        if (GamePadInput.GetButtonDown(GamePadInput.Button.A, (GamePadInput.Index)playerNum) && IsOnGround&&!MainGameManager.IsPause)
+        if (GamePadInput.GetButtonDown(GamePadInput.Button.A, (GamePadInput.Index)playerNum) && IsOnGround && !MainGameManager.IsPause)
         {
             //ジャンプ時の地点を保持
             atJumpPosition = transform.position;
             IsJumping = true;
             IsOnGround = false;
-            animator.CrossFadeInFixedTime("jump",0.5f);
+            animator.CrossFadeInFixedTime("jump", 0.5f);
             //body.isKinematic = true;
             body.AddForce(jumpVec * 100, ForceMode.Impulse);
         }
@@ -187,6 +205,6 @@ public class PlayerControl : NetworkBehaviour
         Isfalling = false;
         IsOnGround = true;
         body.isKinematic = false;
-        animator.CrossFadeInFixedTime("jump_landing",0.1f);
+        animator.CrossFadeInFixedTime("jump_landing", 0.1f);
     }
 }

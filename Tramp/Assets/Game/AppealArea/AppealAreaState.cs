@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections.Generic;
 
-public class AppealAreaState : MonoBehaviour
+public class AppealAreaState : NetworkBehaviour
 {
     ///<summary>
     ///乗っているプレイヤー(いないときはnull)

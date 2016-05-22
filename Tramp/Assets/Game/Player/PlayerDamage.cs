@@ -39,7 +39,7 @@ public class PlayerDamage : NetworkBehaviour
     {
         if (col.gameObject.tag == "Ammo")
         {
-            if (isLocalPlayer)
+            if (isLocalPlayer&&!col.gameObject.GetComponent<Shot>().isLocal)
             {
                 CmdHitEffect(col.gameObject.transform.position);
                 state.animator.CrossFadeInFixedTime("damage", 0.1f);

@@ -62,17 +62,17 @@ public class PlayerShot : NetworkBehaviour
     void Shot()
     {
 
+        playerState.animator.SetLayerWeight(1, 1);
+
         GamePadState padState = GamePad.GetState(PlayerIndex.One);
 
         if (vibrationTimer == -1)
         {
             GamePad.SetVibration(PlayerIndex.One, 0.2f, 0.2f);
-            vibrationTimer=0;
+            vibrationTimer = 0;
         }
 
-        isShot = true;
-        if (!PlayerControl.ChackCurrentAnimatorName(playerState.animator, "run_rightgun"))
-            playerState.animator.CrossFadeInFixedTime("run_rightgun", 0.1f);
+
         //ストックを減らす
         stock--;
 
@@ -85,7 +85,11 @@ public class PlayerShot : NetworkBehaviour
         Quaternion cameraRotation = cameraObj.transform.rotation;
         cameraRotation.x = 0;
         cameraRotation.z = 0;
-        transform.rotation = cameraRotation;
+
+        if (!isShot)
+            transform.rotation = cameraRotation;
+
+        isShot = true;
 
         if (Physics.Raycast(ray, out hit, 100))
         {
@@ -106,11 +110,13 @@ public class PlayerShot : NetworkBehaviour
         if (isServer)
         {
             GameObject go = Instantiate(Ammo, shotPosition.position, shotPosition.rotation) as GameObject;
+            go.GetComponent<Shot>().isLocal=isLocalPlayer;
             NetworkServer.Spawn(go);
         }
         else
         {
             GameObject go = Instantiate(Ammo, shotPosition.position, shotPosition.rotation) as GameObject;
+            go.GetComponent<Shot>().isLocal = isLocalPlayer;
             CmdAmmoSpawn(shotPosition.position, shotPosition.rotation);
         }
     }
@@ -129,7 +135,7 @@ public class PlayerShot : NetworkBehaviour
             if (vibrationTimer > 0.05f)
             {
                 vibrationTimer = -1;
-                GamePad.SetVibration(PlayerIndex.One,0,0);
+                GamePad.SetVibration(PlayerIndex.One, 0, 0);
             }
         }
     }
@@ -184,6 +190,27 @@ public class PlayerShot : NetworkBehaviour
             }
 
             yield return new WaitForSeconds(shotDistance);
+        }
+    }
+    public float testnum=0;
+    void OnAnimatorIK(int layerIndex)
+    {
+        if (isShot)
+        {
+
+            Vector3 localAngles = playerState.animator.GetBoneTransform(HumanBodyBones.Spine).localEulerAngles;
+
+            //先にプレイヤーをカメラと同じ方向に向ける
+            Vector3 cameraRotation = cameraObj.transform.eulerAngles;
+
+            cameraRotation=cameraRotation - transform.rotation.eulerAngles;
+
+            playerState.animator.SetBoneLocalRotation(HumanBodyBones.Spine, Quaternion.Euler(cameraRotation.y, 180.0f,-cameraRotation.x+180.0f));
+        }
+
+        else
+        {
+            playerState.animator.SetLayerWeight(layerIndex, 0);
         }
     }
 

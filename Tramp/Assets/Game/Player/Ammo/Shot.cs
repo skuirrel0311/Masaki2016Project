@@ -11,6 +11,8 @@ public class Shot : MonoBehaviour
     [SerializeField]
     GameObject HitEffect;
 
+    public bool isLocal=false;
+
     // Use this for initialization
     void Start()
     {

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections.Generic;
 
 /*
@@ -8,7 +9,7 @@ using System.Collections.Generic;
     流れ×：プレイヤー○　＝　動かない
 */
 
-public class AppealAreaMove : MonoBehaviour
+public class AppealAreaMove :NetworkBehaviour
 {
     Vector3 oldPosition;
     //移動量
