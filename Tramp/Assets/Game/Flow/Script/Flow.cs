@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 using UnityEngine.Networking;
-using System.Collections;
 
 public class Flow : NetworkBehaviour{
 
@@ -27,9 +27,18 @@ public class Flow : NetworkBehaviour{
     [SyncVar]
     private Vector3 targetPosition;
 
+    public GameObject targetAnchor;
+
     private bool isCalc = true;
 
     public bool isDestory;
+
+    /// <summary>
+    /// アピールエリアに繋がっている流れか？
+    /// </summary>
+    public bool IsFromArea = false;
+
+    private GameObject appealArea;
 
     void Awake()
     {
@@ -41,37 +50,97 @@ public class Flow : NetworkBehaviour{
     {
         isCalc = false;
         isDestory = false;
+
+        if (IsFromArea)
+        {
+            appealArea = GameObject.Find("AppealArea");
+            AppealAreaState areaState = appealArea.GetComponent<AppealAreaState>();
+            if (areaState.flowObj != null) Destroy(areaState.flowObj);
+            areaState.flowObj = gameObject;
+        }
     }
     void Update()
     {
         // if (!isCalc) return;
+
+        if (targetAnchor == null) GetTargetAnchor();
+        
+        if(IsFromArea)
+        {
+            flowVector = targetPosition - appealArea.transform.position;
+            
+            transform.position = Vector3.Lerp(targetPosition,appealArea.transform.position,0.5f);
+        }
         transform.localScale = new Vector3(2, flowVector.magnitude * 0.5f, 2);
-        //CapsuleColliderをアタッチする
         CapsuleCollider capcol = GetComponent<CapsuleCollider>();
         capcol.height = flowVector.magnitude / (flowVector.magnitude * 0.5f);
         capcol.radius = 0.5f;
         capcol.isTrigger = true;
+
+    }
+
+    void GetTargetAnchor()
+    {
+        List<GameObject> anchor = new List<GameObject>();
+        anchor.AddRange(GameObject.FindGameObjectsWithTag("Anchor"));
+
+        targetAnchor = anchor.Find(n => n.transform.position.Equals(targetPosition));
+
+        if (targetAnchor == null) Destroy(gameObject);
     }
 
     void OnTriggerStay(Collider col)
     {
+        if (col.tag == "Player") PlayerStay(col);
+        if (col.gameObject.name == "AppealArea") AreaStay(col);
+    }
 
-        if (col.tag == "Player")
+    void PlayerStay(Collider col)
+    {
+        PlayerState state = col.gameObject.GetComponent<PlayerState>();
+        //アピールエリアのFlowObjectと同じだったら流れない
+        GameObject flowObj = state.AppealArea.flowObj;
+        if (flowObj != null && flowObj.Equals(gameObject)) return;
+        //アピールエリアにいたら流れない
+        if (state.IsOnAppealArea) return;
+
+        PlayerVector = targetPosition - (col.transform.position + Vector3.up);
+        PlayerVector.Normalize();
+        Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
+        body.isKinematic = true;
+        col.gameObject.transform.Translate(PlayerVector * Time.deltaTime * speed, Space.World);
+
+        if (nonDestroy) return;
+        //ターゲットから一定の距離
+        if (Vector3.Distance(targetPosition, col.gameObject.transform.position) < 2)
         {
-            PlayerVector = targetPosition - (col.transform.position + Vector3.up);
-            PlayerVector.Normalize();
-            Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
-            body.isKinematic = true;
-            col.gameObject.transform.Translate(PlayerVector*Time.deltaTime*speed,Space.World);
-
-            if (nonDestroy) return;
-            //ターゲットから一定の距離
-            if (Vector3.Distance(targetPosition, col.gameObject.transform.position) < 2)
-            {
-                Destroy(gameObject); return;
-            }
+            Destroy(gameObject); return;
         }
     }
+
+    void AreaStay(Collider col)
+    {
+        AppealAreaState appealArea = col.gameObject.GetComponent<AppealAreaState>();
+
+        //flowObjは流れを繋いだときに代入
+        //まだ流れていなかったら
+        if (appealArea.flowObj == null) return;
+
+        //流れの終点アンカーとアピールエリアが触れているアンカーが同じだったら流れない
+        foreach (GameObject anchor in appealArea.OnAnchorList)
+        {
+            if (anchor.Equals(targetAnchor)) return;
+        }
+
+        //違う流れには乗らない
+        if (!appealArea.flowObj.Equals(gameObject)) return;
+
+        //流れに乗る
+        appealArea.IsFlowing = true;
+        Vector3 toAnchorVector = (targetPosition - col.transform.position).normalized;
+        col.gameObject.transform.Translate(toAnchorVector * Time.deltaTime * (speed * 0.1f), Space.World);
+    }
+
 
     void OnTriggerExit(Collider col)
     {
@@ -79,8 +148,13 @@ public class Flow : NetworkBehaviour{
         if (col.tag == "Player")
         {
             if (isDestory) { Destroy(gameObject); return; }
+        }
 
+        if(col.name == "AppealArea")
+        {
+            col.gameObject.GetComponent<AppealAreaState>().IsFlowing = false;
 
+            if(isDestory) Destroy(gameObject);
         }
     }
 }

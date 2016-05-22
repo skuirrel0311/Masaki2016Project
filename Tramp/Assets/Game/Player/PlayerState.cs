@@ -8,10 +8,11 @@ public class PlayerState : NetworkBehaviour
     [SerializeField]
     int maxHp = 10;
     public int Hp { get { return hp; }private set { hp = value; }}
+    /// <summary>
+    /// 体力
+    /// </summary>
     [SerializeField][SyncVar]
     private int hp;
-
-
 
     /// <summary>
     /// 復活にかかる時間
@@ -19,7 +20,6 @@ public class PlayerState : NetworkBehaviour
     [SerializeField]
     float TimeToReturn = 3;
     
-
     public GameObject appealItem;
 
     /// <summary>
@@ -52,12 +52,25 @@ public class PlayerState : NetworkBehaviour
     /// </summary>
     public bool IsAppealing{ get; private set; }
 
+    public AppealAreaState AppealArea { get; private set; }
+
+    /// <summary>
+    /// アピールエリアにいるか？
+    /// </summary>
+    public bool IsOnAppealArea;
+
+    /// <summary>
+    /// アピールエリアの所有権を持っているか？
+    /// </summary>
+    public bool IsAreaOwner;
+
     private int playerIndex = 1;
 
     void Awake()
     {
         playerIndex = GetComponent<PlayerControl>().playerNum;
         animator = GetComponentInChildren<Animator>();
+        AppealArea = GameObject.Find("AppealArea").GetComponent<AppealAreaState>();
         Initialize();
     }
 
@@ -94,11 +107,12 @@ public class PlayerState : NetworkBehaviour
     void Initialize()
     {
         hp = maxHp;
-        //transform.position = Vector3.zero;
-        //transform.rotation = Quaternion.Euler(Vector3.zero);
         PlayerControl playerControl = GetComponent<PlayerControl>();
         playerControl.enabled = true;
         IsAppealing = false;
+        if(IsAreaOwner) AppealArea.Owner = null;
+        IsAreaOwner = false;
+        
         IsPossessionOfItem = false;
     }
 
@@ -179,5 +193,20 @@ public class PlayerState : NetworkBehaviour
         GUI.TextArea(new Rect(800,0,400,200),"残HP："+hp,style);
     }
 
+    void OnTriggerEnter(Collider col)
+    {
+        if(col.gameObject.name == "AppealAreaCollider")
+        {
+            IsOnAppealArea = true;
+        }
+    }
+
+    void OnTriggerExit(Collider col)
+    {
+        if (col.gameObject.name == "AppealAreaCollider")
+        {
+            IsOnAppealArea = false;
+        }
+    }
 
 }

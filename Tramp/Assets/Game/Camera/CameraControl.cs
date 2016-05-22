@@ -182,6 +182,8 @@ public class CameraControl : MonoBehaviour
         InitLookatPosition(targetAnchor);
         timer = 0;
         IsLockOn = true;
+        //localEuleranglesはインスペクタと同じ数値
+        player.transform.localRotation = Quaternion.Euler(0, transform.localEulerAngles.y, 0);
     }
 
     private void InitLookatPosition(GameObject targetAnchor)
