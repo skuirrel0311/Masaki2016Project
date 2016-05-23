@@ -11,7 +11,8 @@ public class PlayerState : NetworkBehaviour
     /// <summary>
     /// 体力
     /// </summary>
-    [SerializeField][SyncVar]
+    [SerializeField]
+    [SyncVar]
     private int hp;
 
     /// <summary>
@@ -100,19 +101,20 @@ public class PlayerState : NetworkBehaviour
                 StartCoroutine("IsDead");
             }
         }
-
-        if (Input.GetKeyDown(KeyCode.A)) animator.SetTrigger("Dead");
     }
 
+
+    [Client]
     void Initialize()
     {
         hp = maxHp;
         PlayerControl playerControl = GetComponent<PlayerControl>();
+        animator.CrossFadeInFixedTime("wait", 0.1f);
+        playerControl.SetSratPosition();
         playerControl.enabled = true;
         IsAppealing = false;
-        if(IsAreaOwner) AppealArea.Owner = null;
+        if (IsAreaOwner) AppealArea.Owner = null;
         IsAreaOwner = false;
-        
         IsPossessionOfItem = false;
     }
 
@@ -125,11 +127,6 @@ public class PlayerState : NetworkBehaviour
         //GetComponent<FeverGauge>().KilledInPlayer();
 
         GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("Player");
-        //foreach (GameObject playerObj in playerObjects)
-        //{
-        //    //自分以外のプレイヤーのフィーバーゲージを増加させる
-        //    if (gameObject.Equals(playerObj) == false) playerObj.GetComponent<FeverGauge>().KillPlayer();
-        //}
 
         //アイテムを所持していたら
         if (IsPossessionOfItem)
@@ -141,12 +138,12 @@ public class PlayerState : NetworkBehaviour
 
         //操作できないようにする。
         GetComponent<PlayerControl>().enabled = false;
-        //animator.SetTrigger("Dead");
+        animator.CrossFadeInFixedTime("dead", 0.1f);
 
         yield return new WaitForSeconds(TimeToReturn);
         //3秒後に復活
-
         Initialize();
+        CmdHpReset();
     }
 
     public override void OnStartLocalPlayer()
@@ -177,6 +174,12 @@ public class PlayerState : NetworkBehaviour
     }
 
     [Command]
+    void CmdHpReset()
+    {
+        hp = maxHp;
+    }
+
+    [Command]
     void CmdHpDamage()
     {
         //hpを減らす
@@ -195,7 +198,7 @@ public class PlayerState : NetworkBehaviour
 
     void OnTriggerEnter(Collider col)
     {
-        if(col.gameObject.name == "AppealAreaCollider")
+        if (col.gameObject.name == "AppealAreaCollider")
         {
             IsOnAppealArea = true;
         }

@@ -71,7 +71,7 @@ public class PlayerControl : NetworkBehaviour
         Debug.Log("Player Destory");
     }
 
-    void SetSratPosition()
+    public void SetSratPosition()
     {
         //スタート座標の設定
         if (isServer)
