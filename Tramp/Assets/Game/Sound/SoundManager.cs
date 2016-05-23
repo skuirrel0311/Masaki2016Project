@@ -57,13 +57,8 @@ public class SoundManager : MonoBehaviour
         mainMusic.Stop();
     }
 
-    void OnGUI()
+    public int GetRemainingTime()
     {
-        GUIStyle style = new GUIStyle();
-        style.fontSize = 70;
-        style.fontStyle = FontStyle.Bold;
-
-        GUI.TextArea(new Rect(0, 0, 200, 100), "残り時間" + (int)(mainMusic.clip.length - mainMusic.time),style);
+        return (int)(mainMusic.clip.length - mainMusic.time);
     }
-
 }
