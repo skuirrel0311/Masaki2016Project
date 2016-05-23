@@ -36,12 +36,18 @@ public class AppealAreaState : NetworkBehaviour
     /// </summary>
     public GameObject Owner = null;
 
+
+    /// <summary>
+    /// サーバー側が勝ったか？
+    /// </summary>
+    public Winner ServerWiner;
+
     /// <summary>
     /// オーナーが存在するか
     /// </summary>
     [SyncVar]
     private bool isOwner;
-
+    
     /// <summary>
     /// どちらのプレイヤーがオーナーか（severで判断)
     /// </summary>
@@ -104,6 +110,23 @@ public class AppealAreaState : NetworkBehaviour
             Owner = null;
             isOwner = false;
         }
+
+        if(transform.position.z < 0)
+        {
+            ServerWiner = Winner.win;
+            return;
+        }
+        if(transform.position.z == 0)
+        {
+            ServerWiner = Winner.draw;
+            return;
+        }
+        if(transform.position.z > 0)
+        {
+            ServerWiner = Winner.lose;
+            return;
+        }
+
     }
 
     //プレイヤーが乗った
@@ -111,6 +134,7 @@ public class AppealAreaState : NetworkBehaviour
     {
         if (col.gameObject.tag == "Ammo") AmmoHit();
         if (col.gameObject.tag == "Anchor") AnchorHit(col.gameObject);
+        if (col.gameObject.name == "Goal") GoalHit();
         if (col.tag != "Player") return;
         if (ridingPlayer.Find(n => n.Equals(col.gameObject)) != null) return;
         //リストにいなかったら追加
@@ -126,7 +150,8 @@ public class AppealAreaState : NetworkBehaviour
     void OnCollisionEnter(Collision col)
     {
         if (col.gameObject.tag == "Ammo") AmmoHit();
-        if (col.gameObject.tag != "Anchor") AnchorHit(col.gameObject);
+        if (col.gameObject.tag == "Anchor") AnchorHit(col.gameObject);
+        if (col.gameObject.name == "Goal") GoalHit();
     }
     //流れていないときにアンカーに触れている
     void OnCollisionStay(Collision col)
@@ -172,5 +197,25 @@ public class AppealAreaState : NetworkBehaviour
             IsFlowing = false;
             flowObj = null;
         }
+    }
+
+    void GoalHit()
+    {
+        if (transform.position.z < 0)
+        {
+            ServerWiner = Winner.lose;
+        }
+        if (transform.position.z > 0)
+        {
+            ServerWiner = Winner.win;
+        }
+        if (transform.position.z == 0)
+        {
+            ServerWiner = Winner.draw;
+        }
+
+        GameObject go = GameObject.FindGameObjectWithTag("NetworkManager");
+        MyNetworkManager man = go.GetComponent<MyNetworkManager>();
+        man.ServerChangeScene("Result");
     }
 }

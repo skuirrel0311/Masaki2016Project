@@ -31,9 +31,14 @@ public class PlayerCreateAnchor : NetworkBehaviour
     float collsionRadius = 1;
 
     /// <summary>
-    /// アピールエリアに繋がっている流れか？
+    /// アピールエリアから繋がっている流れか？
     /// </summary>
     public bool IsFromArea = false;
+
+    /// <summary>
+    /// アピールエリアへ繋ぐ流れか？
+    /// </summary>
+    public bool IsToArea = false;
 
     // Use this for initialization
     void Start()
@@ -66,6 +71,9 @@ public class PlayerCreateAnchor : NetworkBehaviour
             
             //流れを繋ぐ先を取得する
             GetTargetAnchor();
+
+            if (targetAnchor.gameObject.name == "AreaAnchor") IsToArea = true;
+            else IsToArea = false;
 
             //アピールエリアに繋ぐ流れは壁をすり抜けない
             if (playerState.IsAreaOwner && !IsPossibleCreateFlow())
@@ -202,6 +210,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
         flow.FlowVector = flowvec;
         flow.TargetPosition = tpos;
         flow.IsFromArea = isfrom;
+        flow.IsToArea = IsToArea;
 
         //流れのベクトルに合わせて回転させる
         float dist = Vector3.Distance(tpos, thisPositon);

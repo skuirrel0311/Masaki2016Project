@@ -7,7 +7,7 @@ public class Flow : NetworkBehaviour{
     [SerializeField]
     private float speed=10;
     [SerializeField]
-    bool nonDestroy;
+    bool nonDestroy = false;
 
     public Vector3 FlowVector
     {
@@ -34,10 +34,15 @@ public class Flow : NetworkBehaviour{
     public bool isDestory;
 
     /// <summary>
-    /// アピールエリアに繋がっている流れか？
+    /// アピールエリアから繋がっている流れか？
     /// </summary>
     [SyncVar]
     public bool IsFromArea = false;
+
+    /// <summary>
+    /// アピールエリアへ繋ぐ流れか？
+    /// </summary>
+    public bool IsToArea = false;
 
     private GameObject appealArea;
 
@@ -56,8 +61,14 @@ public class Flow : NetworkBehaviour{
         {
             appealArea = GameObject.Find("AppealArea");
             AppealAreaState areaState = appealArea.GetComponent<AppealAreaState>();
-            if (areaState.flowObj != null) Destroy(areaState.flowObj);
+            if (areaState.flowObj != null)
+                Destroy(areaState.flowObj);
             areaState.flowObj = gameObject;
+        }
+
+        if(IsToArea)
+        {
+            targetAnchor = GameObject.Find("AreaAnchor");
         }
     }
     void Update()
@@ -87,7 +98,8 @@ public class Flow : NetworkBehaviour{
 
         targetAnchor = anchor.Find(n => n.transform.position.Equals(targetPosition));
 
-        if (targetAnchor == null) Destroy(gameObject);
+        if (targetAnchor == null)
+            Destroy(gameObject);
     }
 
     void OnTriggerStay(Collider col)
@@ -115,7 +127,8 @@ public class Flow : NetworkBehaviour{
         //ターゲットから一定の距離
         if (Vector3.Distance(targetPosition, col.gameObject.transform.position) < 2)
         {
-            Destroy(gameObject); return;
+            Destroy(gameObject);
+            return;
         }
     }
 
@@ -148,14 +161,16 @@ public class Flow : NetworkBehaviour{
         if (nonDestroy) return;
         if (col.tag == "Player")
         {
-            if (isDestory) { Destroy(gameObject); return; }
+            if (isDestory) {
+                Destroy(gameObject); return; }
         }
 
         if(col.name == "AppealArea")
         {
             col.gameObject.GetComponent<AppealAreaState>().IsFlowing = false;
 
-            if(isDestory) Destroy(gameObject);
+            if(isDestory)
+                Destroy(gameObject);
         }
     }
 }
