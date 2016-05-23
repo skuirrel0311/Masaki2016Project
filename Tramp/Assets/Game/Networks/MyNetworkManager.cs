@@ -88,11 +88,14 @@ public class MyNetworkManager : NetworkManager
             Winner serverWiner = GameObject.Find("AppealArea").GetComponent<AppealAreaState>().ServerWiner;
             if(discovery.isServer)
             {
+                //サーバーならそのまま
                 winner = serverWiner;
             }
             else
             {
-                if (serverWiner == Winner.draw) winner = Winner.draw;
+                //クライアントはごちゃごちゃする。
+                if (serverWiner == Winner.draw)
+                    winner = Winner.draw;
                 else
                 {
                     winner = serverWiner == Winner.win ? Winner.lose : Winner.win;
@@ -133,7 +136,6 @@ public class MyNetworkManager : NetworkManager
     {
         if (networkSceneName == "main")
         {
-            autoCreatePlayer = true;
             // if (!GetComponent<NetworkDiscovery>().isServer)
             soundManager.PlayMusic(false);
         }

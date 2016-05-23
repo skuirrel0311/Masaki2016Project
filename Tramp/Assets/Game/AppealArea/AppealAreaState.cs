@@ -78,7 +78,7 @@ public class AppealAreaState : NetworkBehaviour
 
     GameObject SearchOwnerObject()
     {
-        if (isOwner) return null;
+        if (!isOwner) return null;
         if (Owner != null) return Owner;
 
         foreach (GameObject player in GameObject.FindGameObjectsWithTag("Player"))
