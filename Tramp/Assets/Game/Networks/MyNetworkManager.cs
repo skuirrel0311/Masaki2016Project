@@ -137,7 +137,7 @@ public class MyNetworkManager : NetworkManager
         if (networkSceneName == "main")
         {
             // if (!GetComponent<NetworkDiscovery>().isServer)
-            soundManager.PlayMusic(false);
+            soundManager.PlayMusic(discovery.isServer);
         }
         else
         {

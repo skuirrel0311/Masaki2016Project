@@ -11,11 +11,22 @@ public class MainGameManager : MonoBehaviour
 
     private static bool isPause;
 
+    [SerializeField]
+    private GameObject AppealArea;
+
+    private GameObject networkManager;
+    private MyNetworkManager myNetManager;
+    private MyNetworkDiscovery myNetDiscovery;
+
     // Use this for initialization
     void Start()
     {
         isPause = false;
         Time.timeScale = 1.0f;
+        //AppealArea = GameObject.Find("AppealArea");
+        networkManager= GameObject.FindGameObjectWithTag("NetworkManager");
+        myNetManager = networkManager.GetComponent<MyNetworkManager>();
+        myNetDiscovery = networkManager.GetComponent<MyNetworkDiscovery>();
     }
 
     // Update is called once per frame
@@ -38,10 +49,9 @@ public class MainGameManager : MonoBehaviour
         {
             Time.timeScale = 1.0f;
             isPause = false;
-            GameObject go = GameObject.FindGameObjectWithTag("NetworkManager");
 
-            MyNetworkManager man = go.GetComponent<MyNetworkManager>();
-            MyNetworkDiscovery dis = go.GetComponent<MyNetworkDiscovery>();
+            MyNetworkManager man = networkManager.GetComponent<MyNetworkManager>();
+            MyNetworkDiscovery dis = networkManager.GetComponent<MyNetworkDiscovery>();
 
             if (dis.isServer)
             {
@@ -54,7 +64,38 @@ public class MainGameManager : MonoBehaviour
             }
             man.DiscoveryShutdown();
             man.ServerChangeScene("Menu");
+        }
+        ChackWinner();
+    }
 
+    //勝利状況をチェックする
+    void ChackWinner()
+    {
+        if (AppealArea.transform.position.z > 0)
+        {
+            if (myNetDiscovery.isServer)
+            {
+                myNetManager.winner = Winner.lose;
+            }
+            else
+            {
+                myNetManager.winner = Winner.win;
+            }
+        }
+        else if (AppealArea.transform.position.z < 0)
+        {
+            if (myNetDiscovery.isServer)
+            {
+                myNetManager.winner = Winner.win;
+            }
+            else
+            {
+                myNetManager.winner = Winner.lose;
+            }
+        }
+        else
+        {
+            myNetManager.winner = Winner.draw;
         }
     }
 

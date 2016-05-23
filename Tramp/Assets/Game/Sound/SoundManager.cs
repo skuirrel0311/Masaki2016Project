@@ -5,7 +5,11 @@ using System.Collections.Generic;
 
 public class SoundManager : MonoBehaviour
 {
+    [SerializeField]
     AudioSource mainMusic;
+
+    [SerializeField]
+    AudioSource VoiceAudio;
 
     [SerializeField]
     AudioClip HostVoiceClip;
@@ -13,16 +17,20 @@ public class SoundManager : MonoBehaviour
     [SerializeField]
     AudioClip ClientVoiceClip;
 
+    private MyNetworkManager myNetManager;
+
     public void PlayMusic(bool isSever)
     {
         mainMusic.Play();
         if (isSever)
         {
-            mainMusic.PlayOneShot(HostVoiceClip);
+            VoiceAudio.clip = HostVoiceClip;
+            VoiceAudio.Play();
         }
         else
         {
-            mainMusic.PlayOneShot(ClientVoiceClip);
+            VoiceAudio.clip =ClientVoiceClip;
+            VoiceAudio.Play();
         }
         Debug.Log("Play MainMusic");
     }
@@ -30,15 +38,24 @@ public class SoundManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        mainMusic = GetComponent<AudioSource>();
         isEnd = false;
         isWin = false;
+        myNetManager = GetComponent<MyNetworkManager>();
     }
     bool isEnd = false;
     public static bool isWin;
     // Update is called once per frame
     void Update()
     {
+        if (myNetManager.winner == Winner.lose)
+        {
+            VoiceAudio.mute = true;
+        }
+        else
+        {
+            VoiceAudio.mute = false;
+        }
+
         if (mainMusic.time >= mainMusic.clip.length)
         {
             isEnd = true;
