@@ -36,6 +36,7 @@ public class Flow : NetworkBehaviour{
     /// <summary>
     /// アピールエリアに繋がっている流れか？
     /// </summary>
+    [SyncVar]
     public bool IsFromArea = false;
 
     private GameObject appealArea;

@@ -36,6 +36,18 @@ public class AppealAreaState : NetworkBehaviour
     /// </summary>
     public GameObject Owner = null;
 
+    /// <summary>
+    /// オーナーが存在するか
+    /// </summary>
+    [SyncVar]
+    private bool isOwner;
+
+    /// <summary>
+    /// どちらのプレイヤーがオーナーか（severで判断)
+    /// </summary>
+    [SyncVar]
+    private bool isOwnerPlayer;
+
     //耐久値
     int maxHp = 10;
     public int hp;
@@ -48,8 +60,32 @@ public class AppealAreaState : NetworkBehaviour
 
     public void SetOwner(GameObject owner)
     {
-        Owner = owner;
+        CmdSetOwner(owner.GetComponent<NetworkBehaviour>().isServer);
         hp = maxHp;
+    }
+
+    [Command]
+    void CmdSetOwner(bool isSever)
+    {
+        isOwner = true;
+    }
+
+    GameObject SearchOwnerObject()
+    {
+        if (isOwner) return null;
+        if (Owner != null) return Owner;
+
+        foreach (GameObject player in GameObject.FindGameObjectsWithTag("Player"))
+        {
+            if (isOwnerPlayer == player.GetComponent<NetworkBehaviour>().isServer)
+            {
+                Debug.Log("success setOwner");
+                return player;
+            }
+
+        }
+
+        return null;
     }
 
     void Update()
@@ -60,10 +96,13 @@ public class AppealAreaState : NetworkBehaviour
             IsFlowing = false;
         }
 
+        Owner = SearchOwnerObject();
+
         if (Owner != null && !IsFlowing && !IsRidden)
         {
             Owner.GetComponent<PlayerState>().IsAreaOwner = false;
             Owner = null;
+            isOwner = false;
         }
     }
 
@@ -115,7 +154,7 @@ public class AppealAreaState : NetworkBehaviour
         //所有者がいたら
         hp = --hp > 0 ? hp-- : 0;
 
-        if(hp == 0)
+        if (hp == 0)
         {
             Owner.GetComponent<PlayerState>().IsAreaOwner = false;
             Owner = null;

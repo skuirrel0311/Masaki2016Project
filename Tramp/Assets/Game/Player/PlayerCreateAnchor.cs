@@ -72,7 +72,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
                 return;
 
             //流れを生成する
-            CmdCreateFlowObject(targetPosition, CreatePosition, flowVector);
+            CmdCreateFlowObject(targetPosition, CreatePosition, flowVector,IsFromArea);
         }
     }
 
@@ -184,7 +184,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
     }
 
     [Command]
-    void CmdCreateFlowObject(Vector3 tpos,Vector3 thisPositon, Vector3 flowvec)
+    void CmdCreateFlowObject(Vector3 tpos,Vector3 thisPositon, Vector3 flowvec,bool isfrom)
     {
         if (!isServer) return;
         //流れのコリジョン用オブジェクト
@@ -201,7 +201,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
         Flow flow = boxCol.GetComponent<Flow>();
         flow.FlowVector = flowvec;
         flow.TargetPosition = tpos;
-        flow.IsFromArea = IsFromArea;
+        flow.IsFromArea = isfrom;
 
         //流れのベクトルに合わせて回転させる
         float dist = Vector3.Distance(tpos, thisPositon);

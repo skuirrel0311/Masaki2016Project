@@ -76,11 +76,15 @@ public class PlayerControl : NetworkBehaviour
         //スタート座標の設定
         if (isServer)
         {
-            transform.position = GameObject.Find("HostStart").transform.position;
+            GameObject go = GameObject.Find("HostStart");
+            transform.position = go.transform.position;
+            transform.rotation = go.transform.rotation;
         }
         else
         {
-            transform.position = GameObject.Find("ClientStart").transform.position;
+            GameObject go = GameObject.Find("ClientStart");
+            transform.position = go.transform.position;
+            transform.rotation = go.transform.rotation;
         }
     }
 
