@@ -28,12 +28,17 @@ public class PlayerShot : NetworkBehaviour
     float shotDistance = 0.2f;
 
     /// <summary>
-    /// 弾の残弾数
+    /// 弾を発射するのに必要なエネルギーの残量の最大値
     /// </summary>
+    int stockMax = 500;
     [SerializeField]
-    int stockMax = 30;
+    int stock; //現在のエネルギー残量
+
+    //弾を発射するのに必要なエネルギー量
     [SerializeField]
-    int stock;
+    int shotEnergyNum = 30;
+    int anchorEnergy = 20;
+
     //弾を連射中か
     bool isShot;
 
@@ -41,6 +46,7 @@ public class PlayerShot : NetworkBehaviour
     /// リロードする必要があるか？
     /// </summary>
     bool IsReload;
+    bool IsReloading;
 
     GamepadInputState padState;
 
@@ -71,10 +77,6 @@ public class PlayerShot : NetworkBehaviour
             GamePad.SetVibration(PlayerIndex.One, 0.2f, 0.2f);
             vibrationTimer = 0;
         }
-
-
-        //ストックを減らす
-        stock--;
         
         Vector3 targetPosition = GetTargetPosition();
 
@@ -134,29 +136,35 @@ public class PlayerShot : NetworkBehaviour
     {
         while (true)
         {
-
             if (IsReload)
             {
                 while (true)
                 {
+                    if (stock > 0) break;
                     if (!GamePadInput.GetButtonDown(GamePadInput.Button.X, (GamePadInput.Index)playerNum)) yield return null;
                     else break;
                 }
-                //ボタン押したら3秒待つ
-                gameObject.GetComponentInChildren<Animator>().SetBool("Reload", true);
-                //動けない
-                GetComponent<PlayerControl>().enabled = false;
-                yield return new WaitForSeconds(3);
+                if (stock > 0) IsReload = false;
+                else
+                {
+                    //ボタン押したら3秒待つ
+                    IsReloading = true;
+                    IsReload = false;
+                    gameObject.GetComponentInChildren<Animator>().SetBool("Reload", true);
+                    //動けない
+                    yield return new WaitForSeconds(3);
 
-                //リロードが終わったら
-                IsReload = false;
-                gameObject.GetComponentInChildren<Animator>().SetBool("Reload", false);
-                GetComponent<PlayerControl>().enabled = true;
-                stock = stockMax;
+                    //リロードが終わったら
+                    IsReloading = false;
+                    gameObject.GetComponentInChildren<Animator>().SetBool("Reload", false);
+                    if (stock <= 0) stock = stockMax;
+                }
             }
 
             if (GamePadInput.GetTrigger(GamePadInput.Trigger.RightTrigger, (GamePadInput.Index)playerNum, true) > 0 && !playerState.IsAppealing && isLocalPlayer)
             {
+                stock -= shotEnergyNum;
+                if (stock <= 0) stock = 0;
                 Shot();
 
                 playerState.animator.SetBool("RunShotEnd", false);
@@ -167,7 +175,7 @@ public class PlayerShot : NetworkBehaviour
 
 
             //ストックが無くなった
-            if (stock < 0)
+            if (stock <= 0)
             {
                 IsReload = true;
             }
@@ -275,9 +283,15 @@ public class PlayerShot : NetworkBehaviour
 
     void OnGUI()
     {
-        if (!IsReload) return;
+        if (IsReload) GUI.TextField(new Rect(500, 100, 200, 25), "Push_X Reload or Touch Anchor");
 
-        GUI.TextField(new Rect(500, 100, 100, 30), "Push_X Reload");
+        if (IsReloading) GUI.TextField(new Rect(500, 100, 110, 25), "Now Reloading…");
+    }
+
+    public void AnchorHit()
+    {
+        int temp = stock + anchorEnergy;
+        stock =  temp > stockMax ? stockMax : stock += anchorEnergy;
     }
 
 }

@@ -36,6 +36,7 @@ public class AnchorHit : MonoBehaviour {
         }
         Destroy(gameObject);
         Instantiate(HitEffect, transform.position, Quaternion.identity);
+        col.gameObject.GetComponent<PlayerShot>().AnchorHit();
     }
 
     void AreaHit(Collision col)
