@@ -111,7 +111,7 @@ public class AppealAreaState : NetworkBehaviour
             isOwner = false;
         }
 
-        if(transform.position.z < 0)
+        if(transform.position.z > 0)
         {
             ServerWiner = Winner.win;
             return;
@@ -121,12 +121,11 @@ public class AppealAreaState : NetworkBehaviour
             ServerWiner = Winner.draw;
             return;
         }
-        if(transform.position.z > 0)
+        if(transform.position.z < 0)
         {
             ServerWiner = Winner.lose;
             return;
         }
-
     }
 
     //プレイヤーが乗った
@@ -201,19 +200,6 @@ public class AppealAreaState : NetworkBehaviour
 
     void GoalHit()
     {
-        if (transform.position.z < 0)
-        {
-            ServerWiner = Winner.lose;
-        }
-        if (transform.position.z > 0)
-        {
-            ServerWiner = Winner.win;
-        }
-        if (transform.position.z == 0)
-        {
-            ServerWiner = Winner.draw;
-        }
-
         GameObject go = GameObject.FindGameObjectWithTag("NetworkManager");
         MyNetworkManager man = go.GetComponent<MyNetworkManager>();
         man.ServerChangeScene("Result");

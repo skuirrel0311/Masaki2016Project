@@ -9,7 +9,10 @@ public class SoundManager : MonoBehaviour
     AudioSource mainMusic;
 
     [SerializeField]
-    AudioSource VoiceAudio;
+    AudioSource Voice_A_Audio;
+
+    [SerializeField]
+    AudioSource Voice_B_Audio;
 
     [SerializeField]
     AudioClip HostVoiceClip;
@@ -18,20 +21,16 @@ public class SoundManager : MonoBehaviour
     AudioClip ClientVoiceClip;
 
     private MyNetworkManager myNetManager;
+    private MyNetworkDiscovery myNetDiscovery;
 
     public void PlayMusic(bool isSever)
     {
         mainMusic.Play();
-        if (isSever)
-        {
-            VoiceAudio.clip = HostVoiceClip;
-            VoiceAudio.Play();
-        }
-        else
-        {
-            VoiceAudio.clip =ClientVoiceClip;
-            VoiceAudio.Play();
-        }
+
+        Voice_A_Audio.Play();
+
+        Voice_B_Audio.Play();
+
         Debug.Log("Play MainMusic");
     }
 
@@ -41,19 +40,38 @@ public class SoundManager : MonoBehaviour
         isEnd = false;
         isWin = false;
         myNetManager = GetComponent<MyNetworkManager>();
+        myNetDiscovery = GetComponent<MyNetworkDiscovery>();
     }
     bool isEnd = false;
     public static bool isWin;
     // Update is called once per frame
     void Update()
     {
-        if (myNetManager.winner == Winner.lose)
+        if (myNetDiscovery.isServer)
         {
-            VoiceAudio.mute = true;
+            if (myNetManager.winner == Winner.lose)
+            {
+                Voice_A_Audio.mute = true;
+                Voice_B_Audio.mute = false;
+            }
+            else
+            {
+                Voice_A_Audio.mute = false;
+                Voice_B_Audio.mute = true;
+            }
         }
         else
         {
-            VoiceAudio.mute = false;
+            if (myNetManager.winner == Winner.lose)
+            {
+                Voice_A_Audio.mute = false;
+                Voice_B_Audio.mute = true;
+            }
+            else
+            {
+                Voice_A_Audio.mute = true;
+                Voice_B_Audio.mute = false;
+            }
         }
 
         if (mainMusic.time >= mainMusic.clip.length)
@@ -67,7 +85,7 @@ public class SoundManager : MonoBehaviour
 
     }
 
-    public  void GameEnd()
+    public void GameEnd()
     {
         isEnd = false;
         isWin = false;
