@@ -13,7 +13,7 @@ public class AnchorHit : MonoBehaviour {
     /// <summary>
     /// このアンカーから出ている流れ
     /// </summary>
-    GameObject FlowEffect;
+    public GameObject FlowEffect;
 
     void Start()
     {

@@ -28,6 +28,7 @@ public class Flow : NetworkBehaviour{
     private Vector3 targetPosition;
 
     public GameObject targetAnchor;
+    public GameObject startAnchor;
 
     private bool isCalc = true;
 
@@ -76,6 +77,8 @@ public class Flow : NetworkBehaviour{
         // if (!isCalc) return;
 
         if (targetAnchor == null) GetTargetAnchor();
+        if (startAnchor == null)
+            GetStartAnchor();
         
         if(IsFromArea)
         {
@@ -100,6 +103,25 @@ public class Flow : NetworkBehaviour{
 
         if (targetAnchor == null)
             Destroy(gameObject);
+    }
+
+    //始点を探す
+    void GetStartAnchor()
+    {
+        List<GameObject> anchor = new List<GameObject>();
+        anchor.AddRange(GameObject.FindGameObjectsWithTag("Anchor"));
+
+        if (anchor.Count == 0) return;
+        else Debug.Log("showAnchor");
+
+        anchor = anchor.FindAll(n => n.name != "FixAnchor" && n.name != "AreaAnchor");
+
+        if (anchor.Count == 0) return;
+
+        startAnchor = anchor.Find(n => n.GetComponent<AnchorHit>().FlowEffect.Equals(gameObject));
+
+        if (startAnchor == null) return;
+        else Debug.Log("getAnchor");
     }
 
     void OnTriggerStay(Collider col)
@@ -154,8 +176,7 @@ public class Flow : NetworkBehaviour{
         Vector3 toAnchorVector = (targetPosition - col.transform.position).normalized;
         col.gameObject.transform.Translate(toAnchorVector * Time.deltaTime * (speed * 0.1f), Space.World);
     }
-
-
+    
     void OnTriggerExit(Collider col)
     {
         if (nonDestroy) return;
@@ -172,5 +193,12 @@ public class Flow : NetworkBehaviour{
             if(isDestory)
                 Destroy(gameObject);
         }
+    }
+
+    void OnDestroy()
+    {
+        if (IsFromArea) return;
+
+        Destroy(startAnchor);
     }
 }
