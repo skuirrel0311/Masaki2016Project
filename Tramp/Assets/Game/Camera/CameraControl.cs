@@ -60,12 +60,12 @@ public class CameraControl : MonoBehaviour
     {
         cameraObj = transform.FindChild("ThirdPersonCamera").gameObject;
         oldPlayerPosition = player.transform.position;
-        playerNum = player.GetComponent<PlayerControl>().playerNum;
+        playerNum = player.GetComponent<PlayerControl>().playerNum;ｍお
         LockonDecision = false;
     }
 
     //カメラの角度をリセットする
-    void Reset()
+    public void Reset()
     {
         float playerRotation = player.transform.eulerAngles.y;
 
@@ -81,6 +81,7 @@ public class CameraControl : MonoBehaviour
         player = Player;
         oldPlayerPosition = player.transform.position;
         playerNum = player.GetComponent<PlayerControl>().playerNum;
+        Reset();
     }
 
     void Update()
