@@ -56,7 +56,7 @@ public class AppealAreaState : NetworkBehaviour
 
     //耐久値
     int maxHp = 10;
-    [SyncVar] 
+    [SyncVar] [SerializeField]
     private int hp;
 
     void Start()
@@ -67,7 +67,7 @@ public class AppealAreaState : NetworkBehaviour
 
     public void SetOwner(GameObject owner)
     {
-        CmdSetOwner(owner.GetComponent<NetworkBehaviour>().isServer);
+        CmdSetOwner(owner.GetComponent<PlayerState>().isServer);
         CmdHpReset();
     }
 
@@ -81,6 +81,7 @@ public class AppealAreaState : NetworkBehaviour
     void CmdSetOwner(bool isSever)
     {
         isOwner = true;
+        isOwnerPlayer = isServer;
     }
 
     GameObject SearchOwnerObject()
@@ -90,7 +91,7 @@ public class AppealAreaState : NetworkBehaviour
 
         foreach (GameObject player in GameObject.FindGameObjectsWithTag("Player"))
         {
-            if (isOwnerPlayer == player.GetComponent<NetworkBehaviour>().isServer)
+            if (isOwnerPlayer == player.GetComponent<PlayerState>().isServer)
             {
                 Debug.Log("success setOwner");
                 return player;
