@@ -115,11 +115,11 @@ public class Flow : NetworkBehaviour{
         if (anchor.Count == 0) return;
         else Debug.Log("showAnchor");
 
-        anchor = anchor.FindAll(n => n.name != "FixAnchor" && n.name != "AreaAnchor");
+        anchor = anchor.FindAll(n => n.name == "InstanceAnchor(Clone)");
 
         if (anchor.Count == 0) return;
 
-        startAnchor = anchor.Find(n => n.GetComponent<AnchorHit>().FlowEffect.Equals(gameObject));
+        startAnchor = anchor.Find(n => n.GetComponent<AnchorHit>().FlowEffect.name == gameObject.name);
 
         if (startAnchor == null) return;
         else Debug.Log("getAnchor");
