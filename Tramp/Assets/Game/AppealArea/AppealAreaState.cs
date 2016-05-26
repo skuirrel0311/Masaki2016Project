@@ -56,17 +56,24 @@ public class AppealAreaState : NetworkBehaviour
 
     //耐久値
     int maxHp = 10;
-    public int hp;
+    [SyncVar] 
+    private int hp;
 
     void Start()
     {
         IsFlowing = false;
-        hp = maxHp;
+        CmdHpReset();
     }
 
     public void SetOwner(GameObject owner)
     {
         CmdSetOwner(owner.GetComponent<NetworkBehaviour>().isServer);
+        CmdHpReset();
+    }
+
+    [Command]
+    void CmdHpReset()
+    {
         hp = maxHp;
     }
 
@@ -176,8 +183,8 @@ public class AppealAreaState : NetworkBehaviour
     {
         if (Owner == null) return;
         //所有者がいたら
-        hp = --hp > 0 ? hp-- : 0;
 
+        CmdAppealAreaDamage();
         if (hp == 0)
         {
             Owner.GetComponent<PlayerState>().IsAreaOwner = false;
@@ -186,6 +193,12 @@ public class AppealAreaState : NetworkBehaviour
             Destroy(flowObj);
         }
 
+    }
+
+    [Command]
+    void CmdAppealAreaDamage()
+    {
+        hp = --hp > 0 ? hp-- : 0;
     }
 
     void AnchorHit(GameObject col)
