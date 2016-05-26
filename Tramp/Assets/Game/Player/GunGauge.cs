@@ -14,6 +14,7 @@ public class GunGauge : MonoBehaviour
 
     void Start()
     {
+        gunEnergy = GameObject.Find("GunEnergy").GetComponent<Image>();
         shot = GetComponent<PlayerShot>();
     }
 
