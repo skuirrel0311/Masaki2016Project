@@ -13,7 +13,7 @@ public class AnchorHit : MonoBehaviour {
     /// <summary>
     /// このアンカーから出ている流れ
     /// </summary>
-    GameObject FlowEffect;
+    public GameObject FlowEffect;
 
     void Start()
     {
@@ -36,6 +36,7 @@ public class AnchorHit : MonoBehaviour {
         }
         Destroy(gameObject);
         Instantiate(HitEffect, transform.position, Quaternion.identity);
+        col.gameObject.GetComponent<PlayerShot>().AnchorHit();
     }
 
     void AreaHit(Collision col)

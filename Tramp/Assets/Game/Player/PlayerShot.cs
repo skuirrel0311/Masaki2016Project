@@ -28,12 +28,17 @@ public class PlayerShot : NetworkBehaviour
     float shotDistance = 0.2f;
 
     /// <summary>
-    /// 弾の残弾数
+    /// 弾を発射するのに必要なエネルギーの残量の最大値
     /// </summary>
+    int stockMax = 500;
     [SerializeField]
-    int stockMax = 30;
+    int stock; //現在のエネルギー残量
+
+    //弾を発射するのに必要なエネルギー量
     [SerializeField]
-    int stock;
+    int shotEnergyNum = 30;
+    int anchorEnergy = 20;
+
     //弾を連射中か
     bool isShot;
 
@@ -41,6 +46,7 @@ public class PlayerShot : NetworkBehaviour
     /// リロードする必要があるか？
     /// </summary>
     bool IsReload;
+    bool IsReloading;
 
     GamepadInputState padState;
 
@@ -71,15 +77,8 @@ public class PlayerShot : NetworkBehaviour
             GamePad.SetVibration(PlayerIndex.One, 0.2f, 0.2f);
             vibrationTimer = 0;
         }
-
-
-        //ストックを減らす
-        stock--;
-
-        //カメラの中心座標からレイを飛ばす
-        Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
-        RaycastHit hit;
-        Vector3 targetPosition = Vector3.zero;
+        
+        Vector3 targetPosition = GetTargetPosition();
 
         //先にプレイヤーをカメラと同じ方向に向ける
         Quaternion cameraRotation = cameraObj.transform.rotation;
@@ -90,20 +89,6 @@ public class PlayerShot : NetworkBehaviour
             transform.rotation = cameraRotation;
 
         isShot = true;
-
-        if (Physics.Raycast(ray, out hit, 100))
-        {
-            //衝突点がカメラとプレイヤーの間にあるか判定
-            Vector3 temp = hit.point - shotPosition.position;
-            float angle = Vector3.Angle(ray.direction, temp);
-
-            if (angle < 90) targetPosition = hit.point;                  //９０度以内
-            else targetPosition = ray.origin + (ray.direction * 100);   //角度がありすぎる
-        }
-        else
-        {
-            targetPosition = ray.origin + (ray.direction * 100);
-        }
 
         shotPosition.LookAt(targetPosition);
 
@@ -151,29 +136,35 @@ public class PlayerShot : NetworkBehaviour
     {
         while (true)
         {
-
             if (IsReload)
             {
                 while (true)
                 {
+                    if (stock > 0) break;
                     if (!GamePadInput.GetButtonDown(GamePadInput.Button.X, (GamePadInput.Index)playerNum)) yield return null;
                     else break;
                 }
-                //ボタン押したら3秒待つ
-                gameObject.GetComponentInChildren<Animator>().SetBool("Reload", true);
-                //動けない
-                GetComponent<PlayerControl>().enabled = false;
-                yield return new WaitForSeconds(3);
+                if (stock > 0) IsReload = false;
+                else
+                {
+                    //ボタン押したら3秒待つ
+                    IsReloading = true;
+                    IsReload = false;
+                    gameObject.GetComponentInChildren<Animator>().SetBool("Reload", true);
+                    //動けない
+                    yield return new WaitForSeconds(3);
 
-                //リロードが終わったら
-                IsReload = false;
-                gameObject.GetComponentInChildren<Animator>().SetBool("Reload", false);
-                GetComponent<PlayerControl>().enabled = true;
-                stock = stockMax;
+                    //リロードが終わったら
+                    IsReloading = false;
+                    gameObject.GetComponentInChildren<Animator>().SetBool("Reload", false);
+                    if (stock <= 0) stock = stockMax;
+                }
             }
 
             if (GamePadInput.GetTrigger(GamePadInput.Trigger.RightTrigger, (GamePadInput.Index)playerNum, true) > 0 && !playerState.IsAppealing && isLocalPlayer)
             {
+                stock -= shotEnergyNum;
+                if (stock <= 0) stock = 0;
                 Shot();
 
                 playerState.animator.SetBool("RunShotEnd", false);
@@ -184,7 +175,7 @@ public class PlayerShot : NetworkBehaviour
 
 
             //ストックが無くなった
-            if (stock < 0)
+            if (stock <= 0)
             {
                 IsReload = true;
             }
@@ -192,6 +183,82 @@ public class PlayerShot : NetworkBehaviour
             yield return new WaitForSeconds(shotDistance);
         }
     }
+
+    Vector3 GetTargetPosition()
+    {
+        if (LookPlayer()) return GetAdversary().transform.position + Vector3.up;
+
+        //カメラの中心座標からレイを飛ばす
+        Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, 100))
+        {
+
+            Vector3 temp = hit.point - shotPosition.position;
+            float angle = Vector3.Angle(ray.direction, temp);
+
+            if (angle < 90) return hit.point;
+            else return ray.origin + (ray.direction * 100);
+        }
+        else return ray.origin + (ray.direction * 100);
+    }
+
+    /// <summary>
+    /// 対戦相手が見えるかどうか？
+    /// </summary>
+    bool LookPlayer()
+    {
+        GameObject obj = GetAdversary();
+
+        if (obj == null) return false;
+
+        Vector3 toPlayerVector = obj.transform.position - cameraObj.transform.position;
+        Vector3 cameraForward = cameraObj.transform.forward;
+
+        float verticalAngle = VerticalAngle(toPlayerVector, cameraObj.transform.forward);
+        verticalAngle = Mathf.Abs(verticalAngle);
+        float horizontalAngle = Vector2.Angle(new Vector2(toPlayerVector.x, toPlayerVector.z),
+            new Vector2(cameraForward.x, cameraForward.z));
+
+        return verticalAngle < 5 && horizontalAngle < 5;
+    }
+
+    /// <summary>
+    /// 縦方向のAngleを返す
+    /// </summary>
+    float VerticalAngle(Vector3 vec1, Vector3 vec2)
+    {
+        //X方向だけのベクトルに変換
+        Vector3 temp1 = Vector3.right * vec1.magnitude;
+        Vector3 temp2 = Vector3.right * vec2.magnitude;
+
+        //Y座標を代入
+        temp1.y = vec1.y;
+        temp2.y = vec2.y;
+
+        //それぞれの角度を求める
+        float rot1 = Mathf.Atan2(temp1.y, temp1.x) * Mathf.Rad2Deg;
+        float rot2 = Mathf.Atan2(temp2.y, temp2.x) * Mathf.Rad2Deg;
+
+        return rot1 - rot2;
+    }
+
+    /// <summary>
+    /// 対戦相手を取得します
+    /// </summary>
+    GameObject GetAdversary()
+    {
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+
+        foreach (GameObject obj in players)
+        {
+            if (obj.Equals(gameObject)) continue;
+            return obj;
+        }
+        return null;
+    }
+
     public float testnum=0;
     void OnAnimatorIK(int layerIndex)
     {
@@ -216,9 +283,15 @@ public class PlayerShot : NetworkBehaviour
 
     void OnGUI()
     {
-        if (!IsReload) return;
+        if (IsReload) GUI.TextField(new Rect(500, 100, 200, 25), "Push_X Reload or Touch Anchor");
 
-        GUI.TextField(new Rect(500, 100, 100, 30), "Push_X Reload");
+        if (IsReloading) GUI.TextField(new Rect(500, 100, 110, 25), "Now Reloading…");
+    }
+
+    public void AnchorHit()
+    {
+        int temp = stock + anchorEnergy;
+        stock =  temp > stockMax ? stockMax : stock += anchorEnergy;
     }
 
 }
