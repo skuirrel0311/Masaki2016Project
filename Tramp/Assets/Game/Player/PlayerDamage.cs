@@ -13,26 +13,19 @@ public class PlayerDamage : NetworkBehaviour
 
     NoiseAndGrain noise;
 
-    bool isdameged;
-
     void Start()
     {
         state = gameObject.GetComponent<PlayerState>();
         camera = GameObject.FindGameObjectWithTag("MainCamera");
         noise = camera.GetComponent<NoiseAndGrain>();
-        isdameged = false;
     }
     void Update()
     {
-        if (isdameged)
+        if (isLocalPlayer)
         {
-            //ダメージエフェクト
-            noise.intensityMultiplier += 20.0f * Time.deltaTime;
-            if (noise.intensityMultiplier < 10) return;
-            noise.intensityMultiplier = 0;
-            isdameged = false;
-
+            noise.intensityMultiplier = ((float)(state.maxHp - state.Hp) / (float)state.maxHp) * 10;
         }
+
     }
 
     void OnCollisionEnter(Collision col)
@@ -44,8 +37,6 @@ public class PlayerDamage : NetworkBehaviour
                 CmdHitEffect(col.gameObject.transform.position);
                 state.animator.CrossFadeInFixedTime("damage", 0.1f);
                 state.Damege();
-                isdameged = true;
-                noise.intensityMultiplier = 0;
                 Destroy(col.gameObject);
             }
             else

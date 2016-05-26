@@ -6,7 +6,7 @@ using GamepadInput;
 public class PlayerState : NetworkBehaviour
 {
     [SerializeField]
-    int maxHp = 10;
+    public int maxHp = 10;
     public int Hp { get { return hp; } private set { hp = value; } }
     /// <summary>
     /// 体力
