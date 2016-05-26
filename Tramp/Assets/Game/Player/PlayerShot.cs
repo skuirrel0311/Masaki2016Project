@@ -32,8 +32,10 @@ public class PlayerShot : NetworkBehaviour
     /// </summary>
     [SerializeField]
     int stockMax = 30;
+    public int StockMax { get { return stockMax; } }
     [SerializeField]
     int stock;
+    public int Stock { get { return stock; } }
     //弾を連射中か
     bool isShot;
 
