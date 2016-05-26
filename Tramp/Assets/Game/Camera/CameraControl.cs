@@ -74,6 +74,12 @@ public class CameraControl : MonoBehaviour
 
         longitude = cameraRotation;
         latitude = 15;
+
+        transform.position = new Vector3(2, 86.2f, -97.2f);
+        transform.eulerAngles = new Vector3(43.27f, 0, 0);
+
+        cameraObj.transform.localPosition = new Vector3(0, 1, -1.25f);
+        cameraObj.transform.localRotation = Quaternion.Euler(Vector3.zero);
     }
 
     public void SetPlayer(GameObject Player)
@@ -106,6 +112,8 @@ public class CameraControl : MonoBehaviour
         targetAnchor = null;
         timer = Mathf.Max(timer - Time.deltaTime, 0);
 
+        Reset();
+        return;
         Vector2 rightStick = GamePadInput.GetAxis(GamePadInput.Axis.RightStick, (GamePadInput.Index)playerNum);
 
 
