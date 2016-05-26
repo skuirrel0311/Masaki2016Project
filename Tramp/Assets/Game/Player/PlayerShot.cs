@@ -30,14 +30,16 @@ public class PlayerShot : NetworkBehaviour
     /// <summary>
     /// 弾を発射するのに必要なエネルギーの残量の最大値
     /// </summary>
+    [SerializeField]
     int stockMax = 500;
     [SerializeField]
     int stock; //現在のエネルギー残量
-
+    public int StockMax { get { return stockMax; } }
     //弾を発射するのに必要なエネルギー量
     [SerializeField]
     int shotEnergyNum = 30;
     int anchorEnergy = 20;
+    public int Stock { get { return stock; } }
 
     //弾を連射中か
     bool isShot;
