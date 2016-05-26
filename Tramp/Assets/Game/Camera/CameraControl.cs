@@ -64,6 +64,18 @@ public class CameraControl : MonoBehaviour
         LockonDecision = false;
     }
 
+    //カメラの角度をリセットする
+    void Reset()
+    {
+        float playerRotation = player.transform.eulerAngles.y;
+
+        //カメラが向きたい方向
+        float cameraRotation = playerRotation + 180;
+
+        longitude = cameraRotation;
+        latitude = 15;
+    }
+
     public void SetPlayer(GameObject Player)
     {
         player = Player;
@@ -100,6 +112,8 @@ public class CameraControl : MonoBehaviour
         else latitude += -rightStick.y * rotationSpeed * Time.deltaTime;
 
         longitude += rightStick.x * rotationSpeed * Time.deltaTime;
+
+        if (GamePadInput.GetButtonDown(GamePadInput.Button.RightStick, (GamePadInput.Index)playerNum)) Reset();
 
         SphereCameraControl();
 
