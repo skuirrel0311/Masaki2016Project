@@ -60,9 +60,9 @@ public class PlayerControl : NetworkBehaviour
 
         if (isLocalPlayer)
         {
+            SetSratPosition();
             GameObject.Find("Camera1").GetComponent<CameraControl>().SetPlayer(gameObject);
             mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
-            SetSratPosition();
         }
     }
 
