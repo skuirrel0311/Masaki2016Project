@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 using System.Collections.Generic;
 using GamepadInput;
 
@@ -13,47 +12,38 @@ public class CameraControl : MonoBehaviour
     {
         Right, Left
     }
-
-    public GameObject targetAnchor;
-
-    [SerializeField]
-    private float rotationSpeed = 5;
-
+    /// <summary>
+    /// 緯度
+    /// </summary>
+    float latitude = 15;
+    /// <summary>
+    /// 経度
+    /// </summary>
+    float longitude = 180;
     /// <summary>
     /// 球体の半径(ターゲットの位置からの距離)
     /// </summary>
     [SerializeField]
     float radius = 3;
-
     [SerializeField]
-    private GameObject AlignmentSprite;
-
-    /// <summary>
-    /// 緯度
-    /// </summary>
-    [SerializeField]
-    float latitude = 15;
-    /// <summary>
-    /// 経度
-    /// </summary>
-    [SerializeField]
-    float longitude = 180;
-
-    private Vector3 oldPlayerPosition;
-    public GameObject player;
+    private float rotationSpeed = 5;
+    
+    public GameObject targetAnchor;
     private GameObject cameraObj;
-    private Vector3 lookatPosition;
-    private Transform ChiledCamera;
+
+    public GameObject player;
+    private Vector3 oldPlayerPosition;
+    private int playerNum = 1;
+    private float  oldInputVec=0;
+
+    [SerializeField]
+    private GameObject AlignmentSprite = null;
     private float timer;
     /// <summary>
     /// ロックオンの処理が終わったか(アンカーにカメラが向き終わったか？)
     /// </summary>
-    private bool LockonDecision;
+    private bool IsEndLockOn;
     public  bool IsLockOn;
-
-    private int playerNum = 1;
-
-    private float  oldInputVec=0;
     #endregion
 
     void Start()
@@ -61,7 +51,7 @@ public class CameraControl : MonoBehaviour
         cameraObj = transform.FindChild("ThirdPersonCamera").gameObject;
         oldPlayerPosition = player.transform.position;
         playerNum = player.GetComponent<PlayerControl>().playerNum;
-        LockonDecision = false;
+        IsEndLockOn = false;
     }
 
     //カメラの角度をリセットする
@@ -100,7 +90,7 @@ public class CameraControl : MonoBehaviour
             AnchorLockOn();
             return;
         }
-        LockonDecision = false;
+        IsEndLockOn = false;
         //照準を元に戻す
         AlignmentImage(1);
         targetAnchor = null;
@@ -197,16 +187,10 @@ public class CameraControl : MonoBehaviour
     {
         targetAnchor = GetTargetAnchor();
         if (targetAnchor == null) return;
-        InitLookatPosition(targetAnchor);
         timer = 0;
         IsLockOn = true;
-        //localEuleranglesはインスペクタと同じ数値
-        player.transform.localRotation = Quaternion.Euler(0, transform.localEulerAngles.y, 0);
-    }
-
-    private void InitLookatPosition(GameObject targetAnchor)
-    {
-         ChiledCamera = transform.FindChild("ThirdPersonCamera");
+        //プレイヤーをカメラと同じ向きに向ける
+        player.transform.localRotation = Quaternion.Euler(0, transform.localEulerAngles.y, 0);//localEuleranglesはインスペクタと同じ数値
     }
 
     /// <summary>
@@ -214,14 +198,14 @@ public class CameraControl : MonoBehaviour
     /// </summary>
     private void AnchorLockOn()
     {
-        float len = (targetAnchor.transform.position - ChiledCamera.position).magnitude;
+        float len = (targetAnchor.transform.position - cameraObj.transform.position).magnitude;
 
-        lookatPosition = transform.position + (ChiledCamera.forward * len);
+        Vector3 lookatPosition = transform.position + (cameraObj.transform.forward * len);
 
         timer = Mathf.Min(timer + Time.deltaTime, 1);
 
-        if (timer == 1) LockonDecision = true;
-        if (LockonDecision)
+        if (timer == 1) IsEndLockOn = true;
+        if (IsEndLockOn)
             AlignmentImage(1);
         else
             AlignmentImage(timer);
@@ -334,16 +318,8 @@ public class CameraControl : MonoBehaviour
                 nextAnchor = obj;
             }
         }
-        if (nextAnchor == null)
-        {
-            nextAnchor = targetAnchor;
-        }
-
-        else
-        {
-            InitLookatPosition(nextAnchor);
-            timer = 0;
-        }
+        if (nextAnchor == null) nextAnchor = targetAnchor;
+        else timer = 0;
 
         return nextAnchor;
     }
