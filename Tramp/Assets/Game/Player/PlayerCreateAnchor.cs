@@ -56,7 +56,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
         if (GamePadInput.GetTrigger(GamePadInput.Trigger.LeftTrigger,GamePadInput.Index.One)==1.0f&&camera.GetComponent<CameraControl>().IsLockOn)
         {
             if (MainGameManager.IsPause) return;
-            if (!playerState.IsOnAppealArea && !CheckNearAnchor())
+            if ( !CheckNearAnchor())
                 return;
 
             camera.GetComponent<CameraControl>().IsLockOn = false;
@@ -64,21 +64,6 @@ public class PlayerCreateAnchor : NetworkBehaviour
             
             //アンカーを置く
             CreateAnchor();
-
-            //アピールエリアにいるが所有権を持っていなかったらリターン
-            if (playerState.IsOnAppealArea && !playerState.IsAreaOwner)
-                return;
-            
-            //流れを繋ぐ先を取得する
-            GetTargetAnchor();
-
-            if (targetAnchor.gameObject.name == "AreaAnchor") IsToArea = true;
-            else IsToArea = false;
-
-            //アピールエリアに繋ぐ流れは壁をすり抜けない
-            if (playerState.IsAreaOwner && !IsPossibleCreateFlow())
-                return;
-
             //流れを生成する
             CmdCreateFlowObject(targetPosition, CreatePosition, flowVector,isServer);
         }
@@ -154,29 +139,11 @@ public class PlayerCreateAnchor : NetworkBehaviour
         float rotationY = cameraObj.transform.eulerAngles.y;
         transform.rotation = Quaternion.Euler(0, rotationY, 0);
 
-        //アピールエリアに乗っていた場合の処理
-        if (playerState.IsOnAppealArea)
-        {
-            //まだ流れに繋がっていなかったら所有権を得る
-            if (!appealArea.IsFlowing)
-            {
-                appealArea.SetOwner(gameObject);
-                playerState.IsAreaOwner = true;
-            }
-            //所有者だったら流れを生成することが出来る
-            if (playerState.IsAreaOwner)
-            {
-                IsFromArea = true;
-                CreatePosition = appealArea.gameObject.transform.position;
-            }
-        }
-        else
-        {
-            IsFromArea = false;
+
             CreatePosition = transform.position + transform.forward * 2 + Vector3.up;
             //アンカーを置く
             Cmd_rezobjectonserver(CreatePosition);
-        }
+        
         Debug.Log("clientCallend");
     }
 

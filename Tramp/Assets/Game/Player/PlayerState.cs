@@ -44,23 +44,6 @@ public class PlayerState : NetworkBehaviour
     }
 
     /// <summary>
-    /// アイテムを所持しているか？
-    /// </summary>
-    public bool IsPossessionOfItem { get; set; }
-
-    /// <summary>
-    /// アピール中か？
-    /// </summary>
-    public bool IsAppealing { get; private set; }
-
-    public AppealAreaState AppealArea { get; private set; }
-
-    /// <summary>
-    /// アピールエリアにいるか？
-    /// </summary>
-    public bool IsOnAppealArea;
-
-    /// <summary>
     /// アピールエリアの所有権を持っているか？
     /// </summary>
     public bool IsAreaOwner;
@@ -71,24 +54,12 @@ public class PlayerState : NetworkBehaviour
     {
         playerIndex = GetComponent<PlayerControl>().playerNum;
         animator = GetComponentInChildren<Animator>();
-        AppealArea = GameObject.Find("AppealArea").GetComponent<AppealAreaState>();
         Initialize();
     }
 
     void Update()
     {
         //animator.SetBool("HaveItem", IsPossessionOfItem);
-
-        //アイテムを所持していたら
-        if (IsPossessionOfItem)
-        {
-            if (GamePadInput.GetButtonDown(GamePadInput.Button.RightShoulder, (GamePadInput.Index)playerIndex))
-            {
-                //反転
-                IsAppealing = IsAppealing ? false : true;
-            }
-        }
-
         if (!IsAlive)
         {
             //操作できない
@@ -112,10 +83,6 @@ public class PlayerState : NetworkBehaviour
         animator.CrossFadeInFixedTime("wait", 0.1f);
         playerControl.SetSratPosition();
         playerControl.enabled = true;
-        IsAppealing = false;
-        if (IsAreaOwner) AppealArea.Owner = null;
-        IsAreaOwner = false;
-        IsPossessionOfItem = false;
     }
 
     /// <summary>
@@ -127,15 +94,6 @@ public class PlayerState : NetworkBehaviour
         //GetComponent<FeverGauge>().KilledInPlayer();
 
         GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("Player");
-
-        //アイテムを所持していたら
-        if (IsPossessionOfItem)
-        {
-            //親子関係をはずしランダムに再設置。
-            appealItem.transform.parent = null;
-            appealItem.GetComponent<AppealItem>().SpawnInRandomPosition();
-        }
-
         //操作できないようにする。
         GetComponent<PlayerControl>().enabled = false;
         animator.CrossFadeInFixedTime("dead", 0.1f);
@@ -155,22 +113,6 @@ public class PlayerState : NetworkBehaviour
     public void Damege()
     {
         CmdHpDamage();
-
-        if (!IsPossessionOfItem || appealItem == null) return;
-
-        //アイテムを所持していたら
-        int firstHp = appealItem.GetComponent<AppealItem>().FirstHp;
-
-        //hpがアイテムを所持したときのhpよりも３小さかったら
-        if (hp <= firstHp - 3)
-        {
-            //親子関係を解除
-            appealItem.transform.parent = null;
-            //ランダムに再配置
-            appealItem.GetComponent<AppealItem>().SpawnInRandomPosition();
-            IsPossessionOfItem = false;
-            IsAppealing = false;
-        }
     }
 
     [Command]
@@ -195,21 +137,4 @@ public class PlayerState : NetworkBehaviour
         style.fontStyle = FontStyle.Bold;
         GUI.TextArea(new Rect(800, 0, 400, 200), "残HP：" + hp, style);
     }
-
-    void OnTriggerEnter(Collider col)
-    {
-        if (col.gameObject.name == "AppealAreaCollider")
-        {
-            IsOnAppealArea = true;
-        }
-    }
-
-    void OnTriggerExit(Collider col)
-    {
-        if (col.gameObject.name == "AppealAreaCollider")
-        {
-            IsOnAppealArea = false;
-        }
-    }
-
 }

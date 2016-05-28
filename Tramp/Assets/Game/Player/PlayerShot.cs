@@ -163,7 +163,7 @@ public class PlayerShot : NetworkBehaviour
                 }
             }
 
-            if (GamePadInput.GetTrigger(GamePadInput.Trigger.RightTrigger, (GamePadInput.Index)playerNum, true) > 0 && !playerState.IsAppealing && isLocalPlayer)
+            if (GamePadInput.GetTrigger(GamePadInput.Trigger.RightTrigger, (GamePadInput.Index)playerNum, true) > 0  && isLocalPlayer)
             {
                 stock -= shotEnergyNum;
                 if (stock <= 0) stock = 0;
