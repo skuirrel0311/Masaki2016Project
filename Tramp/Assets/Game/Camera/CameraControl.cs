@@ -59,8 +59,6 @@ public class CameraControl : MonoBehaviour
     void Start()
     {
         cameraObj = transform.FindChild("ThirdPersonCamera").gameObject;
-        oldPlayerPosition = player.transform.position;
-        playerNum = player.GetComponent<PlayerControl>().playerNum;
         LockonDecision = false;
     }
 

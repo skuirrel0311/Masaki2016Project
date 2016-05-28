@@ -90,7 +90,6 @@ public class PlayerControl : NetworkBehaviour
 
     void Update()
     {
-        body.isKinematic = false;
         Vector2 leftStick = GamePadInput.GetAxis(GamePadInput.Axis.LeftStick, (GamePadInput.Index)playerNum);
         Vector3 direction = new Vector3(leftStick.x, 0, leftStick.y);
         Move(direction);
@@ -108,6 +107,7 @@ public class PlayerControl : NetworkBehaviour
         {
             c.Normalize();
             transform.position = new Vector3(c.x * EndArea, transform.position.y, c.z * EndArea);
+            GetComponent<Rigidbody>().velocity = Vector3.zero;
         }
     }
 
