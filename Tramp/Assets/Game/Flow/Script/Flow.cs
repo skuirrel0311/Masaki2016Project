@@ -88,6 +88,7 @@ public class Flow : NetworkBehaviour{
             transform.position = Vector3.Lerp(targetPosition,appealArea.transform.position,0.5f);
         }
         transform.localScale = new Vector3(2, flowVector.magnitude * 0.5f, 2);
+        GetComponent<MeshRenderer >().materials[0].SetFloat("_LineNum",flowVector.magnitude);
         CapsuleCollider capcol = GetComponent<CapsuleCollider>();
         capcol.height = flowVector.magnitude / (flowVector.magnitude * 0.5f);
         capcol.radius = 0.5f;
@@ -123,6 +124,9 @@ public class Flow : NetworkBehaviour{
 
         if (startAnchor == null) return;
         else Debug.Log("getAnchor");
+
+        GetComponent<LineRenderer>().SetPosition(0,targetAnchor.transform.position);
+        GetComponent<LineRenderer>().SetPosition(1, startAnchor.transform.position);
     }
 
     void OnTriggerStay(Collider col)
