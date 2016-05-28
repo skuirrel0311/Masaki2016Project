@@ -15,18 +15,20 @@ public class CameraControl : MonoBehaviour
     /// <summary>
     /// 緯度
     /// </summary>
+    [SerializeField]
     float latitude = 15;
     /// <summary>
     /// 経度
     /// </summary>
+    [SerializeField]
     float longitude = 180;
     /// <summary>
     /// 球体の半径(ターゲットの位置からの距離)
     /// </summary>
     [SerializeField]
-    float radius = 3;
+    float radius = 6;
     [SerializeField]
-    private float rotationSpeed = 5;
+    private float rotationSpeed = 200;
     
     public GameObject targetAnchor;
     private GameObject cameraObj;
@@ -44,6 +46,9 @@ public class CameraControl : MonoBehaviour
     /// </summary>
     private bool IsEndLockOn;
     public  bool IsLockOn;
+
+    //カメラとプレイヤーの間にあるオブジェクト
+    List<GameObject> lineHitObjects = new List<GameObject>();
     #endregion
 
     void Start()
@@ -77,6 +82,8 @@ public class CameraControl : MonoBehaviour
     void Update()
     {
         if (player == null) return;
+        BetweenPlayerAndCamera();
+
         //ロックオンの処理押された時と押している時で処理を分ける
         if (GamePadInput.GetButtonDown(GamePadInput.Button.LeftShoulder, (GamePadInput.Index)playerNum)&&!MainGameManager.IsPause)
         {
@@ -99,7 +106,7 @@ public class CameraControl : MonoBehaviour
         Vector2 rightStick = GamePadInput.GetAxis(GamePadInput.Axis.RightStick, (GamePadInput.Index)playerNum);
 
 
-        if (latitude < 0) latitude += -rightStick.y * (rotationSpeed * 1.5f) * Time.deltaTime;
+        if (latitude < 0) latitude += -rightStick.y * (rotationSpeed * 2.5f) * Time.deltaTime;
         else latitude += -rightStick.y * rotationSpeed * Time.deltaTime;
 
         longitude += rightStick.x * rotationSpeed * Time.deltaTime;
@@ -114,6 +121,36 @@ public class CameraControl : MonoBehaviour
     }
 
     /// <summary>
+    /// プレイヤーとカメラの間にオブジェクトがあったら非表示にします
+    /// </summary>
+    void BetweenPlayerAndCamera()
+    {
+        Vector3 direction = player.transform.position - cameraObj.transform.position;
+        Ray ray = new Ray(cameraObj.transform.position, direction);
+        List<RaycastHit> hits = new List<RaycastHit>();
+           hits.AddRange( Physics.RaycastAll(ray, direction.magnitude));
+        if(hits.Count == 0)return;
+
+        foreach(RaycastHit hit in hits)
+        {
+            GameObject obj = lineHitObjects.Find(n => n.Equals(hit.transform.gameObject));
+            if(obj != null) continue;
+            if (!(hit.transform.gameObject.tag == "Plane" || hit.transform.gameObject.tag == "Box")) continue;
+            lineHitObjects.Add(hit.transform.gameObject);
+        }
+        List<GameObject> temp = new List<GameObject>();
+        hits.ForEach(n => temp.Add(n.transform.gameObject));
+
+        Debug.Log(temp.Count);
+
+        foreach(GameObject obj in lineHitObjects)
+        {
+            Color color = obj.GetComponent<Renderer>().material.color;
+            obj.GetComponent<Renderer>().material.color = new Color(color.r, color.g, color.b, 0);
+        }
+    }
+
+    /// <summary>
     /// 球体座標系によるカメラの制御
     /// </summary>
     void SphereCameraControl()
@@ -125,31 +162,28 @@ public class CameraControl : MonoBehaviour
         target.y += 1f;
 
         //経度には制限を掛ける
-        float temp = Mathf.Clamp(latitude, -50, 60);
         latitude = Mathf.Clamp(latitude, -120, 60);
 
         if (latitude < 0)
         {
-            //カメラが地面にめり込むので球面線形補正をする
-            //緯度が0の場合の座標
+            //リープ開始
             Vector3 vec1 = SphereCoordinate(longitude, 0);
-            //緯度が-120の場合の座標
-            Vector3 vec2 = SphereCoordinate(longitude, -50);
+            //リープ終了時の座標
+            Vector3 vec2 = SphereCoordinate(longitude, -30);
             Vector3 toPlayerVector = (Vector3.zero - vec2).normalized;
-            vec2 += toPlayerVector * 2f;
+            vec2 += toPlayerVector * 3;
 
             //latitudeが-120だったらtは1になる
-            float t = (latitude * -1) / 120;
+            float t = (-1 * (latitude + 0)) / 120;
             cameraPosition = Vector3.Slerp(vec1, vec2, t);
             transform.position = target + cameraPosition;
         }
         else
         {
             //カメラが地面にめり込まない場合は球体座標をそのまま使う
-            cameraPosition = SphereCoordinate(longitude, temp);
+            cameraPosition = SphereCoordinate(longitude, latitude);
             transform.position = target + cameraPosition;
         }
-
 
         transform.LookAt(target);
     }
@@ -173,11 +207,6 @@ public class CameraControl : MonoBehaviour
         temp.z = t * Mathf.Cos(longitude * deg2Rad);
 
         return temp;
-    }
-
-    private float VectorToAngle(float a, float b)
-    {
-        return Mathf.Atan2(a, b) * 180.0f / Mathf.PI;
     }
 
     /// <summary>
@@ -245,30 +274,7 @@ public class CameraControl : MonoBehaviour
         float rot2 = Mathf.Atan2(transform.forward.z, transform.forward.x) * Mathf.Rad2Deg;
         return SphereCoordinate(longitude + (rot2 - rot1), rot3);
     }
-
-    /// <summary>
-    /// 2つのベクトルの緯度の差を返す
-    /// </summary>
-    float DifferenceLatitude(Vector3 vec1, Vector3 vec2)
-    {
-        float len1 = vec1.magnitude;
-        float len2 = vec2.magnitude;
-
-        //X方向だけのベクトルに変換
-        Vector3 temp1 = Vector3.right * len1;
-        Vector3 temp2 = Vector3.right * len2;
-
-        //Y座標を代入
-        temp1.y = vec1.y;
-        temp2.y = vec2.y;
-
-        //それぞれの角度を求める
-        float rot1 = Mathf.Atan2(temp1.y, temp1.x) * Mathf.Rad2Deg;
-        float rot2 = Mathf.Atan2(temp2.y, temp2.x) * Mathf.Rad2Deg;
-
-        return rot1 - rot2;
-    }
-
+    
     /// <summary>
     ///照準画像の処理
     /// </summary>
@@ -281,70 +287,20 @@ public class CameraControl : MonoBehaviour
     }
 
     /// <summary>
-    /// 左右どちらかにある一番近い次のアンカーに移動する
+    /// プレイヤーの移動に合わせてカメラの位置を移動
     /// </summary>
-    /// <param name="side"></param>
-    /// <returns></returns>
-    private GameObject GetSideAnchor(Side side)
+    private void PlayerTrace()
     {
-        Vector2 originAnchorVec = new Vector2(targetAnchor.transform.position.x - transform.position.x
-                                                                      , targetAnchor.transform.position.z - transform.position.z);//アンカーとの角度を代入する
-        float angle;//右あるいは左に最も近いアンカーとの角度を代入する
+        Vector3 movement = player.transform.position - oldPlayerPosition;
 
-        angle = 360;
+        //プレイヤーが移動していなかったら終了
+        if (movement.magnitude == 0) return;
 
-        GameObject nextAnchor = null;
-        GameObject[] objects = GameObject.FindGameObjectsWithTag("Anchor");
-
-        foreach (GameObject obj in objects)
-        {
-            if (targetAnchor.Equals(obj)) continue;
-
-            Vector2 vec = new Vector2(obj.transform.position.x - transform.position.x
-                                                     , obj.transform.position.z - transform.position.z);
-
-            float tmpAngle = Vector2.Angle(vec, originAnchorVec);
-            //PQ×PA = PQ.x・PA.y - PQ.y・PA.x ：外積の式
-            //外積を使って現在参照しているオブジェクトからオブジェクトが左右どちらにあるか判定する
-            float crossProduct = CrossProductToVector2(originAnchorVec, vec);
-            bool withinAngle = false;
-            //一番角度が小さいオブジェクトを検索する
-            if ((side == Side.Right && crossProduct < 0) || side == Side.Left && crossProduct > 0)
-                withinAngle = (tmpAngle >= 0 && tmpAngle < angle);
-
-            if (withinAngle)
-            {
-                angle = tmpAngle;
-                nextAnchor = obj;
-            }
-        }
-        if (nextAnchor == null) nextAnchor = targetAnchor;
-        else timer = 0;
-
-        return nextAnchor;
+        //プレイヤーについていくMOMO
+        transform.position += movement;
     }
-
-    /// <summary>
-    /// Vector3を水平のVector2に変換する
-    /// </summary>
-    /// <param name="vec"></param>
-    /// <returns></returns>
-    private Vector2 PlaneVector2ToVector3(Vector3 vec)
-    {
-        return new Vector2(vec.x, vec.z);
-    }
-
-    /// <summary>
-    /// 外積を求める
-    /// </summary>
-    /// <param name="a"></param>
-    /// <param name="b"></param>
-    /// <returns></returns>
-    private float CrossProductToVector2(Vector2 a, Vector2 b)
-    {
-        return a.x * b.y - a.y * b.x;
-    }
-
+    
+    #region GetTargetAnchor
     public GameObject GetTargetAnchor()
     {
         GameObject targetAnchor = null;
@@ -459,16 +415,92 @@ public class CameraControl : MonoBehaviour
     }
 
     /// <summary>
-    /// プレイヤーの移動に合わせてカメラの位置を移動
+    /// 左右どちらかにある一番近い次のアンカーに移動する
     /// </summary>
-    private void PlayerTrace()
+    /// <param name="side"></param>
+    /// <returns></returns>
+    private GameObject GetSideAnchor(Side side)
     {
-        Vector3 movement = player.transform.position - oldPlayerPosition;
+        Vector2 originAnchorVec = new Vector2(targetAnchor.transform.position.x - transform.position.x
+                                                                      , targetAnchor.transform.position.z - transform.position.z);//アンカーとの角度を代入する
+        float angle;//右あるいは左に最も近いアンカーとの角度を代入する
 
-        //プレイヤーが移動していなかったら終了
-        if (movement.magnitude == 0) return;
+        angle = 360;
 
-        //プレイヤーについていくMOMO
-        transform.position += movement;
+        GameObject nextAnchor = null;
+        GameObject[] objects = GameObject.FindGameObjectsWithTag("Anchor");
+
+        foreach (GameObject obj in objects)
+        {
+            if (targetAnchor.Equals(obj)) continue;
+
+            Vector2 vec = new Vector2(obj.transform.position.x - transform.position.x
+                                                     , obj.transform.position.z - transform.position.z);
+
+            float tmpAngle = Vector2.Angle(vec, originAnchorVec);
+            //PQ×PA = PQ.x・PA.y - PQ.y・PA.x ：外積の式
+            //外積を使って現在参照しているオブジェクトからオブジェクトが左右どちらにあるか判定する
+            float crossProduct = CrossProductToVector2(originAnchorVec, vec);
+            bool withinAngle = false;
+            //一番角度が小さいオブジェクトを検索する
+            if ((side == Side.Right && crossProduct < 0) || side == Side.Left && crossProduct > 0)
+                withinAngle = (tmpAngle >= 0 && tmpAngle < angle);
+
+            if (withinAngle)
+            {
+                angle = tmpAngle;
+                nextAnchor = obj;
+            }
+        }
+        if (nextAnchor == null) nextAnchor = targetAnchor;
+        else timer = 0;
+
+        return nextAnchor;
     }
+    #endregion
+
+    /// <summary>
+    /// Vector3を水平のVector2に変換する
+    /// </summary>
+    /// <param name="vec"></param>
+    /// <returns></returns>
+    private Vector2 PlaneVector2ToVector3(Vector3 vec)
+    {
+        return new Vector2(vec.x, vec.z);
+    }
+
+    /// <summary>
+    /// 2つのベクトルの緯度の差を返す
+    /// </summary>
+    float DifferenceLatitude(Vector3 vec1, Vector3 vec2)
+    {
+        float len1 = vec1.magnitude;
+        float len2 = vec2.magnitude;
+
+        //X方向だけのベクトルに変換
+        Vector3 temp1 = Vector3.right * len1;
+        Vector3 temp2 = Vector3.right * len2;
+
+        //Y座標を代入
+        temp1.y = vec1.y;
+        temp2.y = vec2.y;
+
+        //それぞれの角度を求める
+        float rot1 = Mathf.Atan2(temp1.y, temp1.x) * Mathf.Rad2Deg;
+        float rot2 = Mathf.Atan2(temp2.y, temp2.x) * Mathf.Rad2Deg;
+
+        return rot1 - rot2;
+    }
+
+    /// <summary>
+    /// 外積を求める
+    /// </summary>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
+    /// <returns></returns>
+    private float CrossProductToVector2(Vector2 a, Vector2 b)
+    {
+        return a.x * b.y - a.y * b.x;
+    }
+
 }
