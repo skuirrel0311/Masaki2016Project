@@ -40,7 +40,8 @@ public class CameraControl : MonoBehaviour
 
     [SerializeField]
     private GameObject AlignmentSprite = null;
-    private float timer;
+    private Timer lockonTimer = new Timer();
+    private Timer imageTimer = new Timer();
     /// <summary>
     /// ロックオンの処理が終わったか(アンカーにカメラが向き終わったか？)
     /// </summary>
@@ -54,7 +55,6 @@ public class CameraControl : MonoBehaviour
     void Start()
     {
         cameraObj = transform.FindChild("ThirdPersonCamera").gameObject;
-        oldPlayerPosition = player.transform.position;
         playerNum = player.GetComponent<PlayerControl>().playerNum;
         IsEndLockOn = false;
     }
@@ -83,12 +83,17 @@ public class CameraControl : MonoBehaviour
     {
         if (player == null) return;
         BetweenPlayerAndCamera();
-
+        lockonTimer.Update();
+        imageTimer.Update();
         //ロックオンの処理押された時と押している時で処理を分ける
         if (GamePadInput.GetButtonDown(GamePadInput.Button.LeftShoulder, (GamePadInput.Index)playerNum)&&!MainGameManager.IsPause)
         {
             if (!IsLockOn) CameraLockOnStart();
-            else IsLockOn = false;
+            else
+            {
+                IsLockOn = false;
+                lockonTimer.TimerStart(0.2f); //戻る時の速さ
+            }
         }
         if (IsLockOn && targetAnchor != null)
         {
@@ -101,7 +106,6 @@ public class CameraControl : MonoBehaviour
         //照準を元に戻す
         AlignmentImage(1);
         targetAnchor = null;
-        timer = Mathf.Max(timer - Time.deltaTime, 0);
 
         Vector2 rightStick = GamePadInput.GetAxis(GamePadInput.Axis.RightStick, (GamePadInput.Index)playerNum);
 
@@ -115,7 +119,7 @@ public class CameraControl : MonoBehaviour
 
         SphereCameraControl();
 
-        cameraObj.transform.localRotation = Quaternion.Lerp(Quaternion.Euler(0, cameraObj.transform.localRotation.y, 0), cameraObj.transform.localRotation, timer);
+        cameraObj.transform.localRotation = Quaternion.Lerp(Quaternion.Euler(0, cameraObj.transform.localRotation.y, 0), cameraObj.transform.localRotation, 1 - lockonTimer.Progress);
 
         oldPlayerPosition = player.transform.position;
     }
@@ -128,26 +132,53 @@ public class CameraControl : MonoBehaviour
         Vector3 direction = player.transform.position - cameraObj.transform.position;
         Ray ray = new Ray(cameraObj.transform.position, direction);
         List<RaycastHit> hits = new List<RaycastHit>();
-           hits.AddRange( Physics.RaycastAll(ray, direction.magnitude));
-        if(hits.Count == 0)return;
+        hits.AddRange( Physics.RaycastAll(ray, direction.magnitude));
+        List<GameObject> hitList = new List<GameObject>();
+        hits.ForEach(n => hitList.Add(n.transform.gameObject));
 
-        foreach(RaycastHit hit in hits)
+        if (hitList.Count == 0)return;
+
+        foreach(GameObject hit in hitList)
         {
-            GameObject obj = lineHitObjects.Find(n => n.Equals(hit.transform.gameObject));
+            GameObject obj = lineHitObjects.Find(n => n.Equals(hit));
             if(obj != null) continue;
-            if (!(hit.transform.gameObject.tag == "Plane" || hit.transform.gameObject.tag == "Box")) continue;
-            lineHitObjects.Add(hit.transform.gameObject);
+            if (hit.tag != "Box") continue;
+            lineHitObjects.Add(hit);
         }
-        List<GameObject> temp = new List<GameObject>();
-        hits.ForEach(n => temp.Add(n.transform.gameObject));
-
-        Debug.Log(temp.Count);
-
         foreach(GameObject obj in lineHitObjects)
         {
-            Color color = obj.GetComponent<Renderer>().material.color;
-            obj.GetComponent<Renderer>().material.color = new Color(color.r, color.g, color.b, 0);
+            Material mat = obj.GetComponent<Renderer>().material;
+            Color color = mat.color;
+            mat.SetFloat("_Mode", 2);
+            mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            mat.SetInt("_ZWrite", 0);
+            mat.DisableKeyword("_ALPHATEST_ON");
+            mat.EnableKeyword("_ALPHABLEND_ON");
+            mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            mat.renderQueue = 3000;
+            mat.color = new Color(color.r, color.g, color.b, 0);
         }
+    }
+
+    void SetAlpha(GameObject obj, float alpha)
+    {
+        Material mat = obj.GetComponent<Renderer>().material;
+        Color color = mat.color;
+        mat.SetFloat("_Mode", 2);
+        mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        mat.SetInt("_ZWrite", 0);
+        mat.DisableKeyword("_ALPHATEST_ON");
+        mat.EnableKeyword("_ALPHABLEND_ON");
+        mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+        mat.renderQueue = 3000;
+        mat.color = new Color(color.r, color.g, color.b, alpha);
+    }
+
+    void ResetAlpha()
+    {
+
     }
 
     /// <summary>
@@ -216,7 +247,8 @@ public class CameraControl : MonoBehaviour
     {
         targetAnchor = GetTargetAnchor();
         if (targetAnchor == null) return;
-        timer = 0;
+        lockonTimer.TimerStart(0.2f); //ロックオンにかかる時間
+        imageTimer.TimerStart(1f);
         IsLockOn = true;
         //プレイヤーをカメラと同じ向きに向ける
         player.transform.localRotation = Quaternion.Euler(0, transform.localEulerAngles.y, 0);//localEuleranglesはインスペクタと同じ数値
@@ -231,13 +263,13 @@ public class CameraControl : MonoBehaviour
 
         Vector3 lookatPosition = transform.position + (cameraObj.transform.forward * len);
 
-        timer = Mathf.Min(timer + Time.deltaTime, 1);
-
-        if (timer == 1) IsEndLockOn = true;
+        if (imageTimer.IsLimitTime) IsEndLockOn = true;
         if (IsEndLockOn)
+        {
             AlignmentImage(1);
+        }
         else
-            AlignmentImage(timer);
+            AlignmentImage(imageTimer.Progress);
 
         Vector2 inputVec = GamePadInput.GetAxis(GamePadInput.Axis.RightStick, GamePadInput.Index.One);
         if (oldInputVec == 0)
@@ -254,7 +286,7 @@ public class CameraControl : MonoBehaviour
         transform.position = playerPosition + PositionForLockOnAnchor(targetAnchor);
         //カメラの注視点を移動
         //cameraObj.transform.LookAt(targetAnchor.transform);
-        cameraObj.transform.LookAt(Vector3.Lerp(lookatPosition, targetAnchor.transform.position, timer*10));
+        cameraObj.transform.LookAt(Vector3.Lerp(lookatPosition, targetAnchor.transform.position, lockonTimer.Progress));
     }
 
     /// <summary>
@@ -453,7 +485,7 @@ public class CameraControl : MonoBehaviour
             }
         }
         if (nextAnchor == null) nextAnchor = targetAnchor;
-        else timer = 0;
+        else lockonTimer.Reset();
 
         return nextAnchor;
     }

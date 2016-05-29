@@ -30,11 +30,21 @@ public class Timer : MonoBehaviour
     }
 
     /// <summary>
+    /// タイマーの時間をリセットします(起動はしたまま)
+    /// </summary>
+    public void Reset()
+    {
+        time = 0;
+        IsLimitTime = false;
+    }
+
+    /// <summary>
     /// タイマーを一時停止させます。
     /// </summary>
-    public void Stop()
+    public void Stop(bool isReset = false)
     {
         IsWorking = false;
+        if (isReset) Reset();
     }
     
     public void Update()
