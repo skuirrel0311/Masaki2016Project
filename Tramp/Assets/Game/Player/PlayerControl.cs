@@ -50,6 +50,9 @@ public class PlayerControl : NetworkBehaviour
     private Rigidbody body;
     bool isRun = false;
 
+    //最後にあたっていた流れ
+    public bool hitFix;
+
     void Start()
     {
         animator = GetComponentInChildren<Animator>();
@@ -57,7 +60,7 @@ public class PlayerControl : NetworkBehaviour
         atJumpPosition = Vector3.zero;
         IsOnGround = true;
         isRun = false;
-
+        hitFix = false;
         if (isLocalPlayer)
         {
             SetSratPosition();
@@ -187,12 +190,41 @@ public class PlayerControl : NetworkBehaviour
             //body.isKinematic = true;
             body.AddForce(jumpVec * 100, ForceMode.Impulse);
         }
+    }
 
+    void OnTriggerEnter(Collider col)
+    {
+        if (col.name == "FixAnchor"||col.name=="AreaAnchor")
+        {
+            hitFix = true;
+            if(col.name== "AreaAnchor")
+            {
+                GetComponent<Rigidbody>().velocity=Vector3.zero;
+                GetComponent<Rigidbody>().useGravity=true;
+            }
+        }
+    }
+
+    void OnTriggerExit(Collider col)
+    {
+        if (col.name == "FixAnchor" || col.name == "AreaAnchor")
+        {
+            StartCoroutine("SleepHItFix");
+        }
+    }
+
+    IEnumerator SleepHItFix()
+    {
+        yield return new WaitForSeconds(1);
+        hitFix = false;
     }
 
     void OnCollisionEnter(Collision collision)
     {
         Debug.Log("Player Control hit");
+
+        
+
         //地面にいたらダメ
         if (IsOnGround) return;
 

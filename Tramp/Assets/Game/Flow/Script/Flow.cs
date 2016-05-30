@@ -114,8 +114,8 @@ public class Flow : NetworkBehaviour{
         CapsuleCollider capcol = GetComponent<CapsuleCollider>();
         capcol.height = flowVector.magnitude / (flowVector.magnitude * 0.5f);
         capcol.radius = 0.5f;
-        GetComponent<LineRenderer>().SetPosition(0, transform.position + (transform.up * transform.localScale.y * 0.5f));
-        GetComponent<LineRenderer>().SetPosition(1, transform.position - (transform.up * transform.localScale.y * 0.5f));
+        GetComponent<LineRenderer>().SetPosition(0, transform.position + (transform.up * transform.localScale.y));
+        GetComponent<LineRenderer>().SetPosition(1, transform.position - (transform.up * transform.localScale.y));
         capcol.isTrigger = true;
         isCalc = false;
     }
@@ -154,6 +154,7 @@ public class Flow : NetworkBehaviour{
     {
         if (col.tag != "Player") return;
         if (!col.gameObject.GetComponent<NetworkBehaviour>().isLocalPlayer) return;
+        if (col.gameObject.GetComponent<PlayerControl>().hitFix) return;
         FlowRender();
         Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
         bodys.Add(body);
@@ -168,6 +169,7 @@ public class Flow : NetworkBehaviour{
 
     void PlayerStay(Collider col)
     {
+        if (col.gameObject.GetComponent<PlayerControl>().hitFix) return;
         PlayerState state = col.gameObject.GetComponent<PlayerState>();
         if (isCreatePlayer)
         {
