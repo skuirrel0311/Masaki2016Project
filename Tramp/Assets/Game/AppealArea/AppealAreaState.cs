@@ -13,16 +13,37 @@ public class AppealAreaState : NetworkBehaviour
     [SyncVar]
     private bool isOccupiers;
 
+    //占領済みか
+    [SyncVar]
+    public bool isOccupation;
+
     private List<GameObject> RidePlayers = new List<GameObject>();
 
-    private GameObject ShareImage;
+    private GameObject ShareImageHost;
+    private GameObject ShareImageClient;
+
+    [SerializeField]
+    private Image ShareImage;
+
+    private static bool isDrawUI=false;
+
+    void Awake()
+    {
+        ShareImageHost = GameObject.Find("ShareImageHost");
+        ShareImageClient = GameObject.Find("ShareImageClient");
+    }
 
     void Start()
     {
         isOccupiers = false;
+        isOccupation = false;
         share = 0;
         RidePlayers = new List<GameObject>();
-        ShareImage = GameObject.Find("ShareImage");
+    }
+
+    void FixedUpdate()
+    {
+        isDrawUI = false;
     }
 
     void Update()
@@ -34,19 +55,29 @@ public class AppealAreaState : NetworkBehaviour
         ShareUI();
     }
 
+    void LateUpdate()
+    {
+        if (isDrawUI == false)
+        {
+            ShareImageHost.SetActive(false);
+            ShareImageClient.SetActive(false);
+        }
+    }
+
     //占有度に変化があるときの処理
     void UpdateShare()
     {
         if (RidePlayers.Count != 1) return;
+        if (!isServer) return;
 
         //誰にも占拠されていない
         if (share == 0)
         {
-            CmdChangeOccupiers(isServer);
+            ChangeOccupiers(RidePlayers[0].GetComponent<PlayerState>().isLocalPlayer);
             CmdChangeShare(1);
         }
         //自分が占拠している
-        else if (isOccupiers == isServer)
+        else if (isOccupiers == RidePlayers[0].GetComponent<PlayerState>().isLocalPlayer)
         {
             CmdChangeShare(1);
         }
@@ -60,27 +91,59 @@ public class AppealAreaState : NetworkBehaviour
 
     void ShareUI()
     {
-        bool localPlayer=false;
+        if (isOccupiers == true)
+        {
+            ShareImage.color = Color.white;
+            ShareImage.fillAmount = share / 100;
+        }
+        else
+        {
+            ShareImage.color = Color.red;
+            ShareImage.fillAmount = share / 100;
+        }
+
         foreach (GameObject player in RidePlayers)
         {
             if (player.GetComponent<PlayerState>().isLocalPlayer)
             {
-                ShareImage.SetActive(true);
-                ShareImage.GetComponent<Image>().fillAmount = share / 100;
-                localPlayer = true;
+                if (isOccupiers == true)
+                {
+                    ShareImageHost.SetActive(true);
+                    ShareImageHost.GetComponent<Image>().fillAmount = share / 100;
+                }
+                else
+                {
+                    ShareImageClient.SetActive(true);
+                    ShareImageClient.GetComponent<Image>().fillAmount = share / 100;
+                }
+                isDrawUI = true;
             }
         }
+    }
 
-        if(localPlayer==false)
+    [Client]
+    void ChangeOccupiers(bool isSev)
+    {
+        if (isSev)
         {
-            ShareImage.SetActive(false);
+            CmdChangeSeverOccupiers();
+        }
+        else
+        {
+            CmdChangeClinetOccupiers();
         }
     }
 
     [Command]
-    void CmdChangeOccupiers(bool isSever)
+    void CmdChangeSeverOccupiers()
     {
-        isOccupiers = isServer;
+        isOccupiers = true;
+    }
+
+    [Command]
+    void CmdChangeClinetOccupiers()
+    {
+        isOccupiers = false;
     }
 
     [Command]
@@ -90,10 +153,12 @@ public class AppealAreaState : NetworkBehaviour
         if (share >= 100)
         {
             share = 100;
+            isOccupation = true;
         }
         else if (share <= 0)
         {
             share = 0;
+            isOccupation = false;
         }
     }
 
@@ -103,7 +168,7 @@ public class AppealAreaState : NetworkBehaviour
         RidePlayers.Add(col.gameObject);
     }
 
-    void OnTirggerExit(Collider col)
+    void OnTriggerExit(Collider col)
     {
         if (col.tag != "Player") return;
         RidePlayers.Remove(col.gameObject);

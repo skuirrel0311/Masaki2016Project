@@ -19,7 +19,6 @@ public class PlayerCreateAnchor : NetworkBehaviour
 
     private int playerNum;
     PlayerState playerState;
-    AppealAreaState appealArea;
 
     GameObject cameraObj;
     GameObject targetAnchor=null;
@@ -47,7 +46,6 @@ public class PlayerCreateAnchor : NetworkBehaviour
         camera = GameObject.Find("Camera1");
         playerState = GetComponent<PlayerState>();
         cameraObj = GameObject.Find("ThirdPersonCamera");
-        appealArea = GameObject.Find("AppealArea").GetComponent<AppealAreaState>();
     }
 
     // Update is called once per frame
@@ -64,6 +62,8 @@ public class PlayerCreateAnchor : NetworkBehaviour
             
             //アンカーを置く
             CreateAnchor();
+
+            GetTargetAnchor();
             //流れを生成する
             CmdCreateFlowObject(targetPosition, CreatePosition, flowVector,isServer);
         }
@@ -186,18 +186,23 @@ public class PlayerCreateAnchor : NetworkBehaviour
         NetworkServer.Spawn(boxCol);
     }
 
+    /// <summary>
+    /// 現在未使用
+    /// </summary>
+    /// <returns></returns>
     bool IsPossibleCreateFlow()
     {
-        //アピールエリアに繋ぐ流れは壁をすり抜けない
-        Ray ray = new Ray(appealArea.transform.position + Vector3.up, flowVector);
-        float radius = 1;
-        RaycastHit hit;
-        if(Physics.SphereCast(ray, radius, out hit))
-        {
-            //あたったのが床だったらダメ
-            if(hit.transform.gameObject.tag == "Plane")
-                return false;
-        }
+        //すり抜けチェックは使えるかも
+        ////アピールエリアに繋ぐ流れは壁をすり抜けない
+        //Ray ray = new Ray(appealArea.transform.position + Vector3.up, flowVector);
+        //float radius = 1;
+        //RaycastHit hit;
+        //if(Physics.SphereCast(ray, radius, out hit))
+        //{
+        //    //あたったのが床だったらダメ
+        //    if(hit.transform.gameObject.tag == "Plane")
+        //        return false;
+        //}
 
         return true;
     }
