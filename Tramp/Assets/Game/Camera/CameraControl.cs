@@ -130,7 +130,7 @@ public class CameraControl : MonoBehaviour
     /// </summary>
     void BetweenPlayerAndCamera()
     {
-        Vector3 direction = player.transform.position - cameraObj.transform.position;
+        Vector3 direction = (player.transform.position + Vector3.up) - cameraObj.transform.position;
         Ray ray = new Ray(cameraObj.transform.position, direction);
 
 
