@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Linq;
 using GamepadInput;
 
 
@@ -131,34 +132,24 @@ public class CameraControl : MonoBehaviour
     {
         Vector3 direction = player.transform.position - cameraObj.transform.position;
         Ray ray = new Ray(cameraObj.transform.position, direction);
-        List<RaycastHit> hits = new List<RaycastHit>();
-        hits.AddRange( Physics.RaycastAll(ray, direction.magnitude));
-        List<GameObject> hitList = new List<GameObject>();
-        hits.ForEach(n => hitList.Add(n.transform.gameObject));
+
+
+        //rayにあたったオブジェクトをリストに格納
+        List<GameObject> hitList = Physics.RaycastAll(ray, direction.magnitude).Select(n => n.transform.gameObject).ToList();
 
         if (hitList.Count == 0)return;
 
-        foreach(GameObject hit in hitList)
-        {
-            GameObject obj = lineHitObjects.Find(n => n.Equals(hit));
-            if(obj != null) continue;
-            if (hit.tag != "Box") continue;
-            lineHitObjects.Add(hit);
-        }
-        foreach(GameObject obj in lineHitObjects)
-        {
-            Material mat = obj.GetComponent<Renderer>().material;
-            Color color = mat.color;
-            mat.SetFloat("_Mode", 2);
-            mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            mat.SetInt("_ZWrite", 0);
-            mat.DisableKeyword("_ALPHATEST_ON");
-            mat.EnableKeyword("_ALPHABLEND_ON");
-            mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-            mat.renderQueue = 3000;
-            mat.color = new Color(color.r, color.g, color.b, 0);
-        }
+        //containsでlinehitに無くてtagがBoxのものを判定しwhereで無かったものをlistに格納
+        lineHitObjects.AddRange(hitList.Where(n => (!lineHitObjects.Contains(n)) && n.tag == "Box"));
+
+        //半透明にする
+        lineHitObjects.ForEach(n => SetAlpha(n, 0.3f));
+
+        //今回あたっていないものはマテリアルをリセットする
+        lineHitObjects.Where(n => !hitList.Contains(n)).ToList().ForEach(m => ResetAlpha(m));
+
+        //今回あたっていないものは削除
+        lineHitObjects.RemoveAll(n => !hitList.Contains(n));
     }
 
     void SetAlpha(GameObject obj, float alpha)
@@ -176,9 +167,16 @@ public class CameraControl : MonoBehaviour
         mat.color = new Color(color.r, color.g, color.b, alpha);
     }
 
-    void ResetAlpha()
+    void ResetAlpha(GameObject obj)
     {
-
+        Material mat = obj.GetComponent<Renderer>().material;
+        mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+        mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+        mat.SetInt("_ZWrite", 1);
+        mat.DisableKeyword("_ALPHATEST_ON");
+        mat.DisableKeyword("_ALPHABLEND_ON");
+        mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+        mat.renderQueue = -1;
     }
 
     /// <summary>
