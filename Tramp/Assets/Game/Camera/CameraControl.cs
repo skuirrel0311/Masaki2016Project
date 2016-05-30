@@ -30,14 +30,16 @@ public class CameraControl : MonoBehaviour
     float radius = 6;
     [SerializeField]
     private float rotationSpeed = 200;
-    
+
     public GameObject targetAnchor;
     private GameObject cameraObj;
 
-    public GameObject player;
+    private Vector3 cameraTargetPosition;
+    private GameObject player;
+    private PlayerControl playerControl;
     private Vector3 oldPlayerPosition;
     private int playerNum = 1;
-    private float  oldInputVec=0;
+    private float oldInputVec = 0;
 
     [SerializeField]
     private GameObject AlignmentSprite = null;
@@ -47,7 +49,7 @@ public class CameraControl : MonoBehaviour
     /// ロックオンの処理が終わったか(アンカーにカメラが向き終わったか？)
     /// </summary>
     private bool IsEndLockOn;
-    public  bool IsLockOn;
+    public bool IsLockOn;
 
     //カメラとプレイヤーの間にあるオブジェクト
     List<GameObject> lineHitObjects = new List<GameObject>();
@@ -75,7 +77,9 @@ public class CameraControl : MonoBehaviour
     public void SetPlayer(GameObject Player)
     {
         player = Player;
+        playerControl = player.GetComponent<PlayerControl>();
         oldPlayerPosition = player.transform.position;
+        cameraTargetPosition = player.transform.position;
         playerNum = player.GetComponent<PlayerControl>().playerNum;
         Reset();
     }
@@ -87,7 +91,7 @@ public class CameraControl : MonoBehaviour
         lockonTimer.Update();
         imageTimer.Update();
         //ロックオンの処理押された時と押している時で処理を分ける
-        if (GamePadInput.GetButtonDown(GamePadInput.Button.LeftShoulder, (GamePadInput.Index)playerNum)&&!MainGameManager.IsPause)
+        if (GamePadInput.GetButtonDown(GamePadInput.Button.LeftShoulder, (GamePadInput.Index)playerNum) && !MainGameManager.IsPause)
         {
             if (!IsLockOn) CameraLockOnStart();
             else
@@ -118,6 +122,7 @@ public class CameraControl : MonoBehaviour
 
         if (GamePadInput.GetButtonDown(GamePadInput.Button.RightStick, (GamePadInput.Index)playerNum)) Reset();
 
+        GetTargetPosition();
         SphereCameraControl();
 
         cameraObj.transform.localRotation = Quaternion.Lerp(Quaternion.Euler(0, cameraObj.transform.localRotation.y, 0), cameraObj.transform.localRotation, 1 - lockonTimer.Progress);
@@ -137,7 +142,7 @@ public class CameraControl : MonoBehaviour
         //rayにあたったオブジェクトをリストに格納
         List<GameObject> hitList = Physics.RaycastAll(ray, direction.magnitude).Select(n => n.transform.gameObject).ToList();
 
-        if (hitList.Count == 0)return;
+        if (hitList.Count == 0) return;
 
         //containsでlinehitに無くてtagがBoxのものを判定しwhereで無かったものをlistに格納
         lineHitObjects.AddRange(hitList.Where(n => (!lineHitObjects.Contains(n)) && n.tag == "Box"));
@@ -187,8 +192,7 @@ public class CameraControl : MonoBehaviour
         Vector3 cameraPosition;
 
         //プレイヤーの足元からY座標に+1した座標をターゲットにする
-        Vector3 target = player.transform.position;
-        target.y += 1f;
+        Vector3 target = cameraTargetPosition + Vector3.up;
 
         //経度には制限を掛ける
         latitude = Mathf.Clamp(latitude, -120, 60);
@@ -304,7 +308,7 @@ public class CameraControl : MonoBehaviour
         float rot2 = Mathf.Atan2(transform.forward.z, transform.forward.x) * Mathf.Rad2Deg;
         return SphereCoordinate(longitude + (rot2 - rot1), rot3);
     }
-    
+
     /// <summary>
     ///照準画像の処理
     /// </summary>
@@ -326,10 +330,26 @@ public class CameraControl : MonoBehaviour
         //プレイヤーが移動していなかったら終了
         if (movement.magnitude == 0) return;
 
+        if (!playerControl.Isfalling) movement.y *= 0.1f;
+
         //プレイヤーについていくMOMO
-        transform.position += movement;
+        cameraTargetPosition += movement;
     }
-    
+
+    private void GetTargetPosition()
+    {
+        Vector3 movement = player.transform.position - oldPlayerPosition;
+
+        //プレイヤーが移動していなかったら終了
+        if (movement.magnitude == 0) return;
+
+        if(!playerControl.Isfalling) movement.y *= 0.3f;
+
+        cameraTargetPosition += movement;
+
+        if (playerControl.IsOnGround) cameraTargetPosition = Vector3.Lerp(cameraTargetPosition, player.transform.position,playerControl.OnGroundTimer.Progress);
+    }
+        
     #region GetTargetAnchor
     public GameObject GetTargetAnchor()
     {

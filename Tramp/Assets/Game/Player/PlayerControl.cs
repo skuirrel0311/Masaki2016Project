@@ -23,7 +23,7 @@ public class PlayerControl : NetworkBehaviour
     /// 地上にいる
     /// </summary>
     [SerializeField]
-    private bool IsOnGround;
+    public bool IsOnGround;
 
     [SerializeField]
     private float EndArea = 59;
@@ -32,13 +32,13 @@ public class PlayerControl : NetworkBehaviour
     /// ジャンプ中
     /// </summary>
     [SerializeField]
-    private bool IsJumping;
+    public bool IsJumping;
 
     /// <summary>
     /// 落下中
     /// </summary>
     [SerializeField]
-    private bool Isfalling;
+    public bool Isfalling;
 
     /// <summary>
     /// ジャンプキーが押された時の座標
@@ -50,12 +50,16 @@ public class PlayerControl : NetworkBehaviour
     private Rigidbody body;
     bool isRun = false;
 
+    Timer onGroundTimer = new Timer();
+    public Timer OnGroundTimer { get { return onGroundTimer; } }
+
     void Start()
     {
         animator = GetComponentInChildren<Animator>();
         body = GetComponent<Rigidbody>();
-        atJumpPosition = Vector3.zero;
-        IsOnGround = true;
+        atJumpPosition = transform.position;
+        IsOnGround = false;
+        Isfalling = true;
         isRun = false;
 
         if (isLocalPlayer)
@@ -90,11 +94,14 @@ public class PlayerControl : NetworkBehaviour
 
     void Update()
     {
+        onGroundTimer.Update();
         body.isKinematic = false;
         Vector2 leftStick = GamePadInput.GetAxis(GamePadInput.Axis.LeftStick, (GamePadInput.Index)playerNum);
         Vector3 direction = new Vector3(leftStick.x, 0, leftStick.y);
         Move(direction);
         Jump();
+
+        if (IsJumping && atJumpPosition.y > transform.position.y) Isfalling = true;
 
         //アニメーターにパラメータを送る
         if (!ChackCurrentAnimatorName(animator, "wait") && !Move(direction))
@@ -198,11 +205,41 @@ public class PlayerControl : NetworkBehaviour
 
         //Areaはトリガーなのでヒットしないが
         //どうやら親のタグを取得しているみたい
-        if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Box" && 
-            collision.gameObject.tag != "Area" && collision.gameObject.tag != "Scaffold") return;
+        if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Area" && collision.gameObject.tag != "Scaffold") return;
         Landed();
     }
 
+    void OnCollisionExit(Collision col)
+    {
+        if (col.gameObject.tag != "Plane" && col.gameObject.tag != "Area" && col.gameObject.tag != "Scaffold") return;
+
+        //床から離れたら落ちているかジャンプしているか
+
+        //ジャンプしていなかったら落ちただけ
+        if (!IsJumping) Isfalling = true;
+        animator.CrossFadeInFixedTime("jump", 0.5f);
+        IsOnGround = false;
+    }
+
+    void OnTriggerEnter(Collider col)
+    {
+        Debug.Log(col.name);
+        //着地した
+        if (col.tag != "Box") return;
+
+        Landed();
+    }
+
+    void OnTriggerExit(Collider col)
+    {
+        //地面から離れた
+        if (col.tag != "Box") return;
+
+        if (!IsJumping) Isfalling = true;
+        animator.CrossFadeInFixedTime("jump", 0.5f);
+        IsOnGround = false;
+    }
+    
     //着地した
     void Landed()
     {
@@ -211,5 +248,6 @@ public class PlayerControl : NetworkBehaviour
         IsOnGround = true;
         body.isKinematic = false;
         animator.CrossFadeInFixedTime("jump_landing", 0.1f);
+        onGroundTimer.TimerStart(0.4f);
     }
 }
