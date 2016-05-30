@@ -112,6 +112,8 @@ public class CameraControl : MonoBehaviour
         AlignmentImage(1);
         targetAnchor = null;
 
+        SetMaker();
+
         Vector2 rightStick = GamePadInput.GetAxis(GamePadInput.Axis.RightStick, (GamePadInput.Index)playerNum);
 
 
@@ -334,6 +336,20 @@ public class CameraControl : MonoBehaviour
 
         //プレイヤーについていくMOMO
         cameraTargetPosition += movement;
+    }
+
+    private void SetMaker()
+    {
+        GameObject obj = GetTargetAnchor();
+
+        //アンカーがカメラのどこに表示されているか？
+        Vector3 anchorPosition = cameraObj.GetComponent<Camera>().WorldToViewportPoint(obj.transform.position);
+
+        Vector3 lablPosition = cameraObj.GetComponent<Camera>().ViewportToWorldPoint(anchorPosition);
+
+        lablPosition.z = 0;
+
+        AlignmentSprite.transform.position = lablPosition;
     }
 
     private void GetTargetPosition()
