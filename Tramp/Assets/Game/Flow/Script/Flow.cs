@@ -87,6 +87,7 @@ public class Flow : NetworkBehaviour{
         }
 
         transform.localScale = new Vector3(2, flowVector.magnitude * 0.5f+1.0f, 2);
+        GetComponent<MeshRenderer >().materials[0].SetFloat("_LineNum",flowVector.magnitude);
         CapsuleCollider capcol = GetComponent<CapsuleCollider>();
         capcol.height = flowVector.magnitude / (flowVector.magnitude * 0.5f);
         capcol.radius = 0.5f;

@@ -31,6 +31,14 @@ public class LocalFlow : MonoBehaviour{
         gameObject.name = "FlowEffect"+CreateFlow.flowEffectCount;
     }
 
+    void Start()
+    {
+        GetComponent<MeshRenderer>().materials[0].SetFloat("_LineNum", transform.localScale.y*2);
+        GetComponent<LineRenderer>().SetPosition(0, transform.position + (transform.up * transform.localScale.y));
+        GetComponent<LineRenderer>().SetPosition(1, transform.position - (transform.up * transform.localScale.y));
+
+    }
+
 
     void OnTriggerEnter(Collider col)
     {
