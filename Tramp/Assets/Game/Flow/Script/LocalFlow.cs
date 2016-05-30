@@ -34,8 +34,8 @@ public class LocalFlow : MonoBehaviour{
     void Start()
     {
         GetComponent<MeshRenderer>().materials[0].SetFloat("_LineNum", transform.localScale.y*2);
-        GetComponent<LineRenderer>().SetPosition(0, transform.position + (transform.up * transform.localScale.y));
-        GetComponent<LineRenderer>().SetPosition(1, transform.position - (transform.up * transform.localScale.y));
+        GetComponent<LineRenderer>().SetPosition(0, transform.position + (transform.up * transform.localScale.y*0.5f));
+        GetComponent<LineRenderer>().SetPosition(1, transform.position - (transform.up * transform.localScale.y*0.5f));
 
     }
 
@@ -46,8 +46,6 @@ public class LocalFlow : MonoBehaviour{
         {
             Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
             col.gameObject.GetComponent<Animator>().CrossFadeInFixedTime("ride",0.1f);
-            //body.isKinematic = true;
-            //col.gameObject.transform.Translate(transform.up*Time.deltaTime*speed,Space.World);
             body.AddForce(transform.up * Time.deltaTime * speed*100, ForceMode.Impulse);
         }
     }

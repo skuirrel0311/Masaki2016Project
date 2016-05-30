@@ -63,36 +63,61 @@ public class Flow : NetworkBehaviour{
 
     void Start()
     {
-        isCalc = false;
+        isCalc = true;
         isDestory = false;
         isrenderd = true;
 
         if (!isCreatePlayer)
         {
-            GetComponent<Renderer>().enabled = false;
-            isrenderd = false;
+            StopFlowRender();
+        }
+
+        if (whichCreatePlayer)
+        {
+            GetComponent<Renderer>().materials[0].SetColor("_Color",Color.blue);
+        }
+        else
+        {
+            GetComponent<Renderer>().materials[0].SetColor("_Color", new Color(0.5f,0,0));
         }
 
     }
+
+    public void FlowRender()
+    {
+        GetComponent<Renderer>().enabled = true;
+        GetComponent<LineRenderer>().enabled = true;
+    }
+    public void StopFlowRender()
+    {
+        GetComponent<Renderer>().enabled = false;
+        GetComponent<LineRenderer>().enabled = false;
+        isrenderd = false;
+    }
+
     void Update()
     {
-        // if (!isCalc) return;
+
         if (targetAnchor == null) GetTargetAnchor();
-        if (startAnchor == null)
-            GetStartAnchor();
+        //if (startAnchor == null)
+        //    GetStartAnchor();
 
         if (!isCreatePlayer&&isrenderd==true)
         {
             GetComponent<Renderer>().enabled = false;
+            GetComponent<LineRenderer>().enabled = false;
         }
 
+        if (!isCalc) return;
         transform.localScale = new Vector3(2, flowVector.magnitude * 0.5f+1.0f, 2);
         GetComponent<MeshRenderer >().materials[0].SetFloat("_LineNum",flowVector.magnitude);
         CapsuleCollider capcol = GetComponent<CapsuleCollider>();
         capcol.height = flowVector.magnitude / (flowVector.magnitude * 0.5f);
         capcol.radius = 0.5f;
+        GetComponent<LineRenderer>().SetPosition(0, transform.position + (transform.up * transform.localScale.y * 0.5f));
+        GetComponent<LineRenderer>().SetPosition(1, transform.position - (transform.up * transform.localScale.y * 0.5f));
         capcol.isTrigger = true;
-
+        isCalc = false;
     }
 
     void GetTargetAnchor()
@@ -129,7 +154,7 @@ public class Flow : NetworkBehaviour{
     {
         if (col.tag != "Player") return;
         if (!col.gameObject.GetComponent<NetworkBehaviour>().isLocalPlayer) return;
-        GetComponent<Renderer>().enabled = true;
+        FlowRender();
         Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
         bodys.Add(body);
         body.useGravity = false;
@@ -144,6 +169,14 @@ public class Flow : NetworkBehaviour{
     void PlayerStay(Collider col)
     {
         PlayerState state = col.gameObject.GetComponent<PlayerState>();
+        if (isCreatePlayer)
+        {
+            col.gameObject.GetComponent<Penetrate>().Energy++;
+        }
+        else
+        {
+            col.gameObject.GetComponent<Penetrate>().Energy--;
+        }
 
         PlayerVector = targetPosition - (col.transform.position + Vector3.up);
         PlayerVector.Normalize();
