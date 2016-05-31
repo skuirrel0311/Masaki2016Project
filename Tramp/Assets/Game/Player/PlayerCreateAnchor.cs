@@ -53,7 +53,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (GamePadInput.GetTrigger(GamePadInput.Trigger.LeftTrigger,GamePadInput.Index.One)==1.0f&&camera.GetComponent<CameraControl>().IsLockOn)
+        if (GamePadInput.GetTrigger(GamePadInput.Trigger.LeftTrigger, GamePadInput.Index.One) == 1.0f)
         {
             if (MainGameManager.IsPause) return;
             if (!playerState.IsOnAppealArea && !CheckNearAnchor())

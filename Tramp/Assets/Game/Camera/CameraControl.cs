@@ -43,6 +43,7 @@ public class CameraControl : MonoBehaviour
 
     [SerializeField]
     private GameObject AlignmentSprite = null;
+    private RectTransform canvasRect;
     private Timer lockonTimer = new Timer();
     private Timer imageTimer = new Timer();
     /// <summary>
@@ -58,8 +59,11 @@ public class CameraControl : MonoBehaviour
     void Start()
     {
         cameraObj = transform.FindChild("ThirdPersonCamera").gameObject;
-        playerNum = player.GetComponent<PlayerControl>().playerNum;
         IsEndLockOn = false;
+        canvasRect = GameObject.Find("Canvas").GetComponent<RectTransform>();
+        GameObject g = GameObject.Find("Canvas");
+
+        Debug.Log(g.name);
     }
 
     //カメラの角度をリセットする
@@ -152,11 +156,13 @@ public class CameraControl : MonoBehaviour
         //半透明にする
         lineHitObjects.ForEach(n => SetAlpha(n, 0.3f));
 
-        //今回あたっていないものはマテリアルをリセットする
-        lineHitObjects.Where(n => !hitList.Contains(n)).ToList().ForEach(m => ResetAlpha(m));
-
-        //今回あたっていないものは削除
-        lineHitObjects.RemoveAll(n => !hitList.Contains(n));
+        //今回ヒットしなかったものは透明度をリセットし、リムーブする。
+        lineHitObjects.RemoveAll(n =>
+        {
+            if (hitList.Contains(n)) return false;
+            ResetAlpha(n);
+            return true;
+        });
     }
 
     void SetAlpha(GameObject obj, float alpha)
@@ -341,15 +347,23 @@ public class CameraControl : MonoBehaviour
     private void SetMaker()
     {
         GameObject obj = GetTargetAnchor();
+        Image image = AlignmentSprite.GetComponent<Image>();
 
-        //アンカーがカメラのどこに表示されているか？
+        //nullだったら中央に表示される
+        if (obj == null)
+        {
+            image.rectTransform.anchoredPosition = Vector2.zero;
+            return;
+        }
+
+        //アンカーがカメラのどこに表示されているか？(0～1)
         Vector3 anchorPosition = cameraObj.GetComponent<Camera>().WorldToViewportPoint(obj.transform.position);
 
-        Vector3 lablPosition = cameraObj.GetComponent<Camera>().ViewportToWorldPoint(anchorPosition);
+        //canvasのrectのサイズの1/2を引く。
+        float x = (anchorPosition.x * canvasRect.sizeDelta.x) - (canvasRect.sizeDelta.x * 0.5f);
+        float y = (anchorPosition.y * canvasRect.sizeDelta.y) - (canvasRect.sizeDelta.y * 0.5f);
 
-        lablPosition.z = 0;
-
-        AlignmentSprite.transform.position = lablPosition;
+        image.rectTransform.anchoredPosition = new Vector2(x, y);
     }
 
     private void GetTargetPosition()
@@ -359,13 +373,13 @@ public class CameraControl : MonoBehaviour
         //プレイヤーが移動していなかったら終了
         if (movement.magnitude == 0) return;
 
-        if(!playerControl.Isfalling) movement.y *= 0.3f;
+        if (!playerControl.Isfalling) movement.y *= 0.3f;
 
         cameraTargetPosition += movement;
 
-        if (playerControl.IsOnGround) cameraTargetPosition = Vector3.Lerp(cameraTargetPosition, player.transform.position,playerControl.OnGroundTimer.Progress);
+        if (playerControl.IsOnGround) cameraTargetPosition = Vector3.Lerp(cameraTargetPosition, player.transform.position, playerControl.OnGroundTimer.Progress);
     }
-        
+
     #region GetTargetAnchor
     public GameObject GetTargetAnchor()
     {
@@ -378,7 +392,7 @@ public class CameraControl : MonoBehaviour
         //見ている可能性が高いアンカーを取得
         List<GameObject> temp = GetShouldLookAnchor(anchorList);
 
-        if(temp.Count != 0)
+        if (temp.Count != 0)
         {
             //5度以内のアンカーのなかで一番近いアンカーを取得
             targetAnchor = GetNearAnchor(temp);
@@ -405,7 +419,7 @@ public class CameraControl : MonoBehaviour
 
         anchorList.ForEach(n =>
         {
-            if(Vector3.Distance(transform.position,n.transform.position) < distance)
+            if (Vector3.Distance(transform.position, n.transform.position) < distance)
             {
                 distance = Vector3.Distance(transform.position, n.transform.position);
                 nearAnchor = n;
@@ -443,7 +457,7 @@ public class CameraControl : MonoBehaviour
             float tmpAngleW = Vector2.Angle(vec, originAnchorVec);
             //上下の角度
             Vector3 toAnchorVector = n.transform.position - cameraObj.transform.position;
-            float tmpAngleH = DifferenceLatitude(toAnchorVector,cameraObj.transform.forward);
+            float tmpAngleH = DifferenceLatitude(toAnchorVector, cameraObj.transform.forward);
             tmpAngleH = Mathf.Abs(tmpAngleH);
 
             //5度以内のアンカーを検索
