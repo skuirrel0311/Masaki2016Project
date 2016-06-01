@@ -13,6 +13,9 @@ public class PlayerDamage : NetworkBehaviour
 
     NoiseAndGrain noise;
 
+    [SerializeField]
+    float InpulusPower = 100;
+
     void Start()
     {
         state = gameObject.GetComponent<PlayerState>();
@@ -38,10 +41,9 @@ public class PlayerDamage : NetworkBehaviour
                 state.animator.CrossFadeInFixedTime("damage", 0.1f);
                 state.Damege();
                 Destroy(col.gameObject);
-            }
-            else
-            {
-                Destroy(col.gameObject);
+                Vector3 vec = col.gameObject.GetComponent<Rigidbody>().velocity;
+                vec = new Vector3(vec.x,vec.y/100,vec.z);
+                gameObject.GetComponent<Rigidbody>().AddForce(vec*InpulusPower,ForceMode.Impulse);
             }
         }
     }

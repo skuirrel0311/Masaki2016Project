@@ -50,6 +50,8 @@ public class PlayerShot : NetworkBehaviour
     bool IsReload;
     bool IsReloading;
 
+    float shotTimer;
+
     GamepadInputState padState;
 
     void Start()
@@ -58,10 +60,10 @@ public class PlayerShot : NetworkBehaviour
         playerState = GetComponent<PlayerState>();
         cameraObj = GameObject.Find("Camera" + playerNum);
         cam = cameraObj.GetComponentInChildren<Camera>();
-        StartCoroutine("LongTriggerDown");
         stock = stockMax;
         IsReload = false;
         isShot = false;
+        shotTimer = -1;
         vibrationTimer = 0;
     }
 
@@ -69,7 +71,6 @@ public class PlayerShot : NetworkBehaviour
 
     void Shot()
     {
-
         playerState.animator.SetLayerWeight(1, 1);
 
         GamePadState padState = GamePad.GetState(PlayerIndex.One);
@@ -116,6 +117,21 @@ public class PlayerShot : NetworkBehaviour
             isShot = false;
         }
 
+        if(GamePadInput.GetTrigger(GamePadInput.Trigger.RightTrigger,GamePadInput.Index.One,true)>0&&isLocalPlayer&&shotTimer==-1&&!isShot)
+        {
+            shotTimer = 0;
+            Shot();
+        }
+
+        if(shotTimer != -1)
+        {
+           shotTimer += Time.deltaTime;
+            if (shotTimer >= 0.1f)
+            {
+                shotTimer = -1;
+            }
+        }
+
         if (vibrationTimer != -1)
         {
             vibrationTimer += Time.deltaTime;
@@ -134,57 +150,6 @@ public class PlayerShot : NetworkBehaviour
         go.transform.rotation = shotrotation;
     }
 
-    IEnumerator LongTriggerDown()
-    {
-        while (true)
-        {
-            if (IsReload)
-            {
-                while (true)
-                {
-                    if (stock > 0) break;
-                    if (!GamePadInput.GetButtonDown(GamePadInput.Button.X, (GamePadInput.Index)playerNum)) yield return null;
-                    else break;
-                }
-                if (stock > 0) IsReload = false;
-                else
-                {
-                    //ボタン押したら3秒待つ
-                    IsReloading = true;
-                    IsReload = false;
-                    gameObject.GetComponentInChildren<Animator>().SetBool("Reload", true);
-                    //動けない
-                    yield return new WaitForSeconds(3);
-
-                    //リロードが終わったら
-                    IsReloading = false;
-                    gameObject.GetComponentInChildren<Animator>().SetBool("Reload", false);
-                    if (stock <= 0) stock = stockMax;
-                }
-            }
-
-            if (GamePadInput.GetTrigger(GamePadInput.Trigger.RightTrigger, (GamePadInput.Index)playerNum, true) > 0  && isLocalPlayer)
-            {
-                stock -= shotEnergyNum;
-                if (stock <= 0) stock = 0;
-                Shot();
-
-                playerState.animator.SetBool("RunShotEnd", false);
-            }
-            else
-                yield return null;
-
-
-
-            //ストックが無くなった
-            if (stock <= 0)
-            {
-                IsReload = true;
-            }
-
-            yield return new WaitForSeconds(shotDistance);
-        }
-    }
 
     Vector3 GetTargetPosition()
     {

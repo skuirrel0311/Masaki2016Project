@@ -222,9 +222,6 @@ public class PlayerControl : NetworkBehaviour
     void OnCollisionEnter(Collision collision)
     {
         Debug.Log("Player Control hit");
-
-        
-
         //地面にいたらダメ
         if (IsOnGround) return;
 
