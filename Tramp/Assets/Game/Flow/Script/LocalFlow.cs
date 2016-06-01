@@ -12,27 +12,18 @@ public class LocalFlow : MonoBehaviour{
     public Vector3 FlowVector
     {
         get { return flowVector; }
-        set { flowVector = value; isCalc = true; }
+        set { flowVector = value; }
     }
     
     private Vector3 flowVector;
 
     private Vector3 PlayerVector;
 
-    public Vector3 TargetPosition
-    {
-        get { return targetPosition; }
-        set { targetPosition = value; isCalc = true; }
-    }
+
 
     [SerializeField]
     Transform target;
 
-    private Vector3 targetPosition;
-
-    private bool isCalc = true;
-
-    public bool isDestory;
 
     void Awake()
     {
@@ -42,20 +33,21 @@ public class LocalFlow : MonoBehaviour{
 
     void Start()
     {
-        isCalc = false;
-        isDestory = false;
-        flowVector = new Vector3(0,35,0);
-        targetPosition = target.position;
+        GetComponent<MeshRenderer>().materials[0].SetFloat("_LineNum", transform.localScale.y*2);
+        GetComponent<LineRenderer>().SetPosition(0, transform.position + (transform.up * transform.localScale.y*0.5f));
+        GetComponent<LineRenderer>().SetPosition(1, transform.position - (transform.up * transform.localScale.y*0.5f));
+
     }
-    void Update()
+
+
+    void OnTriggerEnter(Collider col)
     {
-        // if (!isCalc) return;
-        transform.localScale = new Vector3(2, flowVector.magnitude * 0.5f, 2);
-        //CapsuleColliderをアタッチする
-        CapsuleCollider capcol = GetComponent<CapsuleCollider>();
-        capcol.height = flowVector.magnitude / (flowVector.magnitude * 0.5f);
-        capcol.radius = 0.5f;
-        capcol.isTrigger = true;
+        if (col.tag == "Player")
+        {
+            Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
+            col.gameObject.GetComponent<Animator>().CrossFadeInFixedTime("ride",0.1f);
+            body.AddForce(transform.up * Time.deltaTime * speed*100, ForceMode.Impulse);
+        }
     }
 
     void OnTriggerStay(Collider col)
@@ -63,29 +55,18 @@ public class LocalFlow : MonoBehaviour{
 
         if (col.tag == "Player")
         {
-            PlayerVector = targetPosition - (col.transform.position + Vector3.up);
-            PlayerVector.Normalize();
             Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
-            body.isKinematic = true;
-            col.gameObject.transform.Translate(PlayerVector*Time.deltaTime*speed,Space.World);
-
-            if (nonDestroy) return;
-            //ターゲットから一定の距離
-            if (Vector3.Distance(targetPosition, col.gameObject.transform.position) < 2)
-            {
-                Destroy(gameObject); return;
-            }
+            body.AddForce(transform.up * Time.deltaTime * speed,ForceMode.Acceleration);
+            
         }
     }
 
     void OnTriggerExit(Collider col)
     {
-        if (nonDestroy) return;
         if (col.tag == "Player")
         {
-            if (isDestory) { Destroy(gameObject); return; }
-
-
+            Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
+           // body.velocity = Vector3.zero;
         }
     }
 }

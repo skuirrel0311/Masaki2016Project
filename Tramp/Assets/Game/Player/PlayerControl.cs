@@ -25,6 +25,9 @@ public class PlayerControl : NetworkBehaviour
     [SerializeField]
     private bool IsOnGround;
 
+    [SerializeField]
+    private float EndArea = 59;
+
     /// <summary>
     /// ジャンプ中
     /// </summary>
@@ -41,10 +44,14 @@ public class PlayerControl : NetworkBehaviour
     /// ジャンプキーが押された時の座標
     /// </summary>
     private Vector3 atJumpPosition;
-    
+
     public int playerNum;
 
     private Rigidbody body;
+    bool isRun = false;
+
+    //最後にあたっていた流れ
+    public bool hitFix;
 
     void Start()
     {
@@ -52,85 +59,164 @@ public class PlayerControl : NetworkBehaviour
         body = GetComponent<Rigidbody>();
         atJumpPosition = Vector3.zero;
         IsOnGround = true;
+        isRun = false;
+        hitFix = false;
         if (isLocalPlayer)
         {
+            SetSratPosition();
             GameObject.Find("Camera1").GetComponent<CameraControl>().SetPlayer(gameObject);
             mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
         }
     }
 
+    void OnDestroy()
+    {
+        Debug.Log("Player Destory");
+    }
+
+    public void SetSratPosition()
+    {
+        //スタート座標の設定
+        if (isServer)
+        {
+            GameObject go = GameObject.Find("HostStart");
+            transform.position = go.transform.position;
+            transform.rotation = go.transform.rotation;
+        }
+        else
+        {
+            GameObject go = GameObject.Find("ClientStart");
+            transform.position = go.transform.position;
+            transform.rotation = go.transform.rotation;
+        }
+    }
+
     void Update()
     {
-        body.isKinematic = false;
-        Vector2 leftStick = GamePad.GetAxis(GamePad.Axis.LeftStick, (GamePad.Index)playerNum);
-        Vector3 direction = new Vector3(leftStick.x,0,leftStick.y);
+        Vector2 leftStick = GamePadInput.GetAxis(GamePadInput.Axis.LeftStick, (GamePadInput.Index)playerNum);
+        Vector3 direction = new Vector3(leftStick.x, 0, leftStick.y);
         Move(direction);
         Jump();
 
         //アニメーターにパラメータを送る
-        animator.SetFloat("Speed", direction.magnitude);
-        animator.SetBool("Jump", IsJumping);
+        if (!ChackCurrentAnimatorName(animator, "wait") && !Move(direction))
+        {
+            isRun = false;
+            animator.SetBool("IsRun", isRun);
+        }
+
+        Vector3 c = new Vector3(transform.position.x, 0, transform.position.z);
+        if (c.magnitude > EndArea)
+        {
+            c.Normalize();
+            transform.position = new Vector3(c.x * EndArea, transform.position.y, c.z * EndArea);
+            GetComponent<Rigidbody>().velocity = Vector3.zero;
+        }
+    }
+
+    static public bool ChackCurrentAnimatorName(Animator animator, string name)
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsName(name);
     }
 
     /// <summary>
     /// 移動
     /// </summary>
     /// <param name="movement">移動量</param>
-    void Move(Vector3 movement)
+    bool Move(Vector3 movement)
     {
+        //ポーズ中だったら終了
+        if (MainGameManager.IsPause) return false;
 
-        //移動していなかったら終了
-        if (movement == Vector3.zero) return;
-
-        body.velocity = new Vector3(0,body.velocity.y,0);
+        // body.velocity = new Vector3(0,body.velocity.y,0);
         //カメラの角度のx､zは見ない
         Quaternion cameraRotation = mainCamera.transform.rotation;
         cameraRotation.x = 0;
         cameraRotation.z = 0;
+
+        Vector3 mov = movement;
         //入力の角度をカメラの角度に曲げる
         movement = cameraRotation * movement;
 
-        
+        //移動していなかったら終了
+        if (movement == Vector3.zero) return false;
 
-        //弧を描くように移動
-        Vector3 forward = Vector3.Slerp(
-            transform.forward,  //正面から
-            movement,          //入力の角度まで
-            rotationSpeed * Time.deltaTime / Vector3.Angle(transform.forward, movement)
-            );
+
+        //アニメーションの再生
+        if (!ChackCurrentAnimatorName(animator, "Take 001"))
+        {
+            isRun = true;
+            animator.SetBool("IsRun", isRun);
+        }
+
+
         //向きを変える
-        transform.LookAt(transform.position + forward);
-        body.AddForce(movement * moveSpeed,ForceMode.VelocityChange);
+        if (mov.z >= 0)
+        {
+            //弧を描くように移動
+            Vector3 forward = Vector3.Slerp(
+                transform.forward,  //正面から
+                movement,          //入力の角度まで
+                rotationSpeed * Time.deltaTime / Vector3.Angle(transform.forward, movement)
+                );
+            transform.LookAt(transform.position + forward);
+        }
+        else
+        {
+            //弧を描くように移動
+            Vector3 forward = Vector3.Slerp(
+                transform.forward,  //正面から
+                -movement,          //入力の角度まで
+                rotationSpeed * Time.deltaTime / Vector3.Angle(transform.forward, -movement)
+                );
+            transform.LookAt(transform.position + forward);
+        }
+
+        //body.AddForce(movement * moveSpeed,ForceMode.VelocityChange);
+        transform.Translate(movement * Time.deltaTime * moveSpeed, Space.World);
+        return true;
     }
 
     void Jump()
     {
         //プレイヤーがジャンプをしようとしたとき
-        if (GamePad.GetButtonDown(GamePad.Button.A, (GamePad.Index)playerNum) && IsOnGround)
+        if (GamePadInput.GetButtonDown(GamePadInput.Button.A, (GamePadInput.Index)playerNum) && IsOnGround && !MainGameManager.IsPause)
         {
             //ジャンプ時の地点を保持
             atJumpPosition = transform.position;
             IsJumping = true;
             IsOnGround = false;
+            animator.CrossFadeInFixedTime("jump", 0.5f);
             //body.isKinematic = true;
-            body.AddForce(jumpVec,ForceMode.VelocityChange);
+            body.AddForce(jumpVec * 100, ForceMode.Impulse);
         }
+    }
 
-        ////ジャンプキー長押し中
-        //if (GamePad.GetButton(GamePad.Button.A, (GamePad.Index)playerNum) && Isfalling == false && IsJumping == true)
-        //{
-        //    //最高地点に達した
-        //    if (transform.position.y >= atJumpPosition.y + jumpLimitPositionY)
-        //    {
-        //        Isfalling = true;
-        //    }
-        //}
+    void OnTriggerEnter(Collider col)
+    {
+        if (col.name == "FixAnchor"||col.name=="AreaAnchor")
+        {
+            hitFix = true;
+            if(col.name== "AreaAnchor")
+            {
+                GetComponent<Rigidbody>().velocity=Vector3.zero;
+                GetComponent<Rigidbody>().useGravity=true;
+            }
+        }
+    }
 
-        ////ジャンプキーを離した
-        //if (GamePad.GetButtonUp(GamePad.Button.A, (GamePad.Index)playerNum) && IsJumping == true)
-        //{
-        //    Isfalling = true;
-        //}
+    void OnTriggerExit(Collider col)
+    {
+        if (col.name == "FixAnchor" || col.name == "AreaAnchor")
+        {
+            StartCoroutine("SleepHItFix");
+        }
+    }
+
+    IEnumerator SleepHItFix()
+    {
+        yield return new WaitForSeconds(1);
+        hitFix = false;
     }
 
     void OnCollisionEnter(Collision collision)
@@ -152,11 +238,6 @@ public class PlayerControl : NetworkBehaviour
         Isfalling = false;
         IsOnGround = true;
         body.isKinematic = false;
-    }
-
-    //上昇中はすり抜ける
-    void SlipThrough()
-    {
-        body.isKinematic = true;
+        animator.CrossFadeInFixedTime("jump_landing", 0.1f);
     }
 }

@@ -49,17 +49,29 @@ public class CameraControl : MonoBehaviour
     /// ロックオンの処理が終わったか(アンカーにカメラが向き終わったか？)
     /// </summary>
     private bool LockonDecision;
-    private bool IsLockOn;
+    public  bool IsLockOn;
 
     private int playerNum = 1;
+
+    private float  oldInputVec=0;
     #endregion
 
     void Start()
     {
         cameraObj = transform.FindChild("ThirdPersonCamera").gameObject;
-        oldPlayerPosition = player.transform.position;
-        playerNum = player.GetComponent<PlayerControl>().playerNum;
         LockonDecision = false;
+    }
+
+    //カメラの角度をリセットする
+    public void Reset()
+    {
+        float playerRotation = player.transform.eulerAngles.y;
+
+        //カメラが向きたい方向
+        float cameraRotation = playerRotation + 180;
+
+        longitude = cameraRotation;
+        latitude = 15;
     }
 
     public void SetPlayer(GameObject Player)
@@ -67,12 +79,14 @@ public class CameraControl : MonoBehaviour
         player = Player;
         oldPlayerPosition = player.transform.position;
         playerNum = player.GetComponent<PlayerControl>().playerNum;
+        Reset();
     }
 
     void Update()
     {
+        if (player == null) return;
         //ロックオンの処理押された時と押している時で処理を分ける
-        if (GamePad.GetButtonDown(GamePad.Button.Y, (GamePad.Index)playerNum))
+        if (GamePadInput.GetButtonDown(GamePadInput.Button.LeftShoulder, (GamePadInput.Index)playerNum)&&!MainGameManager.IsPause)
         {
             if (!IsLockOn) CameraLockOnStart();
             else IsLockOn = false;
@@ -90,13 +104,15 @@ public class CameraControl : MonoBehaviour
         targetAnchor = null;
         timer = Mathf.Max(timer - Time.deltaTime, 0);
 
-        Vector2 rightStick = GamePad.GetAxis(GamePad.Axis.RightStick, (GamePad.Index)playerNum);
+        Vector2 rightStick = GamePadInput.GetAxis(GamePadInput.Axis.RightStick, (GamePadInput.Index)playerNum);
 
 
         if (latitude < 0) latitude += -rightStick.y * (rotationSpeed * 1.5f) * Time.deltaTime;
         else latitude += -rightStick.y * rotationSpeed * Time.deltaTime;
 
         longitude += rightStick.x * rotationSpeed * Time.deltaTime;
+
+        if (GamePadInput.GetButtonDown(GamePadInput.Button.RightStick, (GamePadInput.Index)playerNum)) Reset();
 
         SphereCameraControl();
 
@@ -182,6 +198,8 @@ public class CameraControl : MonoBehaviour
         InitLookatPosition(targetAnchor);
         timer = 0;
         IsLockOn = true;
+        //localEuleranglesはインスペクタと同じ数値
+        player.transform.localRotation = Quaternion.Euler(0, transform.localEulerAngles.y, 0);
     }
 
     private void InitLookatPosition(GameObject targetAnchor)
@@ -206,10 +224,14 @@ public class CameraControl : MonoBehaviour
         else
             AlignmentImage(timer);
 
-        if (GamePad.GetButtonDown(GamePad.Button.LeftShoulder, (GamePad.Index)playerNum)) targetAnchor = GetSideAnchor(Side.Left);
+        Vector2 inputVec = GamePadInput.GetAxis(GamePadInput.Axis.RightStick, GamePadInput.Index.One);
+        if (oldInputVec == 0)
+        {
+            if (inputVec.x < 0) targetAnchor = GetSideAnchor(Side.Left);
 
-        if (GamePad.GetButtonDown(GamePad.Button.RightShoulder, (GamePad.Index)playerNum)) targetAnchor = GetSideAnchor(Side.Right);
-
+            if (inputVec.x > 0) targetAnchor = GetSideAnchor(Side.Right);
+        }
+        oldInputVec = inputVec.x;
         //アンカーのある方向を取得
         Vector3 vec = targetAnchor.transform.position - transform.position;
         //オブジェクトのある方向に合わせたカメラのポジション移動

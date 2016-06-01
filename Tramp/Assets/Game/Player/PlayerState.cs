@@ -6,19 +6,20 @@ using GamepadInput;
 public class PlayerState : NetworkBehaviour
 {
     [SerializeField]
-    int maxHp = 10;
-    public int Hp { get { return hp; }private set { hp = value; }}
-    [SerializeField][SyncVar]
+    public int maxHp = 10;
+    public int Hp { get { return hp; } private set { hp = value; } }
+    /// <summary>
+    /// 体力
+    /// </summary>
+    [SerializeField]
+    [SyncVar]
     private int hp;
-
-
 
     /// <summary>
     /// 復活にかかる時間
     /// </summary>
     [SerializeField]
     float TimeToReturn = 3;
-    
 
     public GameObject appealItem;
 
@@ -27,7 +28,7 @@ public class PlayerState : NetworkBehaviour
     /// </summary>
     public Transform LeftHand;
 
-    Animator animator;
+    public Animator animator;
 
     /// <summary>
     /// 生きているか？
@@ -43,14 +44,9 @@ public class PlayerState : NetworkBehaviour
     }
 
     /// <summary>
-    /// アイテムを所持しているか？
+    /// アピールエリアの所有権を持っているか？
     /// </summary>
-    public bool IsPossessionOfItem { get; set; }
-
-    /// <summary>
-    /// アピール中か？
-    /// </summary>
-    public bool IsAppealing{ get; private set; }
+    public bool IsAreaOwner;
 
     private int playerIndex = 1;
 
@@ -63,19 +59,8 @@ public class PlayerState : NetworkBehaviour
 
     void Update()
     {
-        animator.SetBool("HaveItem", IsPossessionOfItem);
-
-        //アイテムを所持していたら
-        if(IsPossessionOfItem)
-        {
-            if (GamePad.GetButtonDown(GamePad.Button.RightShoulder, (GamePad.Index)playerIndex))
-            {
-                //反転
-                IsAppealing = IsAppealing ? false : true;
-            }
-        }
-
-        if(!IsAlive)
+        //animator.SetBool("HaveItem", IsPossessionOfItem);
+        if (!IsAlive)
         {
             //操作できない
             PlayerControl playerControl = GetComponent<PlayerControl>();
@@ -87,19 +72,17 @@ public class PlayerState : NetworkBehaviour
                 StartCoroutine("IsDead");
             }
         }
-
-        if (Input.GetKeyDown(KeyCode.A)) animator.SetTrigger("Dead");
     }
 
+
+    [Client]
     void Initialize()
     {
         hp = maxHp;
-        //transform.position = Vector3.zero;
-        //transform.rotation = Quaternion.Euler(Vector3.zero);
         PlayerControl playerControl = GetComponent<PlayerControl>();
+        animator.CrossFadeInFixedTime("wait", 0.1f);
+        playerControl.SetSratPosition();
         playerControl.enabled = true;
-        IsAppealing = false;
-        IsPossessionOfItem = false;
     }
 
     /// <summary>
@@ -108,31 +91,17 @@ public class PlayerState : NetworkBehaviour
     IEnumerator IsDead()
     {
         //フィーバーゲージ減少
-        GetComponent<FeverGauge>().KilledInPlayer();
+        //GetComponent<FeverGauge>().KilledInPlayer();
 
         GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("Player");
-        foreach (GameObject playerObj in playerObjects)
-        {
-            //自分以外のプレイヤーのフィーバーゲージを増加させる
-            if (gameObject.Equals(playerObj) == false) playerObj.GetComponent<FeverGauge>().KillPlayer();
-        }
-
-        //アイテムを所持していたら
-        if(IsPossessionOfItem)
-        {
-            //親子関係をはずしランダムに再設置。
-            appealItem.transform.parent = null;
-            appealItem.GetComponent<AppealItem>().SpawnInRandomPosition();
-        }
-
         //操作できないようにする。
         GetComponent<PlayerControl>().enabled = false;
-        animator.SetTrigger("Dead");
+        animator.CrossFadeInFixedTime("dead", 0.1f);
 
         yield return new WaitForSeconds(TimeToReturn);
         //3秒後に復活
-
         Initialize();
+        CmdHpReset();
     }
 
     public override void OnStartLocalPlayer()
@@ -144,22 +113,12 @@ public class PlayerState : NetworkBehaviour
     public void Damege()
     {
         CmdHpDamage();
+    }
 
-        if (!IsPossessionOfItem || appealItem == null) return;
-
-        //アイテムを所持していたら
-        int firstHp = appealItem.GetComponent<AppealItem>().FirstHp;
-
-        //hpがアイテムを所持したときのhpよりも３小さかったら
-        if(hp <= firstHp - 3)
-        {
-            //親子関係を解除
-            appealItem.transform.parent = null;
-            //ランダムに再配置
-            appealItem.GetComponent<AppealItem>().SpawnInRandomPosition();
-            IsPossessionOfItem = false;
-            IsAppealing = false;
-        }
+    [Command]
+    void CmdHpReset()
+    {
+        hp = maxHp;
     }
 
     [Command]
@@ -176,8 +135,6 @@ public class PlayerState : NetworkBehaviour
         GUIStyle style = new GUIStyle();
         style.fontSize = 30;
         style.fontStyle = FontStyle.Bold;
-        GUI.TextArea(new Rect(800,0,400,200),"残HP："+hp,style);
+        GUI.TextArea(new Rect(800, 0, 400, 200), "残HP：" + hp, style);
     }
-
-
 }

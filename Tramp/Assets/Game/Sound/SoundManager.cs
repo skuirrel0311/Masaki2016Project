@@ -5,7 +5,14 @@ using System.Collections.Generic;
 
 public class SoundManager : MonoBehaviour
 {
+    [SerializeField]
     AudioSource mainMusic;
+
+    [SerializeField]
+    AudioSource Voice_A_Audio;
+
+    [SerializeField]
+    AudioSource Voice_B_Audio;
 
     [SerializeField]
     AudioClip HostVoiceClip;
@@ -13,70 +20,80 @@ public class SoundManager : MonoBehaviour
     [SerializeField]
     AudioClip ClientVoiceClip;
 
+    private MyNetworkManager myNetManager;
+    private MyNetworkDiscovery myNetDiscovery;
+
     public void PlayMusic(bool isSever)
     {
         mainMusic.Play();
-        if (isSever)
-        {
-            mainMusic.PlayOneShot(HostVoiceClip);
-        }
-        else
-        {
-            mainMusic.PlayOneShot(ClientVoiceClip);
-        }
+
+        Voice_A_Audio.Play();
+
+        Voice_B_Audio.Play();
+
         Debug.Log("Play MainMusic");
     }
 
     // Use this for initialization
     void Start()
     {
-        mainMusic = GetComponent<AudioSource>();
         isEnd = false;
         isWin = false;
+        myNetManager = GetComponent<MyNetworkManager>();
+        myNetDiscovery = GetComponent<MyNetworkDiscovery>();
     }
     bool isEnd = false;
     public static bool isWin;
     // Update is called once per frame
     void Update()
     {
+        if (myNetDiscovery.isServer)
+        {
+            if (myNetManager.winner == Winner.lose)
+            {
+                Voice_A_Audio.mute = true;
+                Voice_B_Audio.mute = false;
+            }
+            else
+            {
+                Voice_A_Audio.mute = false;
+                Voice_B_Audio.mute = true;
+            }
+        }
+        else
+        {
+            if (myNetManager.winner == Winner.lose)
+            {
+                Voice_A_Audio.mute = false;
+                Voice_B_Audio.mute = true;
+            }
+            else
+            {
+                Voice_A_Audio.mute = true;
+                Voice_B_Audio.mute = false;
+            }
+        }
+
         if (mainMusic.time >= mainMusic.clip.length)
         {
             isEnd = true;
 
-            if (!GamepadInput.GamePad.GetButtonDown(GamepadInput.GamePad.Button.A, GamepadInput.GamePad.Index.One))
-            {
-                return;
-            }
-
-            MyNetworkDiscovery netMana = GetComponent<MyNetworkDiscovery>();
-            netMana.StopAllCoroutines();
-            if (netMana.isServer)
-            {
-                GetComponent<MyNetworkManager>().StopServer();
-                GetComponent<MyNetworkManager>().StopHost();
-            }
-            else
-            {
-                GetComponent<MyNetworkManager>().StopClient();
-            }
-            SceneManager.LoadScene("Menu");
+            GameObject go = GameObject.FindGameObjectWithTag("NetworkManager");
+            MyNetworkManager man = go.GetComponent<MyNetworkManager>();
+            man.ServerChangeScene("Result");
         }
 
     }
 
-    void OnGUI()
+    public void GameEnd()
     {
-        GUIStyle style = new GUIStyle();
-        style.fontSize = 70;
-        style.fontStyle = FontStyle.Bold;
-        if (isEnd)
-        {
-            if (isWin)
-                GUI.Label(new Rect(400, 400, 1000, 200), "YOU WIN",style);
-            else
-                GUI.Label(new Rect(400, 400, 1000, 200), "YOU LOSE",style);
-        }
-
+        isEnd = false;
+        isWin = false;
+        mainMusic.Stop();
     }
 
+    public int GetRemainingTime()
+    {
+        return (int)(mainMusic.clip.length - mainMusic.time);
+    }
 }

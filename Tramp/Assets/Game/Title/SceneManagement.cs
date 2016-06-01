@@ -19,7 +19,7 @@ public class SceneManagement : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
-        if (GamepadInput.GamePad.GetButton(GamepadInput.GamePad.Button.A,0))
+        if (GamepadInput.GamePadInput.GetButton(GamepadInput.GamePadInput.Button.A,0))
         {
             //シーン遷移を開始する
             mainScene.allowSceneActivation = true;

@@ -6,6 +6,11 @@ using UnityEngine.Networking.Match;
 using UnityEngine.UI;
 using System.Collections.Generic;
 
+public enum Winner
+{
+    win, lose, draw
+}
+
 public class MyNetworkManager : NetworkManager
 {
 
@@ -19,8 +24,9 @@ public class MyNetworkManager : NetworkManager
     [SerializeField]
     int PlayerCount = 0;
 
-
     float joinTimer;
+
+    public Winner winner;
 
     public bool isStarted = false;
     bool isJoin;
@@ -33,11 +39,12 @@ public class MyNetworkManager : NetworkManager
         isStarted = false;
         isJoin = false;
         joinTimer = 0;
+        winner = Winner.draw;
     }
 
     void Update()
     {
-        if (PlayerCount >= 3||!discovery.isServer)
+        if (PlayerCount >= 3 || !discovery.isServer)
         {
             isStarted = true;
         }
@@ -62,15 +69,24 @@ public class MyNetworkManager : NetworkManager
     {
         if (isJoin)
         {
-            GUI.Label(new Rect(0,0,200,100),"通信中");
+            GUI.Label(new Rect(0, 0, 200, 100), "通信中");
         }
     }
 
-
-    public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId)
+    public override void ServerChangeScene(string newSceneName)
     {
-        base.OnServerAddPlayer(conn, playerControllerId);
+        if (newSceneName == "Menu")
+        {
+            discovery.isStartClient = false;
+            soundManager.GameEnd();
+            isStarted = false;
+            isJoin = false;
+            joinTimer = 0;
+        }
+        base.ServerChangeScene(newSceneName);
     }
+
+
 
     public override void OnServerConnect(NetworkConnection conn)
     {
@@ -84,6 +100,13 @@ public class MyNetworkManager : NetworkManager
         base.OnClientConnect(conn);
     }
 
+    public override void OnClientDisconnect(NetworkConnection conn)
+    {
+        StopClient();
+        DiscoveryShutdown();
+        base.OnClientDisconnect(conn);
+    }
+
     public override void OnServerDisconnect(NetworkConnection conn)
     {
         PlayerCount--;
@@ -94,16 +117,17 @@ public class MyNetworkManager : NetworkManager
     {
         if (networkSceneName == "main")
         {
-            autoCreatePlayer = true;
-            if (!GetComponent<NetworkDiscovery>().isServer)
-                soundManager.PlayMusic(false);
+            // if (!GetComponent<NetworkDiscovery>().isServer)
+            soundManager.PlayMusic(discovery.isServer);
         }
         else
         {
             autoCreatePlayer = false;
         }
+
         base.OnClientSceneChanged(conn);
     }
+
 
     //ButtonStartHostボタンを押した時に実行
     //IPポートを設定し、ホストとして接続
@@ -151,7 +175,7 @@ public class MyNetworkManager : NetworkManager
         networkPort = 7777;
     }
 
-    public void  DiscoveryShutdown()
+    public void DiscoveryShutdown()
     {
         discovery.StopBroadcast();
         NetworkTransport.Shutdown();

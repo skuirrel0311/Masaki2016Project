@@ -4,7 +4,8 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Networking;
 using System.Collections;
 
-public class LobbyManager : MonoBehaviour {
+public class LobbyManager : NetworkBehaviour
+{
 
     [SerializeField]
     string NextSceneName;
@@ -17,12 +18,11 @@ public class LobbyManager : MonoBehaviour {
 
     Text _2pText;
 
-
-    GameObject networkManager=null;
+    GameObject networkManager = null;
     MyNetworkManager myNetManager;
     MyNetworkDiscovery myNetDiscoverry;
-	// Use this for initialization
-	void Start ()
+    // Use this for initialization
+    void Start()
     {
         _2pText = _2PSprite.transform.FindChild("Text").GetComponent<Text>();
     }
@@ -33,10 +33,10 @@ public class LobbyManager : MonoBehaviour {
         {
             networkManager = GameObject.FindGameObjectWithTag("NetworkManager");
             myNetManager = networkManager.GetComponent<MyNetworkManager>();
-            myNetDiscoverry = MyNetworkManager.discovery ;
+            myNetDiscoverry = MyNetworkManager.discovery;
         }
 
-        if (myNetManager.isStarted||!myNetDiscoverry.isServer)
+        if (myNetManager.isStarted || !myNetDiscoverry.isServer)
         {
             _2pText.text = "2P接続";
             _2PSprite.GetComponent<Image>().color = Color.white;
@@ -48,7 +48,7 @@ public class LobbyManager : MonoBehaviour {
             _2PSprite.GetComponent<Image>().color = Color.gray;
         }
 
-        if (myNetManager.isStarted&&myNetDiscoverry.isServer)
+        if (myNetManager.isStarted && myNetDiscoverry.isServer)
         {
             NextButton.SetActive(true);
         }
@@ -58,9 +58,18 @@ public class LobbyManager : MonoBehaviour {
         }
     }
 
-    public  void OnMoveNextScene()
+    public void OnMoveNextScene()
     {
-        myNetManager.ServerChangeScene(NextSceneName); 
+        if (NextSceneName == "main")
+            RpcAutoCreatePlayer();
+
+        myNetManager.ServerChangeScene(NextSceneName);
+    }
+
+    [ClientRpc]
+    public void RpcAutoCreatePlayer()
+    {
+        networkManager.GetComponent<MyNetworkManager>().autoCreatePlayer = true;
     }
 
     public void OnDesConnect()
@@ -69,12 +78,13 @@ public class LobbyManager : MonoBehaviour {
         if (myNetDiscoverry.isServer)
         {
             networkManager.GetComponent<MyNetworkManager>().StopHost();
-            networkManager.GetComponent<MyNetworkManager>().StopServer() ;
+            networkManager.GetComponent<MyNetworkManager>().StopServer();
         }
         else
         {
             networkManager.GetComponent<MyNetworkManager>().StopClient();
         }
+
         myNetManager.DiscoveryShutdown();
         myNetManager.ServerChangeScene("Menu");
     }
