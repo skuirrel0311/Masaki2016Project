@@ -51,7 +51,7 @@ public class LocalFlow : MonoBehaviour{
         {
             Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
             body.AddForce(transform.up * Time.deltaTime * speed,ForceMode.Acceleration);
-            
+            col.gameObject.GetComponent<PlayerControl>().Isfalling = true;
         }
     }
 

@@ -134,6 +134,7 @@ public class Flow : NetworkBehaviour{
     void PlayerStay(Collider col)
     {
         PlayerState state = col.gameObject.GetComponent<PlayerState>();
+        col.gameObject.GetComponent<PlayerControl>().Isfalling = true;
         //アピールエリアのFlowObjectと同じだったら流れない
         GameObject flowObj = state.AppealArea.flowObj;
         if (flowObj != null && flowObj.Equals(gameObject)) return;
@@ -144,6 +145,7 @@ public class Flow : NetworkBehaviour{
         PlayerVector.Normalize();
         Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
         body.isKinematic = true;
+        
         col.gameObject.transform.Translate(PlayerVector * Time.deltaTime * speed, Space.World);
 
         if (nonDestroy) return;
