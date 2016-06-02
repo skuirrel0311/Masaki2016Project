@@ -116,8 +116,6 @@ public class CameraControl : MonoBehaviour
         AlignmentImage(1);
         targetAnchor = null;
 
-        SetMaker();
-
         Vector2 rightStick = GamePadInput.GetAxis(GamePadInput.Axis.RightStick, (GamePadInput.Index)playerNum);
 
 
@@ -125,6 +123,8 @@ public class CameraControl : MonoBehaviour
         else latitude += -rightStick.y * rotationSpeed * Time.deltaTime;
 
         longitude += rightStick.x * rotationSpeed * Time.deltaTime;
+
+        //if (player.GetComponent<PlayerControl>().Isfalling) FallingCamera();
 
         if (GamePadInput.GetButtonDown(GamePadInput.Button.RightStick, (GamePadInput.Index)playerNum)) Reset();
 
@@ -344,6 +344,22 @@ public class CameraControl : MonoBehaviour
         cameraTargetPosition += movement;
     }
 
+    //落ちているときは下方を見る
+    private void FallingCamera()
+    {
+        if (latitude >= 60)
+        {
+            player.GetComponent<PlayerControl>().IsJumping = false;
+            player.GetComponent<PlayerControl>().Isfalling = false;
+            return;
+        }
+
+        //目的のlatitude
+        float a = 60;
+        float t = (200 * Time.deltaTime) / (a - latitude);
+        latitude = Mathf.Lerp(latitude, a, t);
+    }
+
     private void SetMaker()
     {
         GameObject obj = GetTargetAnchor();
@@ -373,7 +389,9 @@ public class CameraControl : MonoBehaviour
         //プレイヤーが移動していなかったら終了
         if (movement.magnitude == 0) return;
 
-        if (!playerControl.Isfalling) movement.y *= 0.3f;
+
+        //落ちていないときに流れていなかったら
+        if (!playerControl.Isfalling && !playerControl.IsFlowing) movement.y *= 0.3f;
 
         cameraTargetPosition += movement;
 

@@ -25,6 +25,11 @@ public class PlayerControl : NetworkBehaviour
     [SerializeField]
     public bool IsOnGround;
 
+    /// <summary>
+    /// 流れに乗っている
+    /// </summary>
+    public bool IsFlowing;
+
     [SerializeField]
     private float EndArea = 59;
 
@@ -233,9 +238,13 @@ public class PlayerControl : NetworkBehaviour
     void OnTriggerExit(Collider col)
     {
         //地面から離れた
-        if (col.tag != "Box") return;
+        if (col.tag != "Box" && col.tag != "Scaffold") return;
 
-        if (!IsJumping) Isfalling = true;
+        if (!IsJumping)
+        {
+            Isfalling = true;
+            IsJumping = true;
+        }
         animator.CrossFadeInFixedTime("jump", 0.5f);
         IsOnGround = false;
     }
@@ -246,8 +255,10 @@ public class PlayerControl : NetworkBehaviour
         IsJumping = false;
         Isfalling = false;
         IsOnGround = true;
+        IsFlowing = false;
         body.isKinematic = false;
         animator.CrossFadeInFixedTime("jump_landing", 0.1f);
         onGroundTimer.TimerStart(0.4f);
+        atJumpPosition = transform.position;
     }
 }

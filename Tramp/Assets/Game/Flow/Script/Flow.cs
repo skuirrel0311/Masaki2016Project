@@ -145,7 +145,9 @@ public class Flow : NetworkBehaviour{
         PlayerVector.Normalize();
         Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
         body.isKinematic = true;
-        
+
+        col.gameObject.GetComponent<PlayerControl>().IsFlowing = true;
+
         col.gameObject.transform.Translate(PlayerVector * Time.deltaTime * speed, Space.World);
 
         if (nonDestroy) return;
@@ -182,11 +184,17 @@ public class Flow : NetworkBehaviour{
     
     void OnTriggerExit(Collider col)
     {
-        if (nonDestroy) return;
         if (col.tag == "Player")
         {
+            PlayerControl control = col.gameObject.GetComponent<PlayerControl>();
+            control.IsJumping = true;
+            control.IsOnGround = false;
+            control.Isfalling = true;
+            control.IsFlowing = false;
+
             if (isDestory) {
                 Destroy(gameObject); return; }
+
         }
 
         if(col.name == "AppealArea")
