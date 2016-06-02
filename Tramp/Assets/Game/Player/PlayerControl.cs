@@ -227,7 +227,8 @@ public class PlayerControl : NetworkBehaviour
 
         //Areaはトリガーなのでヒットしないが
         //どうやら親のタグを取得しているみたい
-        if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Anchor" && collision.gameObject.tag != "Area") return;
+        if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Box" && 
+            collision.gameObject.tag != "Area" && collision.gameObject.tag != "Scaffold") return;
         Landed();
     }
 
