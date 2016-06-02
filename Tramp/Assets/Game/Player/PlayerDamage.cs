@@ -43,6 +43,7 @@ public class PlayerDamage : NetworkBehaviour
                 Destroy(col.gameObject);
                 Vector3 vec = col.gameObject.GetComponent<Rigidbody>().velocity;
                 vec = new Vector3(vec.x,vec.y/100,vec.z);
+                vec.Normalize();
                 gameObject.GetComponent<Rigidbody>().AddForce(vec*InpulusPower,ForceMode.Impulse);
             }
         }
