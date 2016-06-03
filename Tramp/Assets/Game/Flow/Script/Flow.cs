@@ -134,7 +134,7 @@ public class Flow : NetworkBehaviour{
     void PlayerStay(Collider col)
     {
         PlayerState state = col.gameObject.GetComponent<PlayerState>();
-        col.gameObject.GetComponent<PlayerControl>().Isfalling = true;
+        col.gameObject.GetComponent<PlayerControl>().IsFlowing = true;
         //アピールエリアのFlowObjectと同じだったら流れない
         GameObject flowObj = state.AppealArea.flowObj;
         if (flowObj != null && flowObj.Equals(gameObject)) return;
@@ -146,14 +146,13 @@ public class Flow : NetworkBehaviour{
         Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
         body.isKinematic = true;
 
-        col.gameObject.GetComponent<PlayerControl>().IsFlowing = true;
-
         col.gameObject.transform.Translate(PlayerVector * Time.deltaTime * speed, Space.World);
 
         if (nonDestroy) return;
         //ターゲットから一定の距離
         if (Vector3.Distance(targetPosition, col.gameObject.transform.position) < 2)
         {
+            col.gameObject.GetComponent<PlayerControl>().AnchorHit();
             Destroy(gameObject);
             return;
         }
@@ -186,15 +185,11 @@ public class Flow : NetworkBehaviour{
     {
         if (col.tag == "Player")
         {
-            PlayerControl control = col.gameObject.GetComponent<PlayerControl>();
-            control.IsJumping = true;
-            control.IsOnGround = false;
-            control.Isfalling = true;
+            PlayerControl control = col.GetComponent<PlayerControl>();
             control.IsFlowing = false;
-
+            control.IsFalling = true;
             if (isDestory) {
                 Destroy(gameObject); return; }
-
         }
 
         if(col.name == "AppealArea")

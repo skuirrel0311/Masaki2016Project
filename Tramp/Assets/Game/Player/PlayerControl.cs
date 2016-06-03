@@ -24,6 +24,8 @@ public class PlayerControl : NetworkBehaviour
     /// </summary>
     [SerializeField]
     public bool IsOnGround;
+    //落下してから着地した
+    public bool IsFallAfter;
 
     /// <summary>
     /// 流れに乗っている
@@ -43,7 +45,7 @@ public class PlayerControl : NetworkBehaviour
     /// 落下中
     /// </summary>
     [SerializeField]
-    public bool Isfalling;
+    public bool IsFalling;
 
     /// <summary>
     /// ジャンプキーが押された時の座標
@@ -64,7 +66,7 @@ public class PlayerControl : NetworkBehaviour
         body = GetComponent<Rigidbody>();
         atJumpPosition = transform.position;
         IsOnGround = false;
-        Isfalling = true;
+        IsFalling = true;
         isRun = false;
 
         if (isLocalPlayer)
@@ -106,7 +108,11 @@ public class PlayerControl : NetworkBehaviour
         Move(direction);
         Jump();
 
-        if (IsJumping && atJumpPosition.y > transform.position.y) Isfalling = true;
+        //ジャンプしてジャンプ開始地点よりも下に落ちた
+        if (IsJumping && atJumpPosition.y > transform.position.y)
+        {
+            IsFalling = true;
+        }
 
         //アニメーターにパラメータを送る
         if (!ChackCurrentAnimatorName(animator, "wait") && !Move(direction))
@@ -204,14 +210,21 @@ public class PlayerControl : NetworkBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        Debug.Log("Player Control hit");
         //地面にいたらダメ
         if (IsOnGround) return;
+
+        if (collision.gameObject.name == "FixAnchor") AnchorHit();
 
         //Areaはトリガーなのでヒットしないが
         //どうやら親のタグを取得しているみたい
         if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Area" && collision.gameObject.tag != "Scaffold") return;
         Landed();
+    }
+
+    public void AnchorHit()
+    {
+        IsFlowing = false;
+        IsFalling = true;
     }
 
     void OnCollisionExit(Collision col)
@@ -220,19 +233,18 @@ public class PlayerControl : NetworkBehaviour
 
         //床から離れたら落ちているかジャンプしているか
 
-        //ジャンプしていなかったら落ちただけ
-        if (!IsJumping) Isfalling = true;
+        //ジャンプもしてない、流れてもいない、なのに地面から離れてたら
+        if (!IsJumping && !IsOnGround && !IsFlowing) IsFalling = true;
         animator.CrossFadeInFixedTime("jump", 0.5f);
         IsOnGround = false;
     }
 
     void OnTriggerEnter(Collider col)
     {
-        Debug.Log(col.name);
-        //着地した
-        if (col.tag != "Box") return;
+        if (col.gameObject.name == "FixAnchor") AnchorHit();
 
-        Landed();
+        //着地した
+        if (col.tag == "Box") Landed();
     }
 
     void OnTriggerExit(Collider col)
@@ -240,11 +252,8 @@ public class PlayerControl : NetworkBehaviour
         //地面から離れた
         if (col.tag != "Box" && col.tag != "Scaffold") return;
 
-        if (!IsJumping)
-        {
-            Isfalling = true;
-            IsJumping = true;
-        }
+        //ジャンプもしてない、流れてもいない、なのに地面から離れてたら
+        if (!IsJumping && !IsOnGround && !IsFlowing) IsFalling = true;
         animator.CrossFadeInFixedTime("jump", 0.5f);
         IsOnGround = false;
     }
@@ -252,8 +261,9 @@ public class PlayerControl : NetworkBehaviour
     //着地した
     void Landed()
     {
+        if (IsFalling) IsFallAfter = true;
         IsJumping = false;
-        Isfalling = false;
+        IsFalling = false;
         IsOnGround = true;
         IsFlowing = false;
         body.isKinematic = false;

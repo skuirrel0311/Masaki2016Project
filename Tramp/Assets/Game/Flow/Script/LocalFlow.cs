@@ -51,7 +51,7 @@ public class LocalFlow : MonoBehaviour{
         {
             Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
             body.AddForce(transform.up * Time.deltaTime * speed,ForceMode.Acceleration);
-            col.gameObject.GetComponent<PlayerControl>().Isfalling = true;
+            col.gameObject.GetComponent<PlayerControl>().IsFlowing = true;
         }
     }
 
@@ -59,8 +59,9 @@ public class LocalFlow : MonoBehaviour{
     {
         if (col.tag == "Player")
         {
-            Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
-           // body.velocity = Vector3.zero;
+            PlayerControl control = col.GetComponent<PlayerControl>();
+            control.IsFlowing = false;
+            control.IsFalling = true;
         }
     }
 }

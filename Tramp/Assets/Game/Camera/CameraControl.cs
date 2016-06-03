@@ -124,7 +124,7 @@ public class CameraControl : MonoBehaviour
 
         longitude += rightStick.x * rotationSpeed * Time.deltaTime;
 
-        //if (player.GetComponent<PlayerControl>().Isfalling) FallingCamera();
+        if (player.GetComponent<PlayerControl>().IsFalling) FallingCamera();
 
         if (GamePadInput.GetButtonDown(GamePadInput.Button.RightStick, (GamePadInput.Index)playerNum)) Reset();
 
@@ -338,7 +338,7 @@ public class CameraControl : MonoBehaviour
         //プレイヤーが移動していなかったら終了
         if (movement.magnitude == 0) return;
 
-        if (!playerControl.Isfalling) movement.y *= 0.1f;
+        if (!playerControl.IsFalling) movement.y *= 0.1f;
 
         //プレイヤーについていくMOMO
         cameraTargetPosition += movement;
@@ -347,17 +347,29 @@ public class CameraControl : MonoBehaviour
     //落ちているときは下方を見る
     private void FallingCamera()
     {
-        if (latitude >= 60)
-        {
-            player.GetComponent<PlayerControl>().IsJumping = false;
-            player.GetComponent<PlayerControl>().Isfalling = false;
-            return;
-        }
+        if (latitude >= 60) return;
+        //地面が近かったらやめる
+        if (!IsFarGround()) return;
 
         //目的のlatitude
         float a = 60;
         float t = (200 * Time.deltaTime) / (a - latitude);
         latitude = Mathf.Lerp(latitude, a, t);
+    }
+
+    //着地予想をして遠かったらtrueを返す
+    private bool IsFarGround()
+    {
+        Vector3 movement = player.transform.position - oldPlayerPosition;
+        Ray ray = new Ray(player.transform.position, movement);
+        RaycastHit hit;
+        if(Physics.Raycast(ray,out hit, 1000))
+        {
+            if (hit.distance > 5)   return true;
+            else                    return false;
+        }
+
+        return false;
     }
 
     private void SetMaker()
@@ -391,11 +403,15 @@ public class CameraControl : MonoBehaviour
 
 
         //落ちていないときに流れていなかったら
-        if (!playerControl.Isfalling && !playerControl.IsFlowing) movement.y *= 0.3f;
+        if (!playerControl.IsFalling && !playerControl.IsFlowing) movement.y *= 0.3f;
 
         cameraTargetPosition += movement;
 
-        if (playerControl.IsOnGround) cameraTargetPosition = Vector3.Lerp(cameraTargetPosition, player.transform.position, playerControl.OnGroundTimer.Progress);
+        if (playerControl.IsOnGround)
+        {
+            if (playerControl.OnGroundTimer.IsLimitTime) return;
+            cameraTargetPosition = Vector3.Lerp(cameraTargetPosition, player.transform.position, playerControl.OnGroundTimer.Progress);
+        }
     }
 
     #region GetTargetAnchor
