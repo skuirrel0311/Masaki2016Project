@@ -53,6 +53,9 @@ public class PlayerControl : NetworkBehaviour
     //最後にあたっていた流れ
     public bool hitFix;
 
+    [SerializeField]
+    GameObject RideEffect;
+
     void Start()
     {
         animator = GetComponentInChildren<Animator>();
@@ -67,6 +70,7 @@ public class PlayerControl : NetworkBehaviour
             GameObject.Find("Camera1").GetComponent<CameraControl>().SetPlayer(gameObject);
             mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
         }
+        RideEffect.SetActive(false);
     }
 
     void OnDestroy()
@@ -111,6 +115,16 @@ public class PlayerControl : NetworkBehaviour
             c.Normalize();
             transform.position = new Vector3(c.x * EndArea, transform.position.y, c.z * EndArea);
             GetComponent<Rigidbody>().velocity = Vector3.zero;
+        }
+
+        if (GetComponent<Rigidbody>().useGravity == false)
+        {
+            RideEffect.SetActive(true);
+            RideEffect.transform.LookAt(RideEffect.transform.position - GetComponent<Rigidbody>().velocity.normalized);
+        }
+        else
+        {
+            RideEffect.SetActive(false);
         }
     }
 
@@ -194,13 +208,13 @@ public class PlayerControl : NetworkBehaviour
 
     void OnTriggerEnter(Collider col)
     {
-        if (col.name == "FixAnchor"||col.name=="AreaAnchor")
+        if (col.name == "FixAnchor" || col.name == "AreaAnchor")
         {
             hitFix = true;
-            if(col.name== "AreaAnchor")
+            if (col.name == "AreaAnchor")
             {
-                GetComponent<Rigidbody>().velocity=Vector3.zero;
-                GetComponent<Rigidbody>().useGravity=true;
+                GetComponent<Rigidbody>().velocity = Vector3.zero;
+                GetComponent<Rigidbody>().useGravity = true;
             }
         }
     }

@@ -203,8 +203,8 @@ ModelImporter:
     - serializedVersion: 16
       name: t_ride
       takeName: t_ride
-      firstFrame: 2.5
-      lastFrame: 31
+      firstFrame: 2.4
+      lastFrame: 40
       wrapMode: 0
       orientationOffsetY: 0
       level: 0

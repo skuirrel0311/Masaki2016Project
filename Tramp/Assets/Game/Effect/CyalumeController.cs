@@ -60,8 +60,15 @@ public class CyalumeController : MonoBehaviour
 
     void Update()
     {
-        Vector3 pos = startPosition + new Vector3(0,0.7f,0);
-        float t = (Time.time % 1)*5;
-        transform.position = Vector3.Lerp(startPosition,pos, Mathf.Log((1 - Mathf.Cos(t) / (1 + Mathf.Cos(t)))));
+        Vector3 pos = startPosition + new Vector3(0,1.5f,0);
+        float t = ((Time.time*2) % 1);
+
+        if (t >= 0.5f)
+        {
+            t = 1 - t;
+        }
+
+        //Mathf.Log((1 - Mathf.Cos(t) / (1 + Mathf.Cos(t))));
+        transform.position = Vector3.Lerp(startPosition,pos,t );
     }
 }

@@ -171,6 +171,7 @@ public class Flow : NetworkBehaviour{
         bodys.Add(body);
         body.useGravity = false;
         body.velocity = transform.up* body.velocity.magnitude;
+        col.gameObject.GetComponent<Animator>().CrossFadeInFixedTime("ride", 0.1f);
     }
 
     void OnTriggerStay(Collider col)
