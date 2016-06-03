@@ -188,6 +188,9 @@ public class Flow : NetworkBehaviour{
             PlayerControl control = col.GetComponent<PlayerControl>();
             control.IsFlowing = false;
             control.IsFalling = true;
+            CameraControl cam = GameObject.Find("Camera1").GetComponent<CameraControl>();
+            cam.SetNowLatitude();
+            cam.IsEndFallingCamera = false;
             if (isDestory) {
                 Destroy(gameObject); return; }
         }

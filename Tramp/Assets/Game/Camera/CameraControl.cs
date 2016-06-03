@@ -40,6 +40,8 @@ public class CameraControl : MonoBehaviour
     private Vector3 oldPlayerPosition;
     private int playerNum = 1;
     private float oldInputVec = 0;
+    //着地したときに戻すlatitudeの値
+    public float atJumpLatitude = 15;
 
     [SerializeField]
     private GameObject AlignmentSprite = null;
@@ -51,6 +53,7 @@ public class CameraControl : MonoBehaviour
     /// </summary>
     private bool IsEndLockOn;
     public bool IsLockOn;
+    public bool IsEndFallingCamera = true;
 
     //カメラとプレイヤーの間にあるオブジェクト
     List<GameObject> lineHitObjects = new List<GameObject>();
@@ -347,13 +350,20 @@ public class CameraControl : MonoBehaviour
     //落ちているときは下方を見る
     private void FallingCamera()
     {
-        if (latitude >= 60) return;
         //地面が近かったらやめる
         if (!IsFarGround()) return;
 
+        if (IsEndFallingCamera) return;
+        if (latitude >= 60)
+        {
+            IsEndFallingCamera = true;
+            return;
+        }
+
+        IsEndFallingCamera = false;
         //目的のlatitude
         float a = 60;
-        float t = (200 * Time.deltaTime) / (a - latitude);
+        float t = (360 * Time.deltaTime) / (a - latitude);
         latitude = Mathf.Lerp(latitude, a, t);
     }
 
@@ -398,20 +408,26 @@ public class CameraControl : MonoBehaviour
     {
         Vector3 movement = player.transform.position - oldPlayerPosition;
 
-        //プレイヤーが移動していなかったら終了
-        if (movement.magnitude == 0) return;
-
-
         //落ちていないときに流れていなかったら
         if (!playerControl.IsFalling && !playerControl.IsFlowing) movement.y *= 0.3f;
 
         cameraTargetPosition += movement;
-
-        if (playerControl.IsOnGround)
+        
+        if (playerControl.IsOnGround && !playerControl.OnGroundTimer.IsLimitTime)
         {
-            if (playerControl.OnGroundTimer.IsLimitTime) return;
             cameraTargetPosition = Vector3.Lerp(cameraTargetPosition, player.transform.position, playerControl.OnGroundTimer.Progress);
         }
+
+        //落下する前のlatitudeに戻す
+        if(playerControl.IsFallAfter && !playerControl.LandedTimer.IsLimitTime)
+            latitude = Mathf.Lerp(latitude, atJumpLatitude, playerControl.LandedTimer.Progress);
+        else
+            playerControl.IsFallAfter = false;
+    }
+
+    public void SetNowLatitude()
+    {
+        atJumpLatitude = latitude;
     }
 
     #region GetTargetAnchor
