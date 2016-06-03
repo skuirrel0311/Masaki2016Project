@@ -338,7 +338,7 @@ public class CameraControl : MonoBehaviour
         //プレイヤーが移動していなかったら終了
         if (movement.magnitude == 0) return;
 
-        if (!playerControl.IsFalling) movement.y *= 0.1f;
+        if (!playerControl.IsFalling && !playerControl.IsFlowing) movement.y *= 0.1f;
 
         //プレイヤーについていくMOMO
         cameraTargetPosition += movement;
