@@ -72,6 +72,7 @@ public class Flow : NetworkBehaviour{
             StopFlowRender();
         }
 
+        //作ったプレイヤーに合わせて色を替える
         if (whichCreatePlayer)
         {
             GetComponent<Renderer>().materials[0].SetColor("_Color",Color.blue);
@@ -80,6 +81,16 @@ public class Flow : NetworkBehaviour{
         {
             GetComponent<Renderer>().materials[0].SetColor("_Color", new Color(0.5f,0,0));
         }
+
+        //接続先が固定のアンカーだったら自分の情報を固定のアンカーに送るふぃｘ
+        List<GameObject> gos = new List<GameObject>();
+        gos.AddRange(GameObject.FindGameObjectsWithTag("Anchor"));
+        GameObject go =  gos.Find(anchor=>anchor.transform.position.Equals(targetPosition));
+        if(go.name=="AreaAnchor")
+        {
+            go.GetComponent<FixAnchorHit>().ConnectionFlow(gameObject);
+        }
+        
 
     }
 
