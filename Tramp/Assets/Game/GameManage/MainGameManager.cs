@@ -11,9 +11,6 @@ public class MainGameManager : MonoBehaviour
 
     private static bool isPause;
 
-    [SerializeField]
-    private GameObject AppealArea;
-
     private GameObject networkManager;
     private MyNetworkManager myNetManager;
     private MyNetworkDiscovery myNetDiscovery;
@@ -71,32 +68,6 @@ public class MainGameManager : MonoBehaviour
     //勝利状況をチェックする
     void ChackWinner()
     {
-        if (AppealArea.transform.position.z > 0)
-        {
-            if (myNetDiscovery.isServer)
-            {
-                myNetManager.winner = Winner.lose;
-            }
-            else
-            {
-                myNetManager.winner = Winner.win;
-            }
-        }
-        else if (AppealArea.transform.position.z < 0)
-        {
-            if (myNetDiscovery.isServer)
-            {
-                myNetManager.winner = Winner.win;
-            }
-            else
-            {
-                myNetManager.winner = Winner.lose;
-            }
-        }
-        else
-        {
-            myNetManager.winner = Winner.draw;
-        }
     }
 
     void OunGUI()

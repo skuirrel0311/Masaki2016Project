@@ -63,6 +63,12 @@ public class PlayerControl : NetworkBehaviour
     Timer landedTimer = new Timer();
     public Timer LandedTimer { get { return landedTimer; } }
 
+    //最後にあたっていた流れ
+    public bool hitFix;
+
+    [SerializeField]
+    GameObject RideEffect;
+
     void Start()
     {
         animator = GetComponentInChildren<Animator>();
@@ -71,7 +77,7 @@ public class PlayerControl : NetworkBehaviour
         IsOnGround = false;
         IsFalling = true;
         isRun = false;
-
+        hitFix = false;
         if (isLocalPlayer)
         {
             SetSratPosition();
@@ -79,6 +85,7 @@ public class PlayerControl : NetworkBehaviour
             cameraControl.SetPlayer(gameObject);
             cameraObj = GameObject.FindGameObjectWithTag("MainCamera");
         }
+        RideEffect.SetActive(false);
     }
 
     void OnDestroy()
@@ -106,7 +113,6 @@ public class PlayerControl : NetworkBehaviour
     void Update()
     {
         UpdateTimer();
-        body.isKinematic = false;
         Vector2 leftStick = GamePadInput.GetAxis(GamePadInput.Axis.LeftStick, (GamePadInput.Index)playerNum);
         Vector3 direction = new Vector3(leftStick.x, 0, leftStick.y);
         Move(direction);
@@ -132,6 +138,17 @@ public class PlayerControl : NetworkBehaviour
         {
             c.Normalize();
             transform.position = new Vector3(c.x * EndArea, transform.position.y, c.z * EndArea);
+            GetComponent<Rigidbody>().velocity = Vector3.zero;
+        }
+
+        if (GetComponent<Rigidbody>().useGravity == false)
+        {
+            RideEffect.SetActive(true);
+            RideEffect.transform.LookAt(RideEffect.transform.position - GetComponent<Rigidbody>().velocity.normalized);
+        }
+        else
+        {
+            RideEffect.SetActive(false);
         }
     }
 
@@ -217,7 +234,33 @@ public class PlayerControl : NetworkBehaviour
             //body.isKinematic = true;
             body.AddForce(jumpVec * 100, ForceMode.Impulse);
         }
+    }
 
+    void OnTriggerEnter(Collider col)
+    {
+        if (col.name == "FixAnchor" || col.name == "AreaAnchor")
+        {
+            hitFix = true;
+            if (col.name == "AreaAnchor")
+            {
+                GetComponent<Rigidbody>().velocity = Vector3.zero;
+                GetComponent<Rigidbody>().useGravity = true;
+            }
+        }
+    }
+
+    void OnTriggerExit(Collider col)
+    {
+        if (col.name == "FixAnchor" || col.name == "AreaAnchor")
+        {
+            StartCoroutine("SleepHItFix");
+        }
+    }
+
+    IEnumerator SleepHItFix()
+    {
+        yield return new WaitForSeconds(1);
+        hitFix = false;
     }
 
     void OnCollisionEnter(Collision collision)

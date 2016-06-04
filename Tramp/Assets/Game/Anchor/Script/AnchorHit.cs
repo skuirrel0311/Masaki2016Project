@@ -23,36 +23,6 @@ public class AnchorHit : MonoBehaviour {
     void OnCollisionEnter(Collision col)
     {
         if (col.gameObject.tag == "Ammo") AmmoHit(col);
-        if (col.gameObject.tag == "Player") PlayerHit(col);
-        if(col.gameObject.name == "AppealArea") AreaHit(col);
-    }
-    
-    void PlayerHit(Collision col)
-    {
-        if (FlowEffect != null)
-        {
-            FlowEffect.transform.parent = null;
-            FlowEffect.GetComponent<Flow>().isDestory = true;
-        }
-        Destroy(gameObject);
-        Instantiate(HitEffect, transform.position, Quaternion.identity);
-        col.gameObject.GetComponent<PlayerShot>().AnchorHit();
-    }
-
-    void AreaHit(Collision col)
-    {
-        if (FlowEffect != null)
-        {
-            FlowEffect.transform.parent = null;
-            FlowEffect.GetComponent<Flow>().isDestory = true;
-            AppealAreaState areaState = col.gameObject.GetComponent<AppealAreaState>();
-
-            Destroy(areaState.flowObj);
-            areaState.flowObj = FlowEffect;
-            areaState.OnAnchorList.Remove(gameObject);
-        }
-        Destroy(gameObject);
-        Instantiate(HitEffect, transform.position, Quaternion.identity);
     }
 
     void AmmoHit(Collision col)
@@ -63,6 +33,7 @@ public class AnchorHit : MonoBehaviour {
             //Hpが0になったらDestroy
             if (Hp <= 0)
             {
+                Instantiate(HitEffect,transform.position,transform.rotation);
                 Destroy(gameObject);
                 Destroy(FlowEffect);
             }

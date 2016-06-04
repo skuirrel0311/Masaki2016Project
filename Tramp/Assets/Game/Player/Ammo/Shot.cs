@@ -6,7 +6,7 @@ public class Shot : MonoBehaviour
 {
 
     [SerializeField]
-    float speed = 100000;
+    float speed = 0.1f;
 
     [SerializeField]
     GameObject HitEffect;
@@ -17,7 +17,7 @@ public class Shot : MonoBehaviour
     void Start()
     {
         Destroy(gameObject, 10);
-        GetComponent<Rigidbody>().AddForce(transform.forward * speed * Time.deltaTime,ForceMode.Impulse);
+        GetComponent<Rigidbody>().AddForce(transform.forward * speed,ForceMode.Impulse);
     }
 
     // Update is called once per frame

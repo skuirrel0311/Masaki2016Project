@@ -34,19 +34,26 @@ public class Flow : NetworkBehaviour{
 
     public bool isDestory;
 
-    /// <summary>
-    /// アピールエリアから繋がっている流れか？
-    /// </summary>
-    [SyncVar]
-    public bool IsFromArea = false;
+    List<Rigidbody> bodys = new List<Rigidbody>();
 
-    /// <summary>
-    /// アピールエリアへ繋ぐ流れか？
-    /// </summary>
+    //この流れがどちらのプレイヤーによって作られているか
+    public bool WhichCreatePlayer
+    {
+        get { return whichCreatePlayer; }
+        set { whichCreatePlayer = value; }
+    }
     [SyncVar]
-    public bool IsToArea = false;
+    private bool whichCreatePlayer;
+
+    //作ったプレイヤーか？
+    public bool isCreatePlayer
+    {
+        get { return isServer == WhichCreatePlayer; }
+    }
+
 
     private GameObject appealArea;
+    bool isrenderd;
 
     void Awake()
     {
@@ -56,43 +63,72 @@ public class Flow : NetworkBehaviour{
 
     void Start()
     {
-        isCalc = false;
+        isCalc = true;
         isDestory = false;
+        isrenderd = true;
 
-        if (IsFromArea)
+        if (!isCreatePlayer)
         {
-            appealArea = GameObject.Find("AppealArea");
-            AppealAreaState areaState = appealArea.GetComponent<AppealAreaState>();
-            if (areaState.flowObj != null)
-                Destroy(areaState.flowObj);
-            areaState.flowObj = gameObject;
+            StopFlowRender();
         }
 
-        if(IsToArea)
+        //作ったプレイヤーに合わせて色を替える
+        if (whichCreatePlayer)
         {
-            targetAnchor = GameObject.Find("AreaAnchor");
+            GetComponent<Renderer>().materials[0].SetColor("_Color",Color.blue);
         }
+        else
+        {
+            GetComponent<Renderer>().materials[0].SetColor("_Color", new Color(0.5f,0,0));
+        }
+
+        //接続先が固定のアンカーだったら自分の情報を固定のアンカーに送るふぃｘ
+        List<GameObject> gos = new List<GameObject>();
+        gos.AddRange(GameObject.FindGameObjectsWithTag("Anchor"));
+        GameObject go =  gos.Find(anchor=>anchor.transform.position.Equals(targetPosition));
+        if(go.name=="AreaAnchor")
+        {
+            go.GetComponent<FixAnchorHit>().ConnectionFlow(gameObject);
+        }
+        
+
     }
+
+    public void FlowRender()
+    {
+        GetComponent<Renderer>().enabled = true;
+        GetComponent<LineRenderer>().enabled = true;
+    }
+    public void StopFlowRender()
+    {
+        GetComponent<Renderer>().enabled = false;
+        GetComponent<LineRenderer>().enabled = false;
+        isrenderd = false;
+    }
+
     void Update()
     {
-        // if (!isCalc) return;
 
         if (targetAnchor == null) GetTargetAnchor();
-        if (startAnchor == null)
-            GetStartAnchor();
-        
-        if(IsFromArea)
+        //if (startAnchor == null)
+        //    GetStartAnchor();
+
+        if (!isCreatePlayer&&isrenderd==true)
         {
-            flowVector = targetPosition - appealArea.transform.position;
-            
-            transform.position = Vector3.Lerp(targetPosition,appealArea.transform.position,0.5f);
+            GetComponent<Renderer>().enabled = false;
+            GetComponent<LineRenderer>().enabled = false;
         }
-        transform.localScale = new Vector3(2, flowVector.magnitude * 0.5f, 2);
+
+        if (!isCalc) return;
+        transform.localScale = new Vector3(2, flowVector.magnitude * 0.5f+1.0f, 2);
+        GetComponent<MeshRenderer >().materials[0].SetFloat("_LineNum",flowVector.magnitude);
         CapsuleCollider capcol = GetComponent<CapsuleCollider>();
         capcol.height = flowVector.magnitude / (flowVector.magnitude * 0.5f);
         capcol.radius = 0.5f;
+        GetComponent<LineRenderer>().SetPosition(0, transform.position + (transform.up * transform.localScale.y));
+        GetComponent<LineRenderer>().SetPosition(1, transform.position - (transform.up * transform.localScale.y));
         capcol.isTrigger = true;
-
+        isCalc = false;
     }
 
     void GetTargetAnchor()
@@ -119,95 +155,74 @@ public class Flow : NetworkBehaviour{
 
         if (anchor.Count == 0) return;
 
-        startAnchor = anchor.Find(n => n.GetComponent<AnchorHit>().FlowEffect.name == gameObject.name);
+        //startAnchor = anchor.Find(n => n.GetComponent<AnchorHit>().FlowEffect.name == gameObject.name);
 
-        if (startAnchor == null) return;
-        else Debug.Log("getAnchor");
+        //if (startAnchor == null) return;
+        //else Debug.Log("getAnchor");
+    }
+
+    void OnTriggerEnter(Collider col)
+    {
+        if (col.tag != "Player") return;
+        if (!col.gameObject.GetComponent<NetworkBehaviour>().isLocalPlayer) return;
+        if (col.gameObject.GetComponent<PlayerControl>().hitFix) return;
+        FlowRender();
+        Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
+        bodys.Add(body);
+        body.useGravity = false;
+        body.velocity = transform.up* body.velocity.magnitude;
+        col.gameObject.GetComponent<Animator>().CrossFadeInFixedTime("ride", 0.1f);
     }
 
     void OnTriggerStay(Collider col)
     {
         if (col.tag == "Player") PlayerStay(col);
-        if (col.gameObject.name == "AppealArea") AreaStay(col);
     }
 
     void PlayerStay(Collider col)
     {
+        if (col.gameObject.GetComponent<PlayerControl>().hitFix) return;
         PlayerState state = col.gameObject.GetComponent<PlayerState>();
         col.gameObject.GetComponent<PlayerControl>().IsFlowing = true;
-        //アピールエリアのFlowObjectと同じだったら流れない
-        GameObject flowObj = state.AppealArea.flowObj;
-        if (flowObj != null && flowObj.Equals(gameObject)) return;
-        //アピールエリアにいたら流れない
-        if (state.IsOnAppealArea) return;
+        if (isCreatePlayer)
+
+        {
+            col.gameObject.GetComponent<Penetrate>().Energy++;
+        }
+        else
+        {
+            col.gameObject.GetComponent<Penetrate>().Energy--;
+        }
 
         PlayerVector = targetPosition - (col.transform.position + Vector3.up);
         PlayerVector.Normalize();
         Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
-        body.isKinematic = true;
+        body.useGravity = false;
+        body.AddForce(PlayerVector * Time.deltaTime * speed*50,ForceMode.Acceleration);
 
-        col.gameObject.transform.Translate(PlayerVector * Time.deltaTime * speed, Space.World);
-
-        if (nonDestroy) return;
-        //ターゲットから一定の距離
-        if (Vector3.Distance(targetPosition, col.gameObject.transform.position) < 2)
-        {
-            col.gameObject.GetComponent<PlayerControl>().AnchorHit();
-            Destroy(gameObject);
-            return;
-        }
-    }
-
-    void AreaStay(Collider col)
-    {
-        AppealAreaState appealArea = col.gameObject.GetComponent<AppealAreaState>();
-
-        //flowObjは流れを繋いだときに代入
-        //まだ流れていなかったら
-        if (appealArea.flowObj == null) return;
-
-        //流れの終点アンカーとアピールエリアが触れているアンカーが同じだったら流れない
-        foreach (GameObject anchor in appealArea.OnAnchorList)
-        {
-            if (anchor.Equals(targetAnchor)) return;
-        }
-
-        //違う流れには乗らない
-        if (!appealArea.flowObj.Equals(gameObject)) return;
-
-        //流れに乗る
-        appealArea.IsFlowing = true;
-        Vector3 toAnchorVector = (targetPosition - col.transform.position).normalized;
-        col.gameObject.transform.Translate(toAnchorVector * Time.deltaTime * (speed * 0.1f), Space.World);
-    }
-    
-    void OnTriggerExit(Collider col)
-    {
-        if (col.tag == "Player")
-        {
             PlayerControl control = col.GetComponent<PlayerControl>();
             control.IsFlowing = false;
             control.IsFalling = true;
             CameraControl cam = GameObject.Find("Camera1").GetComponent<CameraControl>();
             cam.SetNowLatitude();
             cam.IsEndFallingCamera = false;
-            if (isDestory) {
-                Destroy(gameObject); return; }
-        }
+    }
 
-        if(col.name == "AppealArea")
-        {
-            col.gameObject.GetComponent<AppealAreaState>().IsFlowing = false;
-
-            if(isDestory)
-                Destroy(gameObject);
-        }
+    void OnTriggerExit(Collider col)
+    {
+        if (col.tag != "Player") return;
+        Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
+        body.useGravity = true;
+        bodys.Remove(body);
+        if (!isLocalPlayer) return;
+        if (!isCreatePlayer) isrenderd = false;
     }
 
     void OnDestroy()
     {
-        if (IsFromArea) return;
-
-        Destroy(startAnchor);
+        foreach (Rigidbody body in bodys)
+        {
+            body.useGravity = true;
+        }
     }
 }

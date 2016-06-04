@@ -1,221 +1,205 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class AppealAreaState : NetworkBehaviour
 {
-    ///<summary>
-    ///乗っているプレイヤー(いないときはnull)
-    ///</summary>
-    public List<GameObject> RidingPlayer { get { return ridingPlayer; } }
-    List<GameObject> ridingPlayer = new List<GameObject>();
-
-    ///<summary>
-    ///触れているアンカー
-    ///</summary>
-    public List<GameObject> OnAnchorList { get { return onAnchorList; } }
-    List<GameObject> onAnchorList = new List<GameObject>();
-
-    /// <summary>
-    /// 現在乗っている流れ
-    /// </summary>
-    public GameObject flowObj = null;
-
-    ///<summary>
-    ///プレイヤーに乗られているか？
-    ///</summary>
-    public bool IsRidden { get { return RidingPlayer.Count != 0; } }
-
-    ///<summary>
-    ///流れているか？
-    ///</summary>
-    public bool IsFlowing;
-
-    /// <summary>
-    /// アピールエリアの所有者
-    /// </summary>
-    public GameObject Owner = null;
-
-
-    /// <summary>
-    /// サーバー側が勝ったか？
-    /// </summary>
-    public Winner ServerWiner;
-
-    /// <summary>
-    /// オーナーが存在するか
-    /// </summary>
+    //占有度
     [SyncVar]
-    private bool isOwner;
-    
-    /// <summary>
-    /// どちらのプレイヤーがオーナーか（severで判断)
-    /// </summary>
-    [SyncVar]
-    private bool isOwnerPlayer;
+    private float share;
 
-    //耐久値
-    int maxHp = 10;
-    [SyncVar] [SerializeField]
-    private int hp;
+    //どちらが占領中か
+    [SyncVar]
+    private bool isOccupiers;
+
+    //占領済みか
+    [SyncVar]
+    public bool isOccupation;
+
+    private List<GameObject> RidePlayers = new List<GameObject>();
+
+    private GameObject ShareImageHost;
+    private GameObject ShareImageClient;
+
+    [SerializeField]
+    private Texture SeverTexture;
+
+    [SerializeField]
+    private Texture ClientTexture;
+
+    [SerializeField]
+    private Texture NeutralTexture;
+
+    [SerializeField]
+    private Image ShareImage;
+
+    Renderer StageMesh;
+
+    private static bool isDrawUI = false;
+
+    void Awake()
+    {
+        ShareImageHost = GameObject.Find("ShareImageHost");
+        ShareImageClient = GameObject.Find("ShareImageClient");
+    }
 
     void Start()
     {
-        IsFlowing = false;
-        CmdHpReset();
+        isOccupiers = false;
+        isOccupation = false;
+        share = 0;
+        RidePlayers = new List<GameObject>();
+        StageMesh = transform.FindChild("pSphere1").GetComponent<Renderer>();
     }
 
-    public void SetOwner(GameObject owner)
+    void FixedUpdate()
     {
-        CmdSetOwner(owner.GetComponent<PlayerState>().isServer);
-        CmdHpReset();
-    }
-
-    [Command]
-    void CmdHpReset()
-    {
-        hp = maxHp;
-    }
-
-    [Command]
-    void CmdSetOwner(bool isSever)
-    {
-        isOwner = true;
-        isOwnerPlayer = isServer;
-    }
-
-    GameObject SearchOwnerObject()
-    {
-        if (!isOwner) return null;
-        if (Owner != null) return Owner;
-
-        foreach (GameObject player in GameObject.FindGameObjectsWithTag("Player"))
-        {
-            if (isOwnerPlayer == player.GetComponent<PlayerState>().isServer)
-            {
-                Debug.Log("success setOwner");
-                return player;
-            }
-
-        }
-
-        return null;
+        isDrawUI = false;
     }
 
     void Update()
     {
-        if (flowObj == null)
-        {
-            flowObj = null;
-            IsFlowing = false;
-        }
+        //占有度のアップデート
+        UpdateShare();
 
-        Owner = SearchOwnerObject();
+        //乗っている間の表示処理
+        ShareUI();
 
-        if (Owner != null && !IsFlowing && !IsRidden)
-        {
-            Owner.GetComponent<PlayerState>().IsAreaOwner = false;
-            Owner = null;
-            isOwner = false;
-        }
 
-        if(transform.position.z > 0)
+        if (isOccupation)
         {
-            ServerWiner = Winner.win;
-            return;
+            if (isOccupiers)
+            {
+                StageMesh.materials[0].mainTexture=SeverTexture;
+            }
+            else
+            {
+                StageMesh.materials[0].mainTexture = ClientTexture;
+            }
         }
-        if(transform.position.z == 0)
+        else
         {
-            ServerWiner = Winner.draw;
-            return;
-        }
-        if(transform.position.z < 0)
-        {
-            ServerWiner = Winner.lose;
-            return;
+            StageMesh.materials[0].mainTexture = NeutralTexture;
         }
     }
 
-    //プレイヤーが乗った
-    void OnTriggerEnter(Collider col)
+    void LateUpdate()
     {
-        if (col.gameObject.tag == "Ammo") AmmoHit();
-        if (col.gameObject.tag == "Anchor") AnchorHit(col.gameObject);
-        if (col.gameObject.name == "Goal") GoalHit();
-        if (col.tag != "Player") return;
-        if (ridingPlayer.Find(n => n.Equals(col.gameObject)) != null) return;
-        //リストにいなかったら追加
-        ridingPlayer.Add(col.gameObject);
-    }
-    //プレイヤーが降りた
-    void OnTriggerExit(Collider col)
-    {
-        if (col.gameObject.tag != "Player") return;
-        ridingPlayer.Remove(col.gameObject);
-    }
-    //流れに乗っているときにアンカーに触れた
-    void OnCollisionEnter(Collision col)
-    {
-        if (col.gameObject.tag == "Ammo") AmmoHit();
-        if (col.gameObject.tag == "Anchor") AnchorHit(col.gameObject);
-        if (col.gameObject.name == "Goal") GoalHit();
-    }
-    //流れていないときにアンカーに触れている
-    void OnCollisionStay(Collision col)
-    {
-        if (col.gameObject.tag != "Anchor") return;
-
-        //既に追加されてたら追加しない
-        foreach (GameObject anchor in OnAnchorList)
+        if (isDrawUI == false)
         {
-            if (col.gameObject.Equals(anchor)) return;
+            ShareImageHost.SetActive(false);
+            ShareImageClient.SetActive(false);
         }
-        OnAnchorList.Add(col.gameObject);
-    }
-    //アンカーに触れていたが流れて離れた
-    void OnCollisionExit(Collision col)
-    {
-        if (col.gameObject.tag != "Anchor") return;
-
-        OnAnchorList.Remove(col.gameObject);
     }
 
-    void AmmoHit()
+    //占有度に変化があるときの処理
+    void UpdateShare()
     {
-        if (Owner == null) return;
-        //所有者がいたら
+        if (RidePlayers.Count != 1) return;
+        if (!isServer) return;
 
-        CmdAppealAreaDamage();
-        if (hp == 0)
+        //誰にも占拠されていない
+        if (share == 0)
         {
-            Owner.GetComponent<PlayerState>().IsAreaOwner = false;
-            Owner = null;
-            IsFlowing = false;
-            Destroy(flowObj);
+            ChangeOccupiers(RidePlayers[0].GetComponent<PlayerState>().isLocalPlayer);
+            CmdChangeShare(1);
+        }
+        //自分が占拠している
+        else if (isOccupiers == RidePlayers[0].GetComponent<PlayerState>().isLocalPlayer)
+        {
+            CmdChangeShare(1);
+        }
+        //相手に占拠されている
+        else
+        {
+            CmdChangeShare(-1);
         }
 
+    }
+
+    void ShareUI()
+    {
+        if (isOccupiers == true)
+        {
+            ShareImage.color = Color.white;
+            ShareImage.fillAmount = share / 100;
+        }
+        else
+        {
+            ShareImage.color = Color.red;
+            ShareImage.fillAmount = share / 100;
+        }
+
+        foreach (GameObject player in RidePlayers)
+        {
+            if (player.GetComponent<PlayerState>().isLocalPlayer)
+            {
+                if (isOccupiers == true)
+                {
+                    ShareImageHost.SetActive(true);
+                    ShareImageHost.GetComponent<Image>().fillAmount = share / 100;
+                }
+                else
+                {
+                    ShareImageClient.SetActive(true);
+                    ShareImageClient.GetComponent<Image>().fillAmount = share / 100;
+                }
+                isDrawUI = true;
+            }
+        }
+    }
+
+    [Client]
+    void ChangeOccupiers(bool isSev)
+    {
+        if (isSev)
+        {
+            CmdChangeSeverOccupiers();
+        }
+        else
+        {
+            CmdChangeClinetOccupiers();
+        }
     }
 
     [Command]
-    void CmdAppealAreaDamage()
+    void CmdChangeSeverOccupiers()
     {
-        hp = --hp > 0 ? hp-- : 0;
+        isOccupiers = true;
     }
 
-    void AnchorHit(GameObject col)
+    [Command]
+    void CmdChangeClinetOccupiers()
     {
-        if (flowObj != null && col.Equals(flowObj.GetComponent<Flow>().targetAnchor))
+        isOccupiers = false;
+    }
+
+    [Command]
+    void CmdChangeShare(float value)
+    {
+        share += value;
+        if (share >= 100)
         {
-            Destroy(flowObj);
-            IsFlowing = false;
-            flowObj = null;
+            share = 100;
+            isOccupation = true;
+        }
+        else if (share <= 0)
+        {
+            share = 0;
+            isOccupation = false;
         }
     }
 
-    void GoalHit()
+    void OnTriggerEnter(Collider col)
     {
-        GameObject go = GameObject.FindGameObjectWithTag("NetworkManager");
-        MyNetworkManager man = go.GetComponent<MyNetworkManager>();
-        man.ServerChangeScene("Result");
+        if (col.tag != "Player") return;
+        RidePlayers.Add(col.gameObject);
+    }
+
+    void OnTriggerExit(Collider col)
+    {
+        if (col.tag != "Player") return;
+        RidePlayers.Remove(col.gameObject);
     }
 }
