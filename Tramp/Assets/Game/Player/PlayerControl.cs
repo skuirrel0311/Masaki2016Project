@@ -11,7 +11,8 @@ public class PlayerControl : NetworkBehaviour
 
     private Animator animator;
     [SerializeField]
-    private GameObject mainCamera;//プレイヤーが使用するカメラ
+    private GameObject cameraObj;//プレイヤーが使用するカメラ
+    private CameraControl cameraControl;
 
     [SerializeField]
     private Vector3 jumpVec = new Vector3(0, 0.3f, 0); //ジャンプ力
@@ -23,7 +24,14 @@ public class PlayerControl : NetworkBehaviour
     /// 地上にいる
     /// </summary>
     [SerializeField]
-    private bool IsOnGround;
+    public bool IsOnGround;
+    //落下してから着地した
+    public bool IsFallAfter;
+
+    /// <summary>
+    /// 流れに乗っている
+    /// </summary>
+    public bool IsFlowing;
 
     [SerializeField]
     private float EndArea = 59;
@@ -32,37 +40,44 @@ public class PlayerControl : NetworkBehaviour
     /// ジャンプ中
     /// </summary>
     [SerializeField]
-    private bool IsJumping;
+    public bool IsJumping;
 
     /// <summary>
     /// 落下中
     /// </summary>
     [SerializeField]
-    private bool Isfalling;
+    public bool IsFalling;
 
     /// <summary>
     /// ジャンプキーが押された時の座標
     /// </summary>
-    private Vector3 atJumpPosition;
+    public Vector3 atJumpPosition;
 
     public int playerNum;
 
     private Rigidbody body;
     bool isRun = false;
 
+    Timer onGroundTimer = new Timer();
+    public Timer OnGroundTimer { get { return onGroundTimer; } }
+    Timer landedTimer = new Timer();
+    public Timer LandedTimer { get { return landedTimer; } }
+
     void Start()
     {
         animator = GetComponentInChildren<Animator>();
         body = GetComponent<Rigidbody>();
-        atJumpPosition = Vector3.zero;
-        IsOnGround = true;
+        atJumpPosition = transform.position;
+        IsOnGround = false;
+        IsFalling = true;
         isRun = false;
 
         if (isLocalPlayer)
         {
             SetSratPosition();
-            GameObject.Find("Camera1").GetComponent<CameraControl>().SetPlayer(gameObject);
-            mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+            cameraControl = GameObject.Find("Camera1").GetComponent<CameraControl>();
+            cameraControl.SetPlayer(gameObject);
+            cameraObj = GameObject.FindGameObjectWithTag("MainCamera");
         }
     }
 
@@ -90,11 +105,20 @@ public class PlayerControl : NetworkBehaviour
 
     void Update()
     {
+        UpdateTimer();
         body.isKinematic = false;
         Vector2 leftStick = GamePadInput.GetAxis(GamePadInput.Axis.LeftStick, (GamePadInput.Index)playerNum);
         Vector3 direction = new Vector3(leftStick.x, 0, leftStick.y);
         Move(direction);
         Jump();
+
+        //ジャンプしてジャンプ開始地点よりも下に落ちた
+        if (IsJumping && atJumpPosition.y > transform.position.y)
+        {
+            if(!IsFalling)cameraControl.SetNowLatitude();
+            cameraControl.IsEndFallingCamera = false;
+            IsFalling = true;
+        }
 
         //アニメーターにパラメータを送る
         if (!ChackCurrentAnimatorName(animator, "wait") && !Move(direction))
@@ -111,6 +135,12 @@ public class PlayerControl : NetworkBehaviour
         }
     }
 
+    void UpdateTimer()
+    {
+        onGroundTimer.Update();
+        landedTimer.Update();
+    }
+    
     static public bool ChackCurrentAnimatorName(Animator animator, string name)
     {
         return animator.GetCurrentAnimatorStateInfo(0).IsName(name);
@@ -127,7 +157,7 @@ public class PlayerControl : NetworkBehaviour
 
         // body.velocity = new Vector3(0,body.velocity.y,0);
         //カメラの角度のx､zは見ない
-        Quaternion cameraRotation = mainCamera.transform.rotation;
+        Quaternion cameraRotation = cameraObj.transform.rotation;
         cameraRotation.x = 0;
         cameraRotation.z = 0;
 
@@ -192,24 +222,79 @@ public class PlayerControl : NetworkBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        Debug.Log("Player Control hit");
         //地面にいたらダメ
         if (IsOnGround) return;
 
+        if (collision.gameObject.name == "FixAnchor") AnchorHit();
+
         //Areaはトリガーなのでヒットしないが
         //どうやら親のタグを取得しているみたい
-        if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Box" && 
-            collision.gameObject.tag != "Area" && collision.gameObject.tag != "Scaffold") return;
+        if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Area" && collision.gameObject.tag != "Scaffold") return;
         Landed();
     }
 
+    public void AnchorHit()
+    {
+        IsFlowing = false;
+        IsFalling = true;
+        cameraControl.SetNowLatitude();
+        cameraControl.IsEndFallingCamera = false;
+    }
+
+    void OnCollisionExit(Collision col)
+    {
+        if (col.gameObject.tag != "Plane" && col.gameObject.tag != "Area" && col.gameObject.tag != "Scaffold") return;
+
+        //ジャンプもしてない、流れてもいない、なのに地面から離れてたら
+        if (!IsJumping && !IsOnGround && !IsFlowing)
+        {
+            if(!IsFalling)cameraControl.SetNowLatitude();
+            cameraControl.IsEndFallingCamera = false;
+            IsFalling = true;
+        }
+        animator.CrossFadeInFixedTime("jump", 0.5f);
+        IsOnGround = false;
+    }
+
+    void OnTriggerEnter(Collider col)
+    {
+        if (col.gameObject.name == "FixAnchor") AnchorHit();
+
+        //着地した
+        if (col.tag == "Box") Landed();
+    }
+
+    void OnTriggerExit(Collider col)
+    {
+        //地面から離れた
+        if (col.tag != "Box" && col.tag != "Scaffold") return;
+
+        //ジャンプもしてない、流れてもいない、なのに地面から離れてたら
+        if (!IsJumping && !IsOnGround &&!IsFlowing)
+        {
+            if(!IsFalling)cameraControl.SetNowLatitude();
+            cameraControl.IsEndFallingCamera = false;
+            IsFalling = true;
+        }
+        animator.CrossFadeInFixedTime("jump", 0.5f);
+        IsOnGround = false;
+    }
+    
     //着地した
     void Landed()
     {
+        if (IsFalling)
+        {
+            IsFallAfter = true;
+            landedTimer.TimerStart(0.5f);
+        }
         IsJumping = false;
-        Isfalling = false;
+        IsFalling = false;
         IsOnGround = true;
+        IsFlowing = false;
         body.isKinematic = false;
         animator.CrossFadeInFixedTime("jump_landing", 0.1f);
+        onGroundTimer.TimerStart(0.4f);
+        atJumpPosition = transform.position;
     }
 }

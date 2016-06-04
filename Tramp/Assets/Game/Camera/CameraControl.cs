@@ -30,24 +30,30 @@ public class CameraControl : MonoBehaviour
     float radius = 6;
     [SerializeField]
     private float rotationSpeed = 200;
-    
+
     public GameObject targetAnchor;
     private GameObject cameraObj;
 
-    public GameObject player;
+    private Vector3 cameraTargetPosition;
+    private GameObject player;
+    private PlayerControl playerControl;
     private Vector3 oldPlayerPosition;
     private int playerNum = 1;
-    private float  oldInputVec=0;
+    private float oldInputVec = 0;
+    //着地したときに戻すlatitudeの値
+    public float atJumpLatitude = 15;
 
     [SerializeField]
     private GameObject AlignmentSprite = null;
+    private RectTransform canvasRect;
     private Timer lockonTimer = new Timer();
     private Timer imageTimer = new Timer();
     /// <summary>
     /// ロックオンの処理が終わったか(アンカーにカメラが向き終わったか？)
     /// </summary>
     private bool IsEndLockOn;
-    public  bool IsLockOn;
+    public bool IsLockOn;
+    public bool IsEndFallingCamera = true;
 
     //カメラとプレイヤーの間にあるオブジェクト
     List<GameObject> lineHitObjects = new List<GameObject>();
@@ -56,8 +62,11 @@ public class CameraControl : MonoBehaviour
     void Start()
     {
         cameraObj = transform.FindChild("ThirdPersonCamera").gameObject;
-        playerNum = player.GetComponent<PlayerControl>().playerNum;
         IsEndLockOn = false;
+        canvasRect = GameObject.Find("Canvas").GetComponent<RectTransform>();
+        GameObject g = GameObject.Find("Canvas");
+
+        Debug.Log(g.name);
     }
 
     //カメラの角度をリセットする
@@ -75,7 +84,9 @@ public class CameraControl : MonoBehaviour
     public void SetPlayer(GameObject Player)
     {
         player = Player;
+        playerControl = player.GetComponent<PlayerControl>();
         oldPlayerPosition = player.transform.position;
+        cameraTargetPosition = player.transform.position;
         playerNum = player.GetComponent<PlayerControl>().playerNum;
         Reset();
     }
@@ -87,7 +98,7 @@ public class CameraControl : MonoBehaviour
         lockonTimer.Update();
         imageTimer.Update();
         //ロックオンの処理押された時と押している時で処理を分ける
-        if (GamePadInput.GetButtonDown(GamePadInput.Button.LeftShoulder, (GamePadInput.Index)playerNum)&&!MainGameManager.IsPause)
+        if (GamePadInput.GetButtonDown(GamePadInput.Button.LeftShoulder, (GamePadInput.Index)playerNum) && !MainGameManager.IsPause)
         {
             if (!IsLockOn) CameraLockOnStart();
             else
@@ -116,8 +127,11 @@ public class CameraControl : MonoBehaviour
 
         longitude += rightStick.x * rotationSpeed * Time.deltaTime;
 
+        if (player.GetComponent<PlayerControl>().IsFalling) FallingCamera();
+
         if (GamePadInput.GetButtonDown(GamePadInput.Button.RightStick, (GamePadInput.Index)playerNum)) Reset();
 
+        GetTargetPosition();
         SphereCameraControl();
 
         cameraObj.transform.localRotation = Quaternion.Lerp(Quaternion.Euler(0, cameraObj.transform.localRotation.y, 0), cameraObj.transform.localRotation, 1 - lockonTimer.Progress);
@@ -137,7 +151,7 @@ public class CameraControl : MonoBehaviour
         //rayにあたったオブジェクトをリストに格納
         List<GameObject> hitList = Physics.RaycastAll(ray, direction.magnitude).Select(n => n.transform.gameObject).ToList();
 
-        if (hitList.Count == 0)return;
+        if (hitList.Count == 0) return;
 
         //containsでlinehitに無くてtagがBoxのものを判定しwhereで無かったものをlistに格納
         lineHitObjects.AddRange(hitList.Where(n => (!lineHitObjects.Contains(n)) && n.tag == "Box"));
@@ -145,11 +159,13 @@ public class CameraControl : MonoBehaviour
         //半透明にする
         lineHitObjects.ForEach(n => SetAlpha(n, 0.3f));
 
-        //今回あたっていないものはマテリアルをリセットする
-        lineHitObjects.Where(n => !hitList.Contains(n)).ToList().ForEach(m => ResetAlpha(m));
-
-        //今回あたっていないものは削除
-        lineHitObjects.RemoveAll(n => !hitList.Contains(n));
+        //今回ヒットしなかったものは透明度をリセットし、リムーブする。
+        lineHitObjects.RemoveAll(n =>
+        {
+            if (hitList.Contains(n)) return false;
+            ResetAlpha(n);
+            return true;
+        });
     }
 
     void SetAlpha(GameObject obj, float alpha)
@@ -187,8 +203,7 @@ public class CameraControl : MonoBehaviour
         Vector3 cameraPosition;
 
         //プレイヤーの足元からY座標に+1した座標をターゲットにする
-        Vector3 target = player.transform.position;
-        target.y += 1f;
+        Vector3 target = cameraTargetPosition + Vector3.up;
 
         //経度には制限を掛ける
         latitude = Mathf.Clamp(latitude, -120, 60);
@@ -304,7 +319,7 @@ public class CameraControl : MonoBehaviour
         float rot2 = Mathf.Atan2(transform.forward.z, transform.forward.x) * Mathf.Rad2Deg;
         return SphereCoordinate(longitude + (rot2 - rot1), rot3);
     }
-    
+
     /// <summary>
     ///照準画像の処理
     /// </summary>
@@ -326,10 +341,95 @@ public class CameraControl : MonoBehaviour
         //プレイヤーが移動していなかったら終了
         if (movement.magnitude == 0) return;
 
+        if (!playerControl.IsFalling && !playerControl.IsFlowing) movement.y *= 0.1f;
+
         //プレイヤーについていくMOMO
-        transform.position += movement;
+        cameraTargetPosition += movement;
     }
-    
+
+    //落ちているときは下方を見る
+    private void FallingCamera()
+    {
+        //地面が近かったらやめる
+        if (!IsFarGround()) return;
+
+        if (IsEndFallingCamera) return;
+        if (latitude >= 60)
+        {
+            IsEndFallingCamera = true;
+            return;
+        }
+
+        IsEndFallingCamera = false;
+        //目的のlatitude
+        float a = 60;
+        float t = (360 * Time.deltaTime) / (a - latitude);
+        latitude = Mathf.Lerp(latitude, a, t);
+    }
+
+    //着地予想をして遠かったらtrueを返す
+    private bool IsFarGround()
+    {
+        Vector3 movement = player.transform.position - oldPlayerPosition;
+        Ray ray = new Ray(player.transform.position, movement);
+        RaycastHit hit;
+        if(Physics.Raycast(ray,out hit, 1000))
+        {
+            if (hit.distance > 5)   return true;
+            else                    return false;
+        }
+
+        return false;
+    }
+
+    private void SetMaker()
+    {
+        GameObject obj = GetTargetAnchor();
+        Image image = AlignmentSprite.GetComponent<Image>();
+
+        //nullだったら中央に表示される
+        if (obj == null)
+        {
+            image.rectTransform.anchoredPosition = Vector2.zero;
+            return;
+        }
+
+        //アンカーがカメラのどこに表示されているか？(0～1)
+        Vector3 anchorPosition = cameraObj.GetComponent<Camera>().WorldToViewportPoint(obj.transform.position);
+
+        //canvasのrectのサイズの1/2を引く。
+        float x = (anchorPosition.x * canvasRect.sizeDelta.x) - (canvasRect.sizeDelta.x * 0.5f);
+        float y = (anchorPosition.y * canvasRect.sizeDelta.y) - (canvasRect.sizeDelta.y * 0.5f);
+
+        image.rectTransform.anchoredPosition = new Vector2(x, y);
+    }
+
+    private void GetTargetPosition()
+    {
+        Vector3 movement = player.transform.position - oldPlayerPosition;
+
+        //落ちていないときに流れていなかったら
+        if (!playerControl.IsFalling && !playerControl.IsFlowing) movement.y *= 0.3f;
+
+        cameraTargetPosition += movement;
+        
+        if (playerControl.IsOnGround && !playerControl.OnGroundTimer.IsLimitTime)
+        {
+            cameraTargetPosition = Vector3.Lerp(cameraTargetPosition, player.transform.position, playerControl.OnGroundTimer.Progress);
+        }
+
+        //落下する前のlatitudeに戻す
+        if(playerControl.IsFallAfter && !playerControl.LandedTimer.IsLimitTime)
+            latitude = Mathf.Lerp(latitude, atJumpLatitude, playerControl.LandedTimer.Progress);
+        else
+            playerControl.IsFallAfter = false;
+    }
+
+    public void SetNowLatitude()
+    {
+        atJumpLatitude = latitude;
+    }
+
     #region GetTargetAnchor
     public GameObject GetTargetAnchor()
     {
@@ -342,7 +442,7 @@ public class CameraControl : MonoBehaviour
         //見ている可能性が高いアンカーを取得
         List<GameObject> temp = GetShouldLookAnchor(anchorList);
 
-        if(temp.Count != 0)
+        if (temp.Count != 0)
         {
             //5度以内のアンカーのなかで一番近いアンカーを取得
             targetAnchor = GetNearAnchor(temp);
@@ -369,7 +469,7 @@ public class CameraControl : MonoBehaviour
 
         anchorList.ForEach(n =>
         {
-            if(Vector3.Distance(transform.position,n.transform.position) < distance)
+            if (Vector3.Distance(transform.position, n.transform.position) < distance)
             {
                 distance = Vector3.Distance(transform.position, n.transform.position);
                 nearAnchor = n;
@@ -407,7 +507,7 @@ public class CameraControl : MonoBehaviour
             float tmpAngleW = Vector2.Angle(vec, originAnchorVec);
             //上下の角度
             Vector3 toAnchorVector = n.transform.position - cameraObj.transform.position;
-            float tmpAngleH = DifferenceLatitude(toAnchorVector,cameraObj.transform.forward);
+            float tmpAngleH = DifferenceLatitude(toAnchorVector, cameraObj.transform.forward);
             tmpAngleH = Mathf.Abs(tmpAngleH);
 
             //5度以内のアンカーを検索
