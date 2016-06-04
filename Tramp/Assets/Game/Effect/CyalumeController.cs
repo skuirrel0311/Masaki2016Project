@@ -51,11 +51,12 @@ public class CyalumeController : MonoBehaviour
 	}
 
     private Vector3 startPosition;
-
+    private Color StartColor;
 	void Start()
 	{
 		particleSystem_ = GetComponent<ParticleSystem>();
         startPosition = transform.position;
+        StartColor = baseColor;
 	}
 
     void Update()
@@ -67,8 +68,9 @@ public class CyalumeController : MonoBehaviour
         {
             t = 1 - t;
         }
-
         //Mathf.Log((1 - Mathf.Cos(t) / (1 + Mathf.Cos(t))));
+        float i = 0.8f;
+        baseColor = StartColor * t*t+new Color(i,i,i);
         transform.position = Vector3.Lerp(startPosition,pos,t );
     }
 }

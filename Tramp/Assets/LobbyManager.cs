@@ -74,17 +74,6 @@ public class LobbyManager : NetworkBehaviour
 
     public void OnDesConnect()
     {
-
-        if (myNetDiscoverry.isServer)
-        {
-            networkManager.GetComponent<MyNetworkManager>().StopHost();
-            networkManager.GetComponent<MyNetworkManager>().StopServer();
-        }
-        else
-        {
-            networkManager.GetComponent<MyNetworkManager>().StopClient();
-        }
-
         myNetManager.DiscoveryShutdown();
         myNetManager.ServerChangeScene("Menu");
     }

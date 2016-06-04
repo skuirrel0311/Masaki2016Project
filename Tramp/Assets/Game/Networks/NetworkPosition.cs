@@ -30,6 +30,7 @@ public class NetworkPosition : NetworkBehaviour
     /// </summary>
     void LerpPosition()
     {
+        if (syncPosition == null) return;
         if (!isLocalPlayer)
         {
             myTransform.position = Vector3.Lerp(myTransform.position,syncPosition,Time.deltaTime*lerpRate);

@@ -236,26 +236,7 @@ public class PlayerControl : NetworkBehaviour
         }
     }
 
-    void OnTriggerEnter(Collider col)
-    {
-        if (col.name == "FixAnchor" || col.name == "AreaAnchor")
-        {
-            hitFix = true;
-            if (col.name == "AreaAnchor")
-            {
-                GetComponent<Rigidbody>().velocity = Vector3.zero;
-                GetComponent<Rigidbody>().useGravity = true;
-            }
-        }
-    }
 
-    void OnTriggerExit(Collider col)
-    {
-        if (col.name == "FixAnchor" || col.name == "AreaAnchor")
-        {
-            StartCoroutine("SleepHItFix");
-        }
-    }
 
     IEnumerator SleepHItFix()
     {
@@ -301,6 +282,15 @@ public class PlayerControl : NetworkBehaviour
 
     void OnTriggerEnter(Collider col)
     {
+        if (col.name == "FixAnchor" || col.name == "AreaAnchor")
+        {
+            hitFix = true;
+            if (col.name == "AreaAnchor")
+            {
+                GetComponent<Rigidbody>().velocity = Vector3.zero;
+                GetComponent<Rigidbody>().useGravity = true;
+            }
+        }
         if (col.gameObject.name == "FixAnchor") AnchorHit();
 
         //着地した
@@ -309,6 +299,10 @@ public class PlayerControl : NetworkBehaviour
 
     void OnTriggerExit(Collider col)
     {
+        if (col.name == "FixAnchor" || col.name == "AreaAnchor")
+        {
+            StartCoroutine("SleepHItFix");
+        }
         //地面から離れた
         if (col.tag != "Box" && col.tag != "Scaffold") return;
 

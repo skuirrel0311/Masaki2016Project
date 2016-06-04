@@ -89,6 +89,7 @@ public class CameraControl : MonoBehaviour
         cameraTargetPosition = player.transform.position;
         playerNum = player.GetComponent<PlayerControl>().playerNum;
         Reset();
+        lockonTimer.TimerStart(0.2f);
     }
 
     void Update()

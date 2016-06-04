@@ -21,11 +21,12 @@ public class Penetrate : NetworkBehaviour
 
     private float energy = 0;
     private float MaxEnergy = 100;
-
+    private bool isStopFlowRender;
     // Use this for initialization
     void Start()
     {
         PenetrateGage = GameObject.Find("GunEnergy").GetComponent<Image>();
+        isStopFlowRender = false;
     }
 
     // Update is called once per frame
@@ -35,6 +36,7 @@ public class Penetrate : NetworkBehaviour
         PenetrateGage.fillAmount = energy / MaxEnergy;
         if (GamepadInput.GamePadInput.GetButtonDown(GamepadInput.GamePadInput.Button.RightShoulder, GamepadInput.GamePadInput.Index.One)&&0<energy)
         {
+            isStopFlowRender = false;
             GameObject[] gos = GameObject.FindGameObjectsWithTag("Flow");
             foreach (GameObject go in gos)
             {
@@ -62,6 +64,8 @@ public class Penetrate : NetworkBehaviour
 
     void StopFlowRender()
     {
+        if (isStopFlowRender) return;
+        isStopFlowRender = true;
         GameObject[] gos = GameObject.FindGameObjectsWithTag("Flow");
         foreach (GameObject go in gos)
         {
