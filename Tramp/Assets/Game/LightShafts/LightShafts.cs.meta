@@ -1,10 +1,24 @@
 fileFormatVersion: 2
 guid: 3ef4dc8a32cf5704d99add1a5edd692d
-timeCreated: 1464957824
+timeCreated: 1465106647
 licenseType: Pro
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - m_CurrentCamera: {instanceID: 0}
+  - m_DepthShader: {fileID: 4800000, guid: 9dc9ecb7b7ac63e40a0ee04724d1b0f5, type: 3}
+  - m_ColorFilterShader: {fileID: 4800000, guid: 5761fbc7efd168145b750fcace46f6b1,
+      type: 3}
+  - m_CoordShader: {fileID: 4800000, guid: 28b4cdff0bf88d2458cc028bd6e0dc39, type: 3}
+  - m_DepthBreaksShader: {fileID: 4800000, guid: a75bb0536ea7cff48b3c0dc50447cdce,
+      type: 3}
+  - m_RaymarchShader: {fileID: 4800000, guid: 7b4cd1f247e1fc246b0a38cdc3da10d2, type: 3}
+  - m_InterpolateAlongRaysShader: {fileID: 4800000, guid: da5f640106d9cd646b00a806e256d40c,
+      type: 3}
+  - m_SamplePositionsShader: {fileID: 4800000, guid: 6f4829e6ed060e1459bcd97ddb40cce3,
+      type: 3}
+  - m_FinalInterpolationShader: {fileID: 4800000, guid: d27c8eee8f58eda4394e1f35ad190f46,
+      type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

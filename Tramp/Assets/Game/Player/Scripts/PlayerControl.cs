@@ -90,6 +90,13 @@ public class PlayerControl : NetworkBehaviour
 
     void OnDestroy()
     {
+        GameObject nm = GameObject.FindGameObjectWithTag("NetworkManager");
+        if (nm == null) return;
+        if (nm.GetComponent<MyNetworkManager>().autoCreatePlayer&&isLocalPlayer)
+        {
+            ClientScene.AddPlayer(1);
+        }
+
         Debug.Log("Player Destory");
     }
 
