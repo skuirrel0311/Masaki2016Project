@@ -72,6 +72,7 @@ public class Flow : NetworkBehaviour{
             StopFlowRender();
         }
 
+        //作ったプレイヤーに合わせて色を替える
         if (whichCreatePlayer)
         {
             GetComponent<Renderer>().materials[0].SetColor("_Color",Color.blue);
@@ -80,6 +81,16 @@ public class Flow : NetworkBehaviour{
         {
             GetComponent<Renderer>().materials[0].SetColor("_Color", new Color(0.5f,0,0));
         }
+
+        //接続先が固定のアンカーだったら自分の情報を固定のアンカーに送るふぃｘ
+        List<GameObject> gos = new List<GameObject>();
+        gos.AddRange(GameObject.FindGameObjectsWithTag("Anchor"));
+        GameObject go =  gos.Find(anchor=>anchor.transform.position.Equals(targetPosition));
+        if(go.name=="AreaAnchor")
+        {
+            go.GetComponent<FixAnchorHit>().ConnectionFlow(gameObject);
+        }
+        
 
     }
 
@@ -160,6 +171,7 @@ public class Flow : NetworkBehaviour{
         bodys.Add(body);
         body.useGravity = false;
         body.velocity = transform.up* body.velocity.magnitude;
+        col.gameObject.GetComponent<Animator>().CrossFadeInFixedTime("ride", 0.1f);
     }
 
     void OnTriggerStay(Collider col)
@@ -171,7 +183,9 @@ public class Flow : NetworkBehaviour{
     {
         if (col.gameObject.GetComponent<PlayerControl>().hitFix) return;
         PlayerState state = col.gameObject.GetComponent<PlayerState>();
+        col.gameObject.GetComponent<PlayerControl>().IsFlowing = true;
         if (isCreatePlayer)
+
         {
             col.gameObject.GetComponent<Penetrate>().Energy++;
         }
@@ -186,7 +200,12 @@ public class Flow : NetworkBehaviour{
         body.useGravity = false;
         body.AddForce(PlayerVector * Time.deltaTime * speed*50,ForceMode.Acceleration);
 
-        if (nonDestroy) return;
+            PlayerControl control = col.GetComponent<PlayerControl>();
+            control.IsFlowing = false;
+            control.IsFalling = true;
+            CameraControl cam = GameObject.Find("Camera1").GetComponent<CameraControl>();
+            cam.SetNowLatitude();
+            cam.IsEndFallingCamera = false;
     }
 
     void OnTriggerExit(Collider col)

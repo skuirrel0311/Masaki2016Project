@@ -5,6 +5,7 @@ using System.Collections;
 using UnityEngine.Networking.Match;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Net;
 
 public enum Winner
 {
@@ -22,7 +23,23 @@ public class MyNetworkManager : NetworkManager
     GameObject netmanagerPrefab;
 
     [SerializeField]
-    int PlayerCount = 0;
+    GameObject SeverPlayerPrefab;
+
+    [SerializeField]
+    GameObject ClientPlayerPrefab;
+
+    [SerializeField]
+    int PlayerCount
+    {
+        get { return playercount; }
+        set
+        {
+            playercount = value;
+            if (discovery != null)
+                discovery.broadcastData = playercount.ToString()+","+networkPort;
+        }
+    }
+    private int playercount = 0;
 
     float joinTimer;
 
@@ -86,8 +103,6 @@ public class MyNetworkManager : NetworkManager
         base.ServerChangeScene(newSceneName);
     }
 
-
-
     public override void OnServerConnect(NetworkConnection conn)
     {
         PlayerCount++;
@@ -128,15 +143,17 @@ public class MyNetworkManager : NetworkManager
         base.OnClientSceneChanged(conn);
     }
 
-
     //ButtonStartHostボタンを押した時に実行
     //IPポートを設定し、ホストとして接続
     public void StartupHost()
     {
         if (isJoin) return;
+        playerPrefab = SeverPlayerPrefab;
         SetPort();
         discovery.Initialize();
+        discovery.broadcastData = PlayerCount.ToString()+","+networkPort;
         discovery.StartAsServer();
+        Debug.Log("Start:" + serverBindAddress + ":" + serverBindToIP);
         StartHost();
     }
 
@@ -145,11 +162,28 @@ public class MyNetworkManager : NetworkManager
     public void JoinGame()
     {
         if (isJoin) return;
+        playerPrefab = ClientPlayerPrefab;
+        Debug.Log("Join:" + serverBindAddress + "," + serverBindToIP);
         SetPort();
         discovery.Initialize();
         discovery.StartAsClient();
         isJoin = true;
         joinTimer = 0;
+    }
+
+    public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId)
+    {
+        GameObject player;
+        if (conn.address == "localClient")
+        {
+            player = (GameObject)GameObject.Instantiate(SeverPlayerPrefab, Vector3.zero, Quaternion.identity);
+        }
+        else
+        {
+            player = (GameObject)GameObject.Instantiate(ClientPlayerPrefab, Vector3.zero, Quaternion.identity);
+
+        }
+        NetworkServer.AddPlayerForConnection(conn, player, playerControllerId);
     }
 
     public override void OnStopHost()
@@ -160,6 +194,7 @@ public class MyNetworkManager : NetworkManager
         PlayerCount = 0;
         base.OnStopHost();
     }
+
     public override void OnStopClient()
     {
         networkPort = 0;
@@ -172,14 +207,36 @@ public class MyNetworkManager : NetworkManager
     //ポートの設定
     void SetPort()
     {
-        networkPort = 7777;
+
+        networkPort = Random.Range(7777,7877); 
     }
 
     public void DiscoveryShutdown()
     {
+
+        if (discovery.isServer)
+        {
+            StopHost();
+        }
+        else
+        {
+            StopClient();
+        }
         discovery.StopBroadcast();
         NetworkTransport.Shutdown();
         NetworkTransport.Init();
         discovery.isStartClient = false;
+    }
+
+    public override void OnClientError(NetworkConnection conn, int errorCode)
+    {
+        Debug.Log("Call Client Error:" + (NetworkConnectionError)errorCode);
+        base.OnClientError(conn, errorCode);
+    }
+
+    public override void OnServerError(NetworkConnection conn, int errorCode)
+    {
+        Debug.Log("Call Sever Error:" + (NetworkConnectionError)errorCode);
+        base.OnServerError(conn, errorCode);
     }
 }

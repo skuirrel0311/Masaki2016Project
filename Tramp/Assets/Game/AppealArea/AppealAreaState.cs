@@ -23,9 +23,22 @@ public class AppealAreaState : NetworkBehaviour
     private GameObject ShareImageClient;
 
     [SerializeField]
+    private Texture SeverTexture;
+
+    [SerializeField]
+    private Texture ClientTexture;
+
+    [SerializeField]
+    private Texture NeutralTexture;
+
+    [SerializeField]
+    private GameObject ShareImageObject;
+
     private Image ShareImage;
 
-    private static bool isDrawUI=false;
+    Renderer StageMesh;
+
+    private static bool isDrawUI = false;
 
     void Awake()
     {
@@ -39,6 +52,9 @@ public class AppealAreaState : NetworkBehaviour
         isOccupation = false;
         share = 0;
         RidePlayers = new List<GameObject>();
+        StageMesh = transform.FindChild("pSphere1").GetComponent<Renderer>();
+        ShareImage = ShareImageObject.transform.FindChild("ShareImage").GetComponent<Image>();
+        ShareImageObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(transform.position.x,transform.position.z);
     }
 
     void FixedUpdate()
@@ -53,6 +69,22 @@ public class AppealAreaState : NetworkBehaviour
 
         //乗っている間の表示処理
         ShareUI();
+
+        if (isOccupation)
+        {
+            if (isOccupiers)
+            {
+                StageMesh.materials[0].mainTexture=SeverTexture;
+            }
+            else
+            {
+                StageMesh.materials[0].mainTexture = ClientTexture;
+            }
+        }
+        else
+        {
+            StageMesh.materials[0].mainTexture = NeutralTexture;
+        }
     }
 
     void LateUpdate()

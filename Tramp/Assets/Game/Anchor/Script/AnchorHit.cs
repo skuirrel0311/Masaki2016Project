@@ -33,6 +33,7 @@ public class AnchorHit : MonoBehaviour {
             //Hpが0になったらDestroy
             if (Hp <= 0)
             {
+                Instantiate(HitEffect,transform.position,transform.rotation);
                 Destroy(gameObject);
                 Destroy(FlowEffect);
             }
