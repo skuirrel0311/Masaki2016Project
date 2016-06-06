@@ -57,7 +57,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
             if ( !CheckNearAnchor())
                 return;
 
-            camera.GetComponent<CameraControl>().IsLockOn = false;
+            camera.GetComponent<CameraLockon>().IsLockOn = false;
             Debug.Log("start");
             
             //アンカーを置く
@@ -71,8 +71,8 @@ public class PlayerCreateAnchor : NetworkBehaviour
 
     void GetTargetAnchor()
     {
-        CameraControl camControl = camera.GetComponent<CameraControl>();
-        targetAnchor = camControl.targetAnchor;
+        CameraLockon cameraLockon = camera.GetComponent<CameraLockon>();
+        targetAnchor = cameraLockon.targetAnchor;
         float distance = 1000000;
         if (targetAnchor != null)
         {
@@ -82,7 +82,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
             return;
         }
 
-        targetAnchor = camControl.GetTargetAnchor();
+        targetAnchor = cameraLockon.GetTargetAnchor();
         if (targetAnchor != null)
         {
             targetPosition = targetAnchor.transform.position;

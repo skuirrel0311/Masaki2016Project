@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine.Networking;
 
-public class Flow : NetworkBehaviour{
+public class Flow : NetworkBehaviour
+{
 
     [SerializeField]
-    private float speed=10;
+    private float speed = 10;
     [SerializeField]
     bool nonDestroy = false;
 
@@ -58,7 +59,7 @@ public class Flow : NetworkBehaviour{
     void Awake()
     {
         CreateFlow.flowEffectCount++;
-        gameObject.name = "FlowEffect"+CreateFlow.flowEffectCount;
+        gameObject.name = "FlowEffect" + CreateFlow.flowEffectCount;
     }
 
     void Start()
@@ -75,22 +76,22 @@ public class Flow : NetworkBehaviour{
         //作ったプレイヤーに合わせて色を替える
         if (whichCreatePlayer)
         {
-            GetComponent<Renderer>().materials[0].SetColor("_Color",Color.blue);
+            GetComponent<Renderer>().materials[0].SetColor("_Color", Color.blue);
         }
         else
         {
-            GetComponent<Renderer>().materials[0].SetColor("_Color", new Color(0.5f,0,0));
+            GetComponent<Renderer>().materials[0].SetColor("_Color", new Color(0.5f, 0, 0));
         }
 
         //接続先が固定のアンカーだったら自分の情報を固定のアンカーに送るふぃｘ
         List<GameObject> gos = new List<GameObject>();
         gos.AddRange(GameObject.FindGameObjectsWithTag("Anchor"));
-        GameObject go =  gos.Find(anchor=>anchor.transform.position.Equals(targetPosition));
-        if(go.name=="AreaAnchor")
+        GameObject go = gos.Find(anchor => anchor.transform.position.Equals(targetPosition));
+        if (go.name == "AreaAnchor")
         {
             go.GetComponent<FixAnchorHit>().ConnectionFlow(gameObject);
         }
-        
+
 
     }
 
@@ -113,15 +114,15 @@ public class Flow : NetworkBehaviour{
         //if (startAnchor == null)
         //    GetStartAnchor();
 
-        if (!isCreatePlayer&&isrenderd==true)
+        if (!isCreatePlayer && isrenderd == true)
         {
             GetComponent<Renderer>().enabled = false;
             GetComponent<LineRenderer>().enabled = false;
         }
 
         if (!isCalc) return;
-        transform.localScale = new Vector3(2, flowVector.magnitude * 0.5f+1.0f, 2);
-        GetComponent<MeshRenderer >().materials[0].SetFloat("_LineNum",flowVector.magnitude);
+        transform.localScale = new Vector3(2, flowVector.magnitude * 0.5f + 1.0f, 2);
+        GetComponent<MeshRenderer>().materials[0].SetFloat("_LineNum", flowVector.magnitude);
         CapsuleCollider capcol = GetComponent<CapsuleCollider>();
         capcol.height = flowVector.magnitude / (flowVector.magnitude * 0.5f);
         capcol.radius = 0.5f;
@@ -170,7 +171,7 @@ public class Flow : NetworkBehaviour{
         Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
         bodys.Add(body);
         body.useGravity = false;
-        body.velocity = transform.up* body.velocity.magnitude;
+        body.velocity = transform.up * body.velocity.magnitude;
         col.gameObject.GetComponent<Animator>().CrossFadeInFixedTime("ride", 0.1f);
     }
 
@@ -198,14 +199,9 @@ public class Flow : NetworkBehaviour{
         PlayerVector.Normalize();
         Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
         body.useGravity = false;
-        body.AddForce(PlayerVector * Time.deltaTime * speed*50,ForceMode.Acceleration);
+        body.AddForce(PlayerVector * Time.deltaTime * speed * 50, ForceMode.Acceleration);
 
-            PlayerControl control = col.GetComponent<PlayerControl>();
-            control.IsFlowing = false;
-            control.IsFalling = true;
-            CameraControl cam = GameObject.Find("Camera1").GetComponent<CameraControl>();
-            cam.SetNowLatitude();
-            cam.IsEndFallingCamera = false;
+
     }
 
     void OnTriggerExit(Collider col)
@@ -214,6 +210,14 @@ public class Flow : NetworkBehaviour{
         Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
         body.useGravity = true;
         bodys.Remove(body);
+
+        PlayerControl control = col.GetComponent<PlayerControl>();
+        control.IsFlowing = false;
+        control.IsFalling = true;
+        CameraControl cam = GameObject.Find("Camera1").GetComponent<CameraControl>();
+        cam.SetNowLatitude();
+        cam.IsEndFallingCamera = false;
+
         if (!isLocalPlayer) return;
         if (!isCreatePlayer) isrenderd = false;
     }
