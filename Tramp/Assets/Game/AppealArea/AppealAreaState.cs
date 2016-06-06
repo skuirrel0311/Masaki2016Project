@@ -11,7 +11,7 @@ public class AppealAreaState : NetworkBehaviour
 
     //どちらが占領中か
     [SyncVar]
-    private bool isOccupiers;
+    public bool isOccupiers;
 
     //占領済みか
     [SyncVar]
@@ -30,6 +30,9 @@ public class AppealAreaState : NetworkBehaviour
 
     [SerializeField]
     private Texture NeutralTexture;
+
+    [SerializeField]
+    private GameObject AreaEffect;
 
     [SerializeField]
     private GameObject ShareImageObject;
@@ -54,7 +57,7 @@ public class AppealAreaState : NetworkBehaviour
         RidePlayers = new List<GameObject>();
         StageMesh = transform.FindChild("pSphere1").GetComponent<Renderer>();
         ShareImage = ShareImageObject.transform.FindChild("ShareImage").GetComponent<Image>();
-        ShareImageObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(transform.position.x,transform.position.z);
+        ShareImageObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(transform.position.x, transform.position.z);
     }
 
     void FixedUpdate()
@@ -74,7 +77,7 @@ public class AppealAreaState : NetworkBehaviour
         {
             if (isOccupiers)
             {
-                StageMesh.materials[0].mainTexture=SeverTexture;
+                StageMesh.materials[0].mainTexture = SeverTexture;
             }
             else
             {
@@ -185,13 +188,23 @@ public class AppealAreaState : NetworkBehaviour
         if (share >= 100)
         {
             share = 100;
+            if (!isOccupation)
+                RpcAreaEffect();
             isOccupation = true;
         }
         else if (share <= 0)
         {
             share = 0;
+            if (isOccupation)
+                RpcAreaEffect();
             isOccupation = false;
         }
+    }
+
+    [ClientRpc]
+    void RpcAreaEffect()
+    {
+        Instantiate(AreaEffect, transform.position, transform.rotation);
     }
 
     void OnTriggerEnter(Collider col)

@@ -15,13 +15,16 @@ public class MainGameManager : MonoBehaviour
     private MyNetworkManager myNetManager;
     private MyNetworkDiscovery myNetDiscovery;
 
+    [SerializeField]
+    private AppealAreaState[] AppealAreas;
+
     // Use this for initialization
     void Start()
     {
         isPause = false;
         Time.timeScale = 1.0f;
         //AppealArea = GameObject.Find("AppealArea");
-        networkManager= GameObject.FindGameObjectWithTag("NetworkManager");
+        networkManager = GameObject.FindGameObjectWithTag("NetworkManager");
         myNetManager = networkManager.GetComponent<MyNetworkManager>();
         myNetDiscovery = networkManager.GetComponent<MyNetworkDiscovery>();
     }
@@ -42,7 +45,7 @@ public class MainGameManager : MonoBehaviour
                 isPause = true;
             }
         }
-        if (GamePadInput.GetButtonDown(GamePadInput.Button.A, GamePadInput.Index.One)&&IsPause)
+        if (GamePadInput.GetButtonDown(GamePadInput.Button.A, GamePadInput.Index.One) && IsPause)
         {
             Time.timeScale = 1.0f;
             isPause = false;
@@ -68,12 +71,30 @@ public class MainGameManager : MonoBehaviour
     //勝利状況をチェックする
     void ChackWinner()
     {
+        int count = 0;
+        foreach (AppealAreaState state in AppealAreas)
+        {
+            if (state.isOccupation )
+            {
+                if (state.isOccupiers == myNetDiscovery.isServer)
+                    count++;
+                else
+                    count--;
+            }
+        }
+
+        if (count > 0)
+            myNetManager.winner = Winner.win;
+        else if (count == 0)
+            myNetManager.winner = Winner.draw;
+        else
+            myNetManager.winner = Winner.lose;
     }
 
     void OunGUI()
     {
         if (!isPause) return;
 
-        GUI.Label(new Rect(0,0,200,100),"Aボタンで戻る");
+        GUI.Label(new Rect(0, 0, 200, 100), "Aボタンで戻る");
     }
 }

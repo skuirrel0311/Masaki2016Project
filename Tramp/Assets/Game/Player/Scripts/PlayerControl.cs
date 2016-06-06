@@ -94,7 +94,8 @@ public class PlayerControl : NetworkBehaviour
         if (nm == null) return;
         if (nm.GetComponent<MyNetworkManager>().autoCreatePlayer&&isLocalPlayer)
         {
-            ClientScene.AddPlayer(1);
+            short s = (short)(playerControllerId + 1);
+            ClientScene.AddPlayer(s);
         }
 
         Debug.Log("Player Destory");

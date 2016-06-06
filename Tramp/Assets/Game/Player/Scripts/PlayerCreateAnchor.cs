@@ -21,12 +21,12 @@ public class PlayerCreateAnchor : NetworkBehaviour
     PlayerState playerState;
 
     GameObject cameraObj;
-    GameObject targetAnchor=null;
-    
+    GameObject targetAnchor = null;
+
     Vector3 flowVector;
     Vector3 targetPosition;
     Vector3 CreatePosition;
-    
+
     float collsionRadius = 1;
 
     /// <summary>
@@ -38,6 +38,11 @@ public class PlayerCreateAnchor : NetworkBehaviour
     /// アピールエリアへ繋ぐ流れか？
     /// </summary>
     public bool IsToArea = false;
+
+    private float timer=-1;
+
+    [SerializeField]
+    private float ShotDistance=1;
 
     // Use this for initialization
     void Start()
@@ -51,21 +56,32 @@ public class PlayerCreateAnchor : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (GamePadInput.GetTrigger(GamePadInput.Trigger.LeftTrigger, GamePadInput.Index.One) == 1.0f)
+        if (GamePadInput.GetTrigger(GamePadInput.Trigger.LeftTrigger, GamePadInput.Index.One) == 1.0f&&timer == -1)
         {
+            timer = 0;
             if (MainGameManager.IsPause) return;
-            if ( !CheckNearAnchor())
+            if (!CheckNearAnchor())
                 return;
 
             camera.GetComponent<CameraLockon>().IsLockOn = false;
             Debug.Log("start");
-            
+
             //アンカーを置く
             CreateAnchor();
 
             GetTargetAnchor();
             //流れを生成する
-            CmdCreateFlowObject(targetPosition, CreatePosition, flowVector,isServer);
+            CmdCreateFlowObject(targetPosition, CreatePosition, flowVector, isServer);
+        }
+
+        if (timer != -1)
+        {
+            timer += Time.deltaTime;
+
+            if(timer>ShotDistance)
+            {
+                timer = -1;
+            }
         }
     }
 
@@ -129,7 +145,6 @@ public class PlayerCreateAnchor : NetworkBehaviour
             return false;
         }
         return true;
-
     }
 
     [ClientCallback]
@@ -138,12 +153,10 @@ public class PlayerCreateAnchor : NetworkBehaviour
         //カメラの向いている方向にプレイヤーを向ける
         float rotationY = cameraObj.transform.eulerAngles.y;
         transform.rotation = Quaternion.Euler(0, rotationY, 0);
+        CreatePosition = transform.position + transform.forward * 2 + Vector3.up;
+        //アンカーを置く
+        Cmd_rezobjectonserver(CreatePosition);
 
-
-            CreatePosition = transform.position + transform.forward * 2 + Vector3.up;
-            //アンカーを置く
-            Cmd_rezobjectonserver(CreatePosition);
-        
         Debug.Log("clientCallend");
     }
 
@@ -152,14 +165,14 @@ public class PlayerCreateAnchor : NetworkBehaviour
     {
         Debug.Log("end1");
         GameObject obj;
-        obj = Instantiate(InstanceAnchor,createPosition, transform.rotation) as GameObject;
+        obj = Instantiate(InstanceAnchor, createPosition, transform.rotation) as GameObject;
         obj.GetComponent<CreateFlow>().SetCreatePlayerIndex(1);
         NetworkServer.Spawn(obj);
         Debug.Log("end2");
     }
 
     [Command]
-    void CmdCreateFlowObject(Vector3 tpos,Vector3 thisPositon, Vector3 flowvec,bool isfrom)
+    void CmdCreateFlowObject(Vector3 tpos, Vector3 thisPositon, Vector3 flowvec, bool isfrom)
     {
         if (!isServer) return;
         //流れのコリジョン用オブジェクト
@@ -182,7 +195,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
         float dist = Vector3.Distance(tpos, thisPositon);
         float leap = ((1.5f + dist) / dist) * 0.5f;//少し出す位置をずらす
         boxCol.transform.position = Vector3.Lerp(tpos, thisPositon, leap);
-        boxCol.transform.rotation = Quaternion.FromToRotation(Vector3.up,flowvec.normalized);
+        boxCol.transform.rotation = Quaternion.FromToRotation(Vector3.up, flowvec.normalized);
         NetworkServer.Spawn(boxCol);
     }
 

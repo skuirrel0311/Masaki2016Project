@@ -126,8 +126,8 @@ public class Flow : NetworkBehaviour
         CapsuleCollider capcol = GetComponent<CapsuleCollider>();
         capcol.height = flowVector.magnitude / (flowVector.magnitude * 0.5f);
         capcol.radius = 0.5f;
-        GetComponent<LineRenderer>().SetPosition(0, transform.position + (transform.up * transform.localScale.y));
-        GetComponent<LineRenderer>().SetPosition(1, transform.position - (transform.up * transform.localScale.y));
+        GetComponent<LineRenderer>().SetPosition(0, transform.position + (transform.up * (transform.localScale.y-2)));
+        GetComponent<LineRenderer>().SetPosition(1, transform.position - (transform.up * (transform.localScale.y-2)));
         capcol.isTrigger = true;
         isCalc = false;
     }
