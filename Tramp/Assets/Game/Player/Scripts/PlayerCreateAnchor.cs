@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
-using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using GamepadInput;
 
 public class PlayerCreateAnchor : NetworkBehaviour
@@ -66,10 +67,18 @@ public class PlayerCreateAnchor : NetworkBehaviour
             camera.GetComponent<CameraLockon>().IsLockOn = false;
             Debug.Log("start");
 
+            //始点を決める
+            SetCreatePosition();
+
+            //終点を決める
+            GetTargetAnchor();
+
+            //始点と終点の間に異物混入
+            if (!IsPossibleCreateFlow()) return;
+
             //アンカーを置く
             CreateAnchor();
-
-            GetTargetAnchor();
+            
             //流れを生成する
             CmdCreateFlowObject(targetPosition, CreatePosition, flowVector, isServer);
         }
@@ -94,7 +103,6 @@ public class PlayerCreateAnchor : NetworkBehaviour
         {
             targetPosition = targetAnchor.transform.position;
             flowVector = targetPosition - CreatePosition;
-            distance = flowVector.magnitude;
             return;
         }
 
@@ -103,7 +111,6 @@ public class PlayerCreateAnchor : NetworkBehaviour
         {
             targetPosition = targetAnchor.transform.position;
             flowVector = targetPosition - CreatePosition;
-            distance = flowVector.magnitude;
             return;
         }
 
@@ -147,13 +154,17 @@ public class PlayerCreateAnchor : NetworkBehaviour
         return true;
     }
 
-    [ClientCallback]
-    void CreateAnchor()
+    void SetCreatePosition()
     {
         //カメラの向いている方向にプレイヤーを向ける
         float rotationY = cameraObj.transform.eulerAngles.y;
         transform.rotation = Quaternion.Euler(0, rotationY, 0);
         CreatePosition = transform.position + transform.forward * 2 + Vector3.up;
+    }
+
+    [ClientCallback]
+    void CreateAnchor()
+    {
         //アンカーを置く
         Cmd_rezobjectonserver(CreatePosition);
 
@@ -200,22 +211,18 @@ public class PlayerCreateAnchor : NetworkBehaviour
     }
 
     /// <summary>
-    /// 現在未使用
+    /// 流れを繋いでも大丈夫か？(RayCastをしてBox,Planeがあったらfalseを返す)
     /// </summary>
-    /// <returns></returns>
     bool IsPossibleCreateFlow()
     {
-        //すり抜けチェックは使えるかも
-        ////アピールエリアに繋ぐ流れは壁をすり抜けない
-        //Ray ray = new Ray(appealArea.transform.position + Vector3.up, flowVector);
-        //float radius = 1;
-        //RaycastHit hit;
-        //if(Physics.SphereCast(ray, radius, out hit))
-        //{
-        //    //あたったのが床だったらダメ
-        //    if(hit.transform.gameObject.tag == "Plane")
-        //        return false;
-        //}
+        Ray ray = new Ray(CreatePosition, flowVector);
+        float radius = 1;
+        List<GameObject> hits = Physics.SphereCastAll(ray, radius, flowVector.magnitude).Select(element => element.transform.gameObject).ToList();
+
+        foreach (GameObject hit in hits)
+        {
+            if (hit.tag == "Box" || hit.tag == "Plane") return false;
+        }
 
         return true;
     }
