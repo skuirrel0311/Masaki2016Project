@@ -11,7 +11,7 @@ public class AppealAreaState : NetworkBehaviour
 
     //どちらが占領中か
     [SyncVar]
-    private bool isOccupiers;
+    public bool isOccupiers;
 
     //占領済みか
     [SyncVar]

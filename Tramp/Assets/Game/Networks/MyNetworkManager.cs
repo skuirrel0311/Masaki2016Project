@@ -36,7 +36,7 @@ public class MyNetworkManager : NetworkManager
         {
             playercount = value;
             if (discovery != null)
-                discovery.broadcastData = playercount.ToString()+","+networkPort;
+                discovery.broadcastData = playercount.ToString() + "," + networkPort;
         }
     }
     private int playercount = 0;
@@ -125,6 +125,8 @@ public class MyNetworkManager : NetworkManager
     public override void OnServerDisconnect(NetworkConnection conn)
     {
         PlayerCount--;
+        if (networkSceneName == "main")
+            DiscoveryShutdown();
         base.OnServerDisconnect(conn);
     }
 
@@ -149,9 +151,10 @@ public class MyNetworkManager : NetworkManager
     {
         if (isJoin) return;
         playerPrefab = SeverPlayerPrefab;
+        DiscoveryShutdown();
         SetPort();
         discovery.Initialize();
-        discovery.broadcastData = PlayerCount.ToString()+","+networkPort;
+        discovery.broadcastData = PlayerCount.ToString() + "," + networkPort;
         discovery.StartAsServer();
         Debug.Log("Start:" + serverBindAddress + ":" + serverBindToIP);
         StartHost();
@@ -164,6 +167,7 @@ public class MyNetworkManager : NetworkManager
         if (isJoin) return;
         playerPrefab = ClientPlayerPrefab;
         Debug.Log("Join:" + serverBindAddress + "," + serverBindToIP);
+        DiscoveryShutdown();
         SetPort();
         discovery.Initialize();
         discovery.StartAsClient();
@@ -208,7 +212,7 @@ public class MyNetworkManager : NetworkManager
     void SetPort()
     {
 
-        networkPort = Random.Range(7777,7877); 
+        networkPort = Random.Range(7777, 7877);
     }
 
     public void DiscoveryShutdown()
@@ -222,7 +226,9 @@ public class MyNetworkManager : NetworkManager
         {
             StopClient();
         }
-        discovery.StopBroadcast();
+
+        if (discovery.running)
+            discovery.StopBroadcast();
         NetworkTransport.Shutdown();
         NetworkTransport.Init();
         discovery.isStartClient = false;
