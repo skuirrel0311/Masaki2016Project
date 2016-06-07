@@ -258,10 +258,9 @@ public class PlayerControl : NetworkBehaviour
         if (IsOnGround) return;
 
         if (collision.gameObject.name == "FixAnchor") AnchorHit();
-
-        //Areaはトリガーなのでヒットしないが
+        
         //どうやら親のタグを取得しているみたい
-        if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Area" && collision.gameObject.tag != "Scaffold") return;
+        if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Scaffold") return;
         Landed();
     }
 
@@ -275,7 +274,7 @@ public class PlayerControl : NetworkBehaviour
 
     void OnCollisionExit(Collision col)
     {
-        if (col.gameObject.tag != "Plane" && col.gameObject.tag != "Area" && col.gameObject.tag != "Scaffold") return;
+        if (col.gameObject.tag != "Plane") return;
 
         //ジャンプもしてない、流れてもいない、なのに地面から離れてたら
         if (!IsJumping && !IsOnGround && !IsFlowing)
@@ -311,8 +310,9 @@ public class PlayerControl : NetworkBehaviour
         {
             StartCoroutine("SleepHItFix");
         }
+        if (col.gameObject.tag == "Scaffold") Debug.Log("scaffoldTriggerExit");
         //地面から離れた
-        if (col.tag != "Box" && col.tag != "Scaffold") return;
+        if (col.tag != "Box") return;
 
         //ジャンプもしてない、流れてもいない、なのに地面から離れてたら
         if (!IsJumping && !IsOnGround &&!IsFlowing)
