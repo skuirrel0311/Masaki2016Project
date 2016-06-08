@@ -85,6 +85,7 @@ public class PlayerControl : NetworkBehaviour
             cameraControl.SetPlayer(gameObject);
             cameraObj = GameObject.FindGameObjectWithTag("MainCamera");
         }
+
         RideEffect.SetActive(false);
     }
 

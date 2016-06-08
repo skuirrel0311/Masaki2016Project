@@ -17,37 +17,24 @@ public class MapPlayerPosition : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        SetPlayerObjects();
+    }
+
+    public void SetHostPlayer(GameObject go)
+    {
+        HostPlayerObject = go;
+    }
+
+    public void SetClientPlayer(GameObject go)
+    {
+        ClientPlayerObject = go;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (HostPlayerObject == null || ClientPlayerObject == null)
-        {
-            SetPlayerObjects();
-        }
-        else
-        {
-            HostPlayerSprite.anchoredPosition = new Vector2(HostPlayerObject.transform.position.x, HostPlayerObject.transform.position.z);
-            ClientPlayerSprite.anchoredPosition = new Vector2(ClientPlayerObject.transform.position.x, ClientPlayerObject.transform.position.z);
-        }
-    }
+        if (HostPlayerObject == null || ClientPlayerObject == null) return;
+        HostPlayerSprite.anchoredPosition = new Vector2(HostPlayerObject.transform.position.x, HostPlayerObject.transform.position.z);
+        ClientPlayerSprite.anchoredPosition = new Vector2(ClientPlayerObject.transform.position.x, ClientPlayerObject.transform.position.z);
 
-    void SetPlayerObjects()
-    {
-        GameObject[] gos = GameObject.FindGameObjectsWithTag("Player");
-        if (gos.Length < 2) return;
-        foreach (GameObject go in gos)
-        {
-            if (go.GetComponent<PlayerControl>().isLocalPlayer)
-            {
-                HostPlayerObject = go;
-            }
-            else
-            {
-                ClientPlayerObject = go;
-            }
-        }
     }
 }

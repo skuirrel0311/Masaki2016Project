@@ -19,7 +19,11 @@ public class Penetrate : NetworkBehaviour
         }
     }
 
+   [SerializeField]
+   private float reduce=0.3f;
+
     private float energy = 0;
+    [SerializeField]
     private float MaxEnergy = 100;
     private bool isStopFlowRender;
     // Use this for initialization
@@ -49,7 +53,7 @@ public class Penetrate : NetworkBehaviour
         }
         else if (GamepadInput.GamePadInput.GetButton(GamepadInput.GamePadInput.Button.RightShoulder, GamepadInput.GamePadInput.Index.One))
         {
-            energy--;
+            energy-=reduce ;
             if (energy <= 0)
             {
                 energy = 0;

@@ -57,6 +57,19 @@ public class PlayerState : NetworkBehaviour
         Initialize();
     }
 
+    void Start()
+    {
+        GameObject map = GameObject.Find("Map");
+        if ((!MyNetworkManager.discovery.isServer&&!isLocalPlayer)|| (MyNetworkManager.discovery.isServer && isLocalPlayer))
+        {
+            map.GetComponent<MapPlayerPosition>().SetHostPlayer(gameObject);
+        }
+        else
+        {
+            map.GetComponent<MapPlayerPosition>().SetClientPlayer(gameObject);
+        }
+    }
+
     void Update()
     {
         //animator.SetBool("HaveItem", IsPossessionOfItem);
