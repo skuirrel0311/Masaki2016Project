@@ -216,7 +216,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
     bool IsPossibleCreateFlow()
     {
         Ray ray = new Ray(CreatePosition, flowVector);
-        float radius = 1;
+        float radius = 0.1f;
         List<GameObject> hits = Physics.SphereCastAll(ray, radius, flowVector.magnitude).Select(element => element.transform.gameObject).ToList();
 
         foreach (GameObject hit in hits)

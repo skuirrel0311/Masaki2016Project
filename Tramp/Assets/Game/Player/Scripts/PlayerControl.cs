@@ -217,7 +217,7 @@ public class PlayerControl : NetworkBehaviour
         {
             //弧を描くように移動
             Vector3 forward = Vector3.Slerp(
-                transform.forward,  //正面から
+                transform.forward,  //正面からM
                 -movement,          //入力の角度まで
                 rotationSpeed * Time.deltaTime / Vector3.Angle(transform.forward, -movement)
                 );
@@ -277,7 +277,7 @@ public class PlayerControl : NetworkBehaviour
         if (col.gameObject.tag != "Plane") return;
 
         //ジャンプもしてない、流れてもいない、なのに地面から離れてたら
-        if (!IsJumping && !IsOnGround && !IsFlowing)
+        if (!IsJumping && !IsFlowing)
         {
             if(!IsFalling)cameraControl.SetNowLatitude();
             cameraControl.IsEndFallingCamera = false;
@@ -306,16 +306,17 @@ public class PlayerControl : NetworkBehaviour
 
     void OnTriggerExit(Collider col)
     {
+        Debug.Log("player trigger exit = " + col.tag);
+
         if (col.name == "FixAnchor" || col.name == "AreaAnchor")
         {
             StartCoroutine("SleepHItFix");
         }
-        if (col.gameObject.tag == "Scaffold") Debug.Log("scaffoldTriggerExit");
         //地面から離れた
-        if (col.tag != "Box") return;
+        if (col.tag != "Box" && col.tag != "Scaffold") return;
 
         //ジャンプもしてない、流れてもいない、なのに地面から離れてたら
-        if (!IsJumping && !IsOnGround &&!IsFlowing)
+        if (!IsJumping && !IsFlowing)
         {
             if(!IsFalling)cameraControl.SetNowLatitude();
             cameraControl.IsEndFallingCamera = false;
