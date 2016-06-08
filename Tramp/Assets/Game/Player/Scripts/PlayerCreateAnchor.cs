@@ -185,7 +185,8 @@ public class PlayerCreateAnchor : NetworkBehaviour
     [Command]
     void CmdCreateFlowObject(Vector3 tpos, Vector3 thisPositon, Vector3 flowvec, bool isfrom)
     {
-        if (!isServer) return;
+        if (isfrom == false)
+            Debug.Log("Create Client Flow");
         //流れのコリジョン用オブジェクト
         GameObject boxCol = Instantiate(FlowEffect);
         boxCol.transform.localScale = new Vector3(2, flowvec.magnitude * 0.5f, 2);

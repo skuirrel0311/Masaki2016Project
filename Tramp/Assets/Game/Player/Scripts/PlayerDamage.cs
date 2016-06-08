@@ -12,12 +12,15 @@ public class PlayerDamage : NetworkBehaviour
     GameObject camera;
 
     [SerializeField]
-    float InpulusPower = 100;
+    float InpulusPower = 1000;
+
+    public static bool isInpuls = false;
 
     void Start()
     {
         state = gameObject.GetComponent<PlayerState>();
         camera = GameObject.FindGameObjectWithTag("MainCamera");
+        isInpuls = false;
     }
 
     void OnCollisionEnter(Collision col)
@@ -32,6 +35,7 @@ public class PlayerDamage : NetworkBehaviour
                 vec = new Vector3(vec.x, 0, vec.z);
                 vec.Normalize();
                 gameObject.GetComponent<Rigidbody>().AddForce(vec * InpulusPower, ForceMode.Impulse);
+                isInpuls = true;
                 Destroy(col.gameObject);
             }
             if (!isLocalPlayer && col.gameObject.GetComponent<Shot>().isLocal)

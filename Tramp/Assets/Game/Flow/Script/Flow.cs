@@ -87,6 +87,7 @@ public class Flow : NetworkBehaviour
         List<GameObject> gos = new List<GameObject>();
         gos.AddRange(GameObject.FindGameObjectsWithTag("Anchor"));
         GameObject go = gos.Find(anchor => anchor.transform.position.Equals(targetPosition));
+        if (go == null) return;
         if (go.name == "AreaAnchor")
         {
             go.GetComponent<FixAnchorHit>().ConnectionFlow(gameObject);
