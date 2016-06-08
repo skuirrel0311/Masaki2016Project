@@ -17,7 +17,7 @@ public class AppealAreaState : NetworkBehaviour
     [SyncVar]
     public bool isOccupation;
 
-    private List<GameObject> RidePlayers = new List<GameObject>();
+    public List<GameObject> RidePlayers = new List<GameObject>();
 
     private GameObject ShareImageHost;
     private GameObject ShareImageClient;
@@ -205,17 +205,5 @@ public class AppealAreaState : NetworkBehaviour
     void RpcAreaEffect()
     {
         Instantiate(AreaEffect, transform.position, transform.rotation);
-    }
-
-    void OnTriggerEnter(Collider col)
-    {
-        if (col.tag != "Player") return;
-        RidePlayers.Add(col.gameObject);
-    }
-
-    void OnTriggerExit(Collider col)
-    {
-        if (col.tag != "Player") return;
-        RidePlayers.Remove(col.gameObject);
     }
 }
