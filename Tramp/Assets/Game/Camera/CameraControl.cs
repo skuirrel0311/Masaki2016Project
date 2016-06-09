@@ -184,9 +184,9 @@ public class CameraControl : MonoBehaviour
             //リープ開始
             Vector3 vec1 = SphereCoordinate(longitude, 0);
             //リープ終了時の座標
-            Vector3 vec2 = SphereCoordinate(longitude, -30);
-            Vector3 toPlayerVector = (Vector3.zero - vec2).normalized;
-            vec2 += toPlayerVector * 3;
+            Vector3 vec2 = SphereCoordinate(longitude, -17);
+            Vector3 toPlayerVector = (Vector3.down - vec2).normalized;
+            vec2 += toPlayerVector * 5;
 
             //latitudeが-120だったらtは1になる
             float t = (-1 * (latitude + 0)) / 120;
