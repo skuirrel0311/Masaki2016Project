@@ -218,7 +218,10 @@ public class Flow : NetworkBehaviour
         cam.IsEndFallingCamera = false;
 
         if (!isLocalPlayer) return;
-        if (!isCreatePlayer) isrenderd = false;
+        if (!isCreatePlayer)
+        {
+            StopFlowRender();
+        }
     }
 
     void OnDestroy()
