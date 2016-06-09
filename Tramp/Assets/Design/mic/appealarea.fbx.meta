@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: b62443e76833b34468cf17d6f69a2bc7
-timeCreated: 1464781656
+guid: 9054b8f97a124534389f7da3f8baf190
+timeCreated: 1465470041
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
@@ -17,7 +17,6 @@ ModelImporter:
     3300002: pSphere1
     4300000: mic
     4300002: pSphere1
-    9500000: //RootNode
   materials:
     importMaterials: 1
     materialName: 0
@@ -76,7 +75,7 @@ ModelImporter:
     rootMotionBoneName: 
     hasTranslationDoF: 0
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 2
+  animationType: 0
   humanoidOversampling: 1
   additionalBone: 0
   userData: 
