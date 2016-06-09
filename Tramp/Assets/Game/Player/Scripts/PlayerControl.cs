@@ -123,8 +123,8 @@ public class PlayerControl : NetworkBehaviour
     {
         UpdateTimer();
         Vector2 leftStick = GamePadInput.GetAxis(GamePadInput.Axis.LeftStick, (GamePadInput.Index)playerNum);
-        Vector3 direction = new Vector3(leftStick.x, 0, leftStick.y);
-        Move(direction);
+        Vector3 movement = new Vector3(leftStick.x, 0, leftStick.y);
+        Move(movement);
         Jump();
 
         //ジャンプしてジャンプ開始地点よりも下に落ちた
@@ -136,7 +136,7 @@ public class PlayerControl : NetworkBehaviour
         }
 
         //アニメーターにパラメータを送る
-        if (!ChackCurrentAnimatorName(animator, "wait") && !Move(direction))
+        if (!ChackCurrentAnimatorName(animator, "wait") && !Move(movement))
         {
             isRun = false;
             animator.SetBool("IsRun", isRun);
@@ -226,7 +226,8 @@ public class PlayerControl : NetworkBehaviour
         }
 
         //body.AddForce(movement * moveSpeed,ForceMode.VelocityChange);
-        transform.Translate(movement * Time.deltaTime * moveSpeed, Space.World);
+        movement = movement * Time.deltaTime * moveSpeed;
+        transform.Translate(movement, Space.World);
         return true;
     }
 
@@ -261,7 +262,7 @@ public class PlayerControl : NetworkBehaviour
         if (collision.gameObject.name == "FixAnchor") AnchorHit();
         
         //どうやら親のタグを取得しているみたい
-        if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Scaffold") return;
+        if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Scaffold" && collision.gameObject.tag != "Area") return;
         Landed();
     }
 
@@ -275,7 +276,10 @@ public class PlayerControl : NetworkBehaviour
 
     void OnCollisionExit(Collision col)
     {
-        if (col.gameObject.tag != "Plane") return;
+        if (col.gameObject.tag != "Plane" && col.gameObject.tag != "Area") return;
+
+        //エリアなら本当に落ちているかチェック
+        if (col.gameObject.tag == "Area" && !AreaExit()) return;
 
         //ジャンプもしてない、流れてもいない、なのに地面から離れてたら
         if (!IsJumping && !IsFlowing)
@@ -286,6 +290,21 @@ public class PlayerControl : NetworkBehaviour
         }
         animator.CrossFadeInFixedTime("jump", 0.5f);
         IsOnGround = false;
+    }
+
+    //本当にエリアからでたのか？
+    bool AreaExit()
+    {
+        Ray ray = new Ray(transform.position, Vector3.down);
+        RaycastHit hit;
+        if(Physics.Raycast(ray,out hit,100))
+        {
+            Debug.Log("distance" + hit.distance);
+            //近かったらfalseを返す
+            return hit.distance < 0.5f ? false : true;
+        }
+
+        return true;
     }
 
     void OnTriggerEnter(Collider col)
