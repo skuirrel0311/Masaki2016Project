@@ -244,12 +244,13 @@ public class CameraControl : MonoBehaviour
     //落ちているときは下方を見る
     private void FallingCamera()
     {
-        //地面が近かったらやめる
-        if (!IsFarGround()) return;
         //カメラワーク中に操作されたら終了する
         if (IsControled) return;
-
         if (IsEndFallingCamera) return;
+
+        //地面が近かったらやめる
+        if (!IsFarGround()) return;
+
         if (latitude >= 60)
         {
             IsEndFallingCamera = true;
@@ -311,6 +312,7 @@ public class CameraControl : MonoBehaviour
     {
         atJumpLatitude = latitude;
     }
+
     /// <summary>
     /// 2つのベクトルの緯度の差を返す
     /// </summary>
