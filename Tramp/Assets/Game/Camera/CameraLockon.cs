@@ -337,6 +337,8 @@ public class CameraLockon : MonoBehaviour
         //プレイヤーが移動していなかったら終了
         if (movement.magnitude == 0) return;
 
+        if (!playerControl.IsFalling && !playerControl.IsFlowing) movement.y *= 0.3f;
+
         //プレイヤーについていくMOMO
         cameraTargetPosition += movement;
     }
