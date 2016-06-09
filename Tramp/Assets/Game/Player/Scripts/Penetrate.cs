@@ -25,12 +25,13 @@ public class Penetrate : NetworkBehaviour
     private float energy = 0;
     [SerializeField]
     private float MaxEnergy = 100;
-    private bool isStopFlowRender;
+    private bool isPenetrate;
     // Use this for initialization
     void Start()
     {
         PenetrateGage = GameObject.Find("GunEnergy").GetComponent<Image>();
-        isStopFlowRender = false;
+        isPenetrate = false;
+        energy = MaxEnergy;
     }
 
     // Update is called once per frame
@@ -40,18 +41,31 @@ public class Penetrate : NetworkBehaviour
         PenetrateGage.fillAmount = energy / MaxEnergy;
         if (GamepadInput.GamePadInput.GetButtonDown(GamepadInput.GamePadInput.Button.RightShoulder, GamepadInput.GamePadInput.Index.One)&&0<energy)
         {
-            isStopFlowRender = false;
-            GameObject[] gos = GameObject.FindGameObjectsWithTag("Flow");
-            foreach (GameObject go in gos)
+            isPenetrate = !isPenetrate;
+            if (isPenetrate)
             {
-                if (!go.GetComponent<Flow>().isCreatePlayer)
+                GameObject[] gos = GameObject.FindGameObjectsWithTag("Flow");
+                foreach (GameObject go in gos)
                 {
-                    go.GetComponent<Renderer>().enabled = true;
-                    go.GetComponent<LineRenderer>().enabled = true;
+                    if (!go.GetComponent<Flow>().isCreatePlayer)
+                    {
+                        go.GetComponent<Renderer>().enabled = true;
+                        go.GetComponent<LineRenderer>().enabled = true;
+                    }
                 }
+
+                GetComponent<PlayerControl>().hitFix = true;
+                GetComponent<Rigidbody>().velocity = Vector3.zero;
+                GetComponent<Rigidbody>().useGravity = true;
             }
+            else
+            {
+                StopFlowRender();
+            }
+
         }
-        else if (GamepadInput.GamePadInput.GetButton(GamepadInput.GamePadInput.Button.RightShoulder, GamepadInput.GamePadInput.Index.One))
+
+        if(isPenetrate)
         {
             energy-=reduce ;
             if (energy <= 0)
@@ -60,17 +74,12 @@ public class Penetrate : NetworkBehaviour
                 StopFlowRender();
             }
         }
-        else if (GamepadInput.GamePadInput.GetButtonUp(GamepadInput.GamePadInput.Button.RightShoulder, GamepadInput.GamePadInput.Index.One))
-        {
-            StopFlowRender();
-        }
     }
 
     void StopFlowRender()
     {
-        if (isStopFlowRender) return;
-        isStopFlowRender = true;
         GameObject[] gos = GameObject.FindGameObjectsWithTag("Flow");
+        GetComponent<PlayerControl>().hitFix = false;
         foreach (GameObject go in gos)
         {
             if (!go.GetComponent<Flow>().isCreatePlayer)

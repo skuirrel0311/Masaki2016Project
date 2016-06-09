@@ -92,8 +92,6 @@ public class Flow : NetworkBehaviour
         {
             go.GetComponent<FixAnchorHit>().ConnectionFlow(gameObject);
         }
-
-
     }
 
     public void FlowRender()
