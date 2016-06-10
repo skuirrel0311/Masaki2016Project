@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System;
 using GamepadInput;
 
 public class CameraLockon : MonoBehaviour
@@ -23,8 +24,17 @@ public class CameraLockon : MonoBehaviour
 
     //ロックオンマーカー
     [SerializeField]
-    private GameObject AlignmentSprite = null;
+    private GameObject AlignmentSpriteImage = null;
+
+    [SerializeField]
+    private Sprite AlignmentSprite = null;
+    [SerializeField]
+    private Sprite LockOnSprite = null;
+
     private RectTransform canvasRect;
+
+    [SerializeField]
+    private float LockOnDistance = 10;
 
     //タイマー
     private Timer lockonTimer = new Timer(); //ロックオンにかかる時間の制御
@@ -42,6 +52,7 @@ public class CameraLockon : MonoBehaviour
         cameraObj = transform.FindChild("ThirdPersonCamera").gameObject;
         IsEndLockOn = false;
         canvasRect = GameObject.Find("Canvas").GetComponent<RectTransform>();
+        GetComponent<LineRenderer>().enabled = false;
     }
 
     public void SetPlayer(GameObject player)
@@ -66,17 +77,50 @@ public class CameraLockon : MonoBehaviour
             if (!IsLockOn) CameraLockOnStart();
             else
             {
-                IsLockOn = false;
-                lockonTimer.TimerStart(0.2f); //戻る時の速さ
+                LockOnCut();
             }
         }
         if (IsLockOn && targetAnchor != null)
         {
+            Vector3 p = player.transform.position+Vector3.up;
+
+            GetComponent<LineRenderer>().SetPosition(0,p);
+
+            GetComponent<LineRenderer>().SetPosition(1, targetAnchor.transform.position);
+
+            if (!PlayerCreateAnchor.IsPossibleCreateFlow(p, targetAnchor.transform.position - p))
+            {
+                //targetAnchor = null;
+                LockOnCut();
+            }
             PlayerTrace();
             oldPlayerPosition = player.transform.position;
             AnchorLockOn();
             return;
         }
+
+        if (targetAnchor == null)
+        {
+            LockOnCut();
+        }
+    }
+
+    public void LockOnCut()
+    {
+        IsLockOn = false;
+        lockonTimer.TimerStart(0.2f); //戻る時の速さ
+        AlignmentSpriteImage.GetComponent<Image>().sprite = AlignmentSprite;
+        GetComponent<LineRenderer>().enabled = false;
+    }
+
+    Vector3 GetAncohrCreatePosition()
+    {
+        float rotationY = cameraObj.transform.eulerAngles.y;
+        double radian = rotationY * (Math.PI / 180);
+        float momentX = (float)(Math.Sin(radian) * 0.1);
+        float momentZ = (float)(Math.Cos(radian) * 0.1);
+        Vector3 momentAddition = new Vector3(momentX, 0, momentZ);
+        return player.transform.position + momentAddition * 2 + Vector3.up;
     }
 
     void UpdateTimer()
@@ -98,6 +142,8 @@ public class CameraLockon : MonoBehaviour
         IsEndLockOn = false;
         //プレイヤーをカメラと同じ向きに向ける
         player.transform.localRotation = Quaternion.Euler(0, transform.localEulerAngles.y, 0);//localEuleranglesはインスペクタと同じ数値
+        AlignmentSpriteImage.GetComponent<Image>().sprite = LockOnSprite;
+        GetComponent<LineRenderer>().enabled = true;
     }
 
     /// <summary>
@@ -118,11 +164,9 @@ public class CameraLockon : MonoBehaviour
             AlignmentImage(imageTimer.Progress);
 
         Vector2 inputVec = GamePadInput.GetAxis(GamePadInput.Axis.RightStick, GamePadInput.Index.One);
-        if (oldInputVec == 0)
+        if (oldInputVec == 0 && inputVec != Vector2.zero)
         {
-            if (inputVec.x < 0) targetAnchor = GetSideAnchor(Side.Left);
-
-            if (inputVec.x > 0) targetAnchor = GetSideAnchor(Side.Right);
+            targetAnchor = GetSideAnchor(inputVec);
         }
         oldInputVec = inputVec.x;
         //アンカーのある方向を取得
@@ -140,16 +184,16 @@ public class CameraLockon : MonoBehaviour
     /// </summary>
     public void AlignmentImage(float timer)
     {
-        AlignmentSprite.SetActive(true);
-        Image img = AlignmentSprite.GetComponent<Image>();
+        AlignmentSpriteImage.SetActive(true);
+        Image img = AlignmentSpriteImage.GetComponent<Image>();
         img.color = new Color(img.color.r, img.color.g, img.color.b, timer * timer);
-        AlignmentSprite.transform.localScale = Vector3.one * 2 * ((1 - timer * timer) + 0.5f);
+        AlignmentSpriteImage.transform.localScale = (Vector3.one * 0.5f) * 2 * ((1 - timer * timer) + 0.5f);
     }
 
     private void SetMaker()
     {
         GameObject obj = GetTargetAnchor();
-        Image image = AlignmentSprite.GetComponent<Image>();
+        Image image = AlignmentSpriteImage.GetComponent<Image>();
 
         //nullだったら中央に表示される
         if (obj == null)
@@ -227,7 +271,14 @@ public class CameraLockon : MonoBehaviour
 
         if (anchorList.Count <= 0) return null;
 
-        return anchorList.FindAll(n => n.GetComponent<IsRendered>().WasRendered);
+        anchorList = anchorList.FindAll(n => n.GetComponent<IsRendered>().WasRendered);
+
+        anchorList = anchorList.FindAll(n => Vector3.Distance(n.transform.position, transform.position) > LockOnDistance);
+
+        Vector3 posion = GetAncohrCreatePosition();
+        anchorList = anchorList.FindAll(n => PlayerCreateAnchor.IsPossibleCreateFlow(posion, n.transform.position - posion));
+
+        return anchorList;
     }
 
     /// <summary>
@@ -287,36 +338,36 @@ public class CameraLockon : MonoBehaviour
     /// </summary>
     /// <param name="side"></param>
     /// <returns></returns>
-    private GameObject GetSideAnchor(Side side)
+    private GameObject GetSideAnchor(Vector2 side)
     {
-        Vector2 originAnchorVec = new Vector2(targetAnchor.transform.position.x - transform.position.x
-                                                                      , targetAnchor.transform.position.z - transform.position.z);//アンカーとの角度を代入する
-        float angle;//右あるいは左に最も近いアンカーとの角度を代入する
+        Camera cam = cameraObj.GetComponent<Camera>();
+        Vector2 originAnchorVec = cam.WorldToScreenPoint(targetAnchor.transform.position);//アンカーとの角度を代入する
+        float dist;//右あるいは左に最も近いアンカーとの角度を代入する
 
-        angle = 360;
+        dist = 10000;
 
         GameObject nextAnchor = null;
-        GameObject[] objects = GameObject.FindGameObjectsWithTag("Anchor");
+        List<GameObject> objects = new List<GameObject>();
+        objects.AddRange(GameObject.FindGameObjectsWithTag("Anchor"));
+        objects = objects.FindAll(n => n.GetComponent<IsRendered>().WasRendered);
+        objects = objects.FindAll(n => Vector3.Distance(n.transform.position, transform.position) > LockOnDistance);
+        Vector3 posion = GetAncohrCreatePosition();
+        objects = objects.FindAll(n => PlayerCreateAnchor.IsPossibleCreateFlow(posion, n.transform.position - posion));
+
 
         foreach (GameObject obj in objects)
         {
             if (targetAnchor.Equals(obj)) continue;
 
-            Vector2 vec = new Vector2(obj.transform.position.x - transform.position.x
-                                                     , obj.transform.position.z - transform.position.z);
-
-            float tmpAngle = Vector2.Angle(vec, originAnchorVec);
-            //PQ×PA = PQ.x・PA.y - PQ.y・PA.x ：外積の式
-            //外積を使って現在参照しているオブジェクトからオブジェクトが左右どちらにあるか判定する
-            float crossProduct = CrossProductToVector2(originAnchorVec, vec);
-            bool withinAngle = false;
+            Vector3 tmpvec = cam.WorldToScreenPoint(obj.transform.position);
+            Vector2 vec = new Vector2(tmpvec.x, tmpvec.y);
+            float tmpAngle = Vector2.Angle(side, vec - originAnchorVec);
             //一番角度が小さいオブジェクトを検索する
-            if ((side == Side.Right && crossProduct < 0) || side == Side.Left && crossProduct > 0)
-                withinAngle = (tmpAngle >= 0 && tmpAngle < angle);
-
-            if (withinAngle)
+            if (tmpAngle > 20) continue;
+            float d = Vector2.Distance(vec, originAnchorVec);
+            if (dist > d)
             {
-                angle = tmpAngle;
+                dist = d;
                 nextAnchor = obj;
             }
         }

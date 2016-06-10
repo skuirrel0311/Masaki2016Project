@@ -61,10 +61,8 @@ public class PlayerCreateAnchor : NetworkBehaviour
         {
             timer = 0;
             if (MainGameManager.IsPause) return;
-            if (!CheckNearAnchor())
-                return;
-
-            camera.GetComponent<CameraLockon>().IsLockOn = false;
+            if (camera.GetComponent<CameraLockon>().IsLockOn == false) return;
+            camera.GetComponent<CameraLockon>().LockOnCut();
             Debug.Log("start");
 
             //始点を決める
@@ -219,6 +217,20 @@ public class PlayerCreateAnchor : NetworkBehaviour
         Ray ray = new Ray(CreatePosition, flowVector);
         float radius = 0.1f;
         List<GameObject> hits = Physics.SphereCastAll(ray, radius, flowVector.magnitude).Select(element => element.transform.gameObject).ToList();
+
+        foreach (GameObject hit in hits)
+        {
+            if (hit.tag == "Box" || hit.tag == "Plane") return false;
+        }
+
+        return true;
+    }
+
+    public  static bool IsPossibleCreateFlow(Vector3 position,Vector3 flowVec)
+    {
+        Ray ray = new Ray(position, flowVec);
+        float radius = 0.1f;
+        List<GameObject> hits = Physics.SphereCastAll(ray, radius, flowVec.magnitude).Select(element => element.transform.gameObject).ToList();
 
         foreach (GameObject hit in hits)
         {
