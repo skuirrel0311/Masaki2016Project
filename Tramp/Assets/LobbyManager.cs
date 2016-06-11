@@ -7,6 +7,8 @@ using System.Collections;
 public class LobbyManager : NetworkBehaviour
 {
 
+
+
     [SerializeField]
     string NextSceneName;
 
@@ -27,15 +29,15 @@ public class LobbyManager : NetworkBehaviour
 
     bool isSelect = false;
     [SerializeField]
-    Button upButton;
+    Image upButton;
 
     [SerializeField]
-    Button downButton;
+    Image downButton;
 
     ColorBlock DefaultColor;
 
     [SerializeField]
-    ColorBlock SelectColor;
+    SelectSprites SelectSprite;
 
 
     // Use this for initialization
@@ -44,11 +46,12 @@ public class LobbyManager : NetworkBehaviour
         _2pText = _2PSprite.transform.FindChild("Text").GetComponent<Text>();
         _2PPlayerObject.SetActive(false);
         isSelect = false;
-        DefaultColor = upButton.colors;
+
     }
 
     void Update()
     {
+        //部屋選択画面の場合
         if (networkManager == null)
         {
             networkManager = GameObject.FindGameObjectWithTag("NetworkManager");
@@ -74,12 +77,12 @@ public class LobbyManager : NetworkBehaviour
         if (myNetManager.isStarted && myNetDiscoverry.isServer)
         {
             NextButton.SetActive(true);
-            GameManager.ChackButtonSelect(ref isSelect,upButton,downButton,DefaultColor,SelectColor);
+            GameManager.ChackButtonSelect(ref isSelect,OnMoveNextScene,OnDesConnect,upButton,downButton,SelectSprite);
         }
         else
         {
             if (GamepadInput.GamePadInput.GetButtonDown(GamepadInput.GamePadInput.Button.A, GamepadInput.GamePadInput.Index.One))
-                downButton.onClick.Invoke();
+                OnDesConnect();
             NextButton.SetActive(false);
         }
 

@@ -69,6 +69,8 @@ public class PlayerControl : NetworkBehaviour
     [SerializeField]
     GameObject RideEffect;
 
+    bool  landingEnd;
+
     void Start()
     {
         animator = GetComponentInChildren<Animator>();
@@ -78,6 +80,7 @@ public class PlayerControl : NetworkBehaviour
         IsFalling = true;
         isRun = false;
         hitFix = false;
+        landingEnd = false;
         if (isLocalPlayer)
         {
             SetSratPosition();
@@ -93,7 +96,7 @@ public class PlayerControl : NetworkBehaviour
     {
         GameObject nm = GameObject.FindGameObjectWithTag("NetworkManager");
         if (nm == null) return;
-        if (nm.GetComponent<MyNetworkManager>().autoCreatePlayer&&isLocalPlayer)
+        if (nm.GetComponent<MyNetworkManager>().autoCreatePlayer && isLocalPlayer)
         {
             short s = (short)(playerControllerId + 1);
             ClientScene.AddPlayer(s);
@@ -119,28 +122,48 @@ public class PlayerControl : NetworkBehaviour
         }
     }
 
+    void FixedUpdate()
+    {
+        Vector2 leftStick = GamePadInput.GetAxis(GamePadInput.Axis.LeftStick, (GamePadInput.Index)playerNum);
+        Vector3 movement = new Vector3(leftStick.x, 0, leftStick.y);
+        //アニメーターにパラメータを送る
+        bool ismove = Move(movement);
+
+        if(ismove&& ChackCurrentAnimatorName(animator, "jump_landing"))
+        {
+            if (landingEnd) return;
+            landingEnd = true;
+            animator.CrossFadeInFixedTime("Take 001", 0.2f);
+            isRun = true;
+        }
+        else
+        {
+            landingEnd = false;
+        }
+        //街のモーションでなく、動いていなければ待ちのモーションにする
+        if (!ChackCurrentAnimatorName(animator, "wait") && !ismove)
+        {
+            isRun = false;
+            animator.SetBool("IsRun", isRun);
+        }
+    }
+
     void Update()
     {
         UpdateTimer();
-        Vector2 leftStick = GamePadInput.GetAxis(GamePadInput.Axis.LeftStick, (GamePadInput.Index)playerNum);
-        Vector3 movement = new Vector3(leftStick.x, 0, leftStick.y);
-        Move(movement);
+
+
         Jump();
 
         //ジャンプしてジャンプ開始地点よりも下に落ちた
         if (IsJumping && atJumpPosition.y > transform.position.y)
         {
-            if(!IsFalling)cameraControl.SetNowLatitude();
+            if (!IsFalling) cameraControl.SetNowLatitude();
             cameraControl.IsEndFallingCamera = false;
             IsFalling = true;
         }
 
-        //アニメーターにパラメータを送る
-        if (!ChackCurrentAnimatorName(animator, "wait") && !Move(movement))
-        {
-            isRun = false;
-            animator.SetBool("IsRun", isRun);
-        }
+
 
         Vector3 c = new Vector3(transform.position.x, 0, transform.position.z);
         if (c.magnitude > EndArea)
@@ -166,7 +189,7 @@ public class PlayerControl : NetworkBehaviour
         onGroundTimer.Update();
         landedTimer.Update();
     }
-    
+
     static public bool ChackCurrentAnimatorName(Animator animator, string name)
     {
         return animator.GetCurrentAnimatorStateInfo(0).IsName(name);
@@ -246,8 +269,6 @@ public class PlayerControl : NetworkBehaviour
         }
     }
 
-
-
     IEnumerator SleepHItFix()
     {
         yield return new WaitForSeconds(1);
@@ -260,7 +281,7 @@ public class PlayerControl : NetworkBehaviour
         if (IsOnGround) return;
 
         if (collision.gameObject.name == "FixAnchor") AnchorHit();
-        
+
         //どうやら親のタグを取得しているみたい
         if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Scaffold" && collision.gameObject.tag != "Area") return;
         Landed();
@@ -284,7 +305,7 @@ public class PlayerControl : NetworkBehaviour
         //ジャンプもしてない、流れてもいない、なのに地面から離れてたら
         if (!IsJumping && !IsFlowing)
         {
-            if(!IsFalling)cameraControl.SetNowLatitude();
+            if (!IsFalling) cameraControl.SetNowLatitude();
             cameraControl.IsEndFallingCamera = false;
             IsFalling = true;
         }
@@ -297,7 +318,7 @@ public class PlayerControl : NetworkBehaviour
     {
         Ray ray = new Ray(transform.position, Vector3.down);
         RaycastHit hit;
-        if(Physics.Raycast(ray,out hit,100))
+        if (Physics.Raycast(ray, out hit, 100))
         {
             Debug.Log("distance" + hit.distance);
             //近かったらfalseを返す
@@ -338,14 +359,14 @@ public class PlayerControl : NetworkBehaviour
         //ジャンプもしてない、流れてもいない、なのに地面から離れてたら
         if (!IsJumping && !IsFlowing)
         {
-            if(!IsFalling)cameraControl.SetNowLatitude();
+            if (!IsFalling) cameraControl.SetNowLatitude();
             cameraControl.IsEndFallingCamera = false;
             IsFalling = true;
         }
         animator.CrossFadeInFixedTime("jump", 0.5f);
         IsOnGround = false;
     }
-    
+
     //着地した
     void Landed()
     {
