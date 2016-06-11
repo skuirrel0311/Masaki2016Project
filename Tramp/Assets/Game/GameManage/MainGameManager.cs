@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using GamepadInput;
-using System.Collections;
+using System.Collections.Generic;
 
 public class MainGameManager : MonoBehaviour
 {
@@ -16,17 +16,25 @@ public class MainGameManager : MonoBehaviour
     private MyNetworkDiscovery myNetDiscovery;
 
     [SerializeField]
-    private AppealAreaState[] AppealAreas;
+    private List<AppealAreaState> AppealAreas;
+
+    public int Occupied
+    {
+        get { return occupied; }
+        set { occupied = value; }
+    }
+    private int occupied = 0;
 
     // Use this for initialization
     void Start()
     {
         isPause = false;
         Time.timeScale = 1.0f;
-        //AppealArea = GameObject.Find("AppealArea");
         networkManager = GameObject.FindGameObjectWithTag("NetworkManager");
         myNetManager = networkManager.GetComponent<MyNetworkManager>();
         myNetDiscovery = networkManager.GetComponent<MyNetworkDiscovery>();
+
+
     }
 
     // Update is called once per frame
@@ -71,21 +79,21 @@ public class MainGameManager : MonoBehaviour
     //勝利状況をチェックする
     void ChackWinner()
     {
-        int count = 0;
+        occupied = 0;
         foreach (AppealAreaState state in AppealAreas)
         {
-            if (state.isOccupation )
+            if (state.isOccupation)
             {
                 if (state.isOccupiers == myNetDiscovery.isServer)
-                    count++;
+                    occupied++;
                 else
-                    count--;
+                    occupied--;
             }
         }
 
-        if (count > 0)
+        if (occupied > 0)
             myNetManager.winner = Winner.win;
-        else if (count == 0)
+        else if (occupied == 0)
             myNetManager.winner = Winner.draw;
         else
             myNetManager.winner = Winner.lose;

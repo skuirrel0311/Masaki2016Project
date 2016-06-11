@@ -256,7 +256,7 @@ public class PlayerShot : NetworkBehaviour
             Vector3 cameraRotation = cameraObj.transform.eulerAngles;
 
             cameraRotation=cameraRotation - transform.rotation.eulerAngles;
-            if (MyNetworkManager.discovery.isServer)
+            if (isServer)
             {
                 playerState.animator.SetBoneLocalRotation(HumanBodyBones.Spine, Quaternion.Euler(cameraRotation.y, 180.0f, -cameraRotation.x + 180.0f));
             }

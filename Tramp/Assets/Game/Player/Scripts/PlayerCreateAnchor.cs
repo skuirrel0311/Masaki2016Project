@@ -8,8 +8,10 @@ public class PlayerCreateAnchor : NetworkBehaviour
 {
 
     [SerializeField]
-    GameObject InstanceAnchor;
+    GameObject InstanceAnchorHost;
 
+    [SerializeField]
+    GameObject InstanceAnchorClient;
     [SerializeField]
     float UncreateDistance = 3;
 
@@ -164,17 +166,24 @@ public class PlayerCreateAnchor : NetworkBehaviour
     void CreateAnchor()
     {
         //アンカーを置く
-        Cmd_rezobjectonserver(CreatePosition);
+        Cmd_rezobjectonserver(CreatePosition,isServer);
 
         Debug.Log("clientCallend");
     }
 
     [Command]
-    public void Cmd_rezobjectonserver(Vector3 createPosition)
+    public void Cmd_rezobjectonserver(Vector3 createPosition,bool isCreater)
     {
         Debug.Log("end1");
         GameObject obj;
-        obj = Instantiate(InstanceAnchor, createPosition, transform.rotation) as GameObject;
+        if (isCreater)
+        {
+            obj = Instantiate(InstanceAnchorHost, createPosition, transform.rotation) as GameObject;
+        }
+        else
+        {
+            obj = Instantiate(InstanceAnchorClient, createPosition, transform.rotation) as GameObject;
+        }
         obj.GetComponent<CreateFlow>().SetCreatePlayerIndex(1);
         NetworkServer.Spawn(obj);
         Debug.Log("end2");
