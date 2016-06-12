@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using GamepadInput;
 using UnityEngine.Events;
 using GamepadInput;
+using System.Collections.Generic;
 
 [System.Serializable]
 public struct SelectSprites
@@ -59,7 +60,7 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        UnityAction TitleSet = () => 
+        UnityAction TitleSet = () =>
         {
             Title.SetActive(true);
             SelectRoom.SetActive(false);
@@ -83,7 +84,6 @@ public class GameManager : MonoBehaviour
                 break;
         }
     }
-
 
     void Start()
     {
@@ -123,9 +123,9 @@ public class GameManager : MonoBehaviour
                 },
                 GameStartImage, HowToImage, gamestartSprites);
         }
-        else if(sceneState==TitleState.HowtoPlay)
+        else if (sceneState == TitleState.HowtoPlay)
         {
-            if(GamePadInput.GetButtonDown(GamePadInput.Button.B,GamePadInput.Index.One))
+            if (GamePadInput.GetButtonDown(GamePadInput.Button.B, GamePadInput.Index.One))
             {
                 sceneState = TitleState.GameStart;
                 GameStart.SetActive(true);
