@@ -30,7 +30,7 @@ public class CameraControl : MonoBehaviour
     private GameObject cameraObj;
     private CameraLockon lockon;
 
-    private Vector3 cameraTargetPosition;
+    public Vector3 cameraTargetPosition;
     private GameObject player;
     private PlayerControl playerControl;
     private Vector3 oldPlayerPosition;
@@ -82,7 +82,11 @@ public class CameraControl : MonoBehaviour
         if (player == null) return;
         BetweenPlayerAndCamera();
 
-        if (lockon.IsLockOn) return;
+        if (lockon.IsLockOn)
+        {
+            oldPlayerPosition = player.transform.position;
+            return;
+        }
 
         lockon.AlignmentImage(1);
         Vector2 rightStick = GamePadInput.GetAxis(GamePadInput.Axis.RightStick, (GamePadInput.Index)playerNum);
