@@ -129,7 +129,7 @@ public class PlayerControl : NetworkBehaviour
         Vector2 leftStick = GamePadInput.GetAxis(GamePadInput.Axis.LeftStick, (GamePadInput.Index)playerNum);
         movement = new Vector3(leftStick.x, 0, leftStick.y);
         //アニメーターにパラメータを送る
-        bool ismove = Move(movement);
+        bool ismove = Move();
 
         if(ismove&& ChackCurrentAnimatorName(animator, "jump_landing"))
         {
@@ -201,7 +201,7 @@ public class PlayerControl : NetworkBehaviour
     /// 移動
     /// </summary>
     /// <param name="movement">移動量</param>
-    bool Move(Vector3 movement)
+    bool Move()
     {
         //ポーズ中だったら終了
         if (MainGameManager.IsPause) return false;
@@ -299,35 +299,24 @@ public class PlayerControl : NetworkBehaviour
 
     void OnCollisionExit(Collision col)
     {
-        if (col.gameObject.tag != "Plane" && col.gameObject.tag != "Area") return;
-
-        //エリアなら本当に落ちているかチェック
-        if (col.gameObject.tag == "Area" && !AreaExit()) return;
+        if (col.gameObject.tag != "Plane") return;
 
         //ジャンプもしてない、流れてもいない、なのに地面から離れてたら
         if (!IsJumping && !IsFlowing)
         {
-            if (!IsFalling) cameraControl.SetNowLatitude();
-            cameraControl.IsEndFallingCamera = false;
-            IsFalling = true;
+            Fall();
         }
         animator.CrossFadeInFixedTime("jump", 0.5f);
         IsOnGround = false;
     }
 
-    //本当にエリアからでたのか？
-    bool AreaExit()
+    public void Fall()
     {
-        Ray ray = new Ray(transform.position, Vector3.down + movement);
-        RaycastHit hit;
-        if (Physics.Raycast(ray, out hit, 100))
-        {
-            Debug.Log("distance" + hit.distance);
-            //近かったらfalseを返す
-            return hit.distance < 0.5f ? false : true;
-        }
-
-        return true;
+        animator.CrossFadeInFixedTime("jump", 0.5f);
+        IsOnGround = false;
+        if (!IsFalling) cameraControl.SetNowLatitude();
+        cameraControl.IsEndFallingCamera = false;
+        IsFalling = true;
     }
 
     void OnTriggerEnter(Collider col)
@@ -361,9 +350,7 @@ public class PlayerControl : NetworkBehaviour
         //ジャンプもしてない、流れてもいない、なのに地面から離れてたら
         if (!IsJumping && !IsFlowing)
         {
-            if (!IsFalling) cameraControl.SetNowLatitude();
-            cameraControl.IsEndFallingCamera = false;
-            IsFalling = true;
+            Fall();
         }
         animator.CrossFadeInFixedTime("jump", 0.5f);
         IsOnGround = false;

@@ -25,10 +25,29 @@ public class ThroughArea : MonoBehaviour
         IsTrigger = true;
     }
 
+    void OnTriggerStay(Collider col)
+    {
+        if (col.tag != "Player") return;
+
+        if (areaCollider.isTrigger) return;
+        //エリアに乗っているだろう
+
+        col.GetComponent<PlayerControl>().IsFalling = false;
+    }
+
     void OnTriggerExit(Collider col)
     {
-        if (col.transform.tag != "Player") return;
-        areaCollider.isTrigger = false;
-        IsTrigger = false;
+        if (col.tag != "Player") return;
+
+        if (areaCollider.isTrigger)
+        {
+            areaCollider.isTrigger = false;
+            IsTrigger = false;
+        }
+        else
+        {
+            col.GetComponent<PlayerControl>().IsOnGround = false;
+            col.GetComponent<PlayerControl>().Fall();
+        }
     }
 }

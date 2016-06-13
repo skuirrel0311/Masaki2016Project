@@ -264,7 +264,7 @@ public class CameraControl : MonoBehaviour
         IsEndFallingCamera = false;
         //目的のlatitude
         float a = 60;
-        float t = (360 * Time.deltaTime) / (a - latitude);
+        float t = (240 * Time.deltaTime) / (a - latitude);
         latitude = Mathf.Lerp(latitude, a, t);
     }
 
@@ -286,9 +286,6 @@ public class CameraControl : MonoBehaviour
     private void GetTargetPosition()
     {
         Vector3 movement = player.transform.position - oldPlayerPosition;
-
-        //落ちていないときに流れていなかったら
-        if (!playerControl.IsFalling && !playerControl.IsFlowing) movement.y *= 0.3f;
 
         cameraTargetPosition += movement;
         
