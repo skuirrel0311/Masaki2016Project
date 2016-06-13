@@ -62,6 +62,7 @@ public class PlayerControl : NetworkBehaviour
     public Timer OnGroundTimer { get { return onGroundTimer; } }
     Timer landedTimer = new Timer();
     public Timer LandedTimer { get { return landedTimer; } }
+    Timer fallTimer = new Timer();
 
     Vector3 movement = Vector3.zero;
 
@@ -83,6 +84,7 @@ public class PlayerControl : NetworkBehaviour
         isRun = false;
         hitFix = false;
         landingEnd = false;
+        fallTimer.TimerStart(1);
         if (isLocalPlayer)
         {
             SetSratPosition();
@@ -190,6 +192,7 @@ public class PlayerControl : NetworkBehaviour
     {
         onGroundTimer.Update();
         landedTimer.Update();
+        fallTimer.Update();
     }
 
     static public bool ChackCurrentAnimatorName(Animator animator, string name)
@@ -259,7 +262,7 @@ public class PlayerControl : NetworkBehaviour
     void Jump()
     {
         //プレイヤーがジャンプをしようとしたとき
-        if (GamePadInput.GetButtonDown(GamePadInput.Button.A, (GamePadInput.Index)playerNum) && IsOnGround && !MainGameManager.IsPause)
+        if (GamePadInput.GetButtonDown(GamePadInput.Button.A, (GamePadInput.Index)playerNum) && !IsJumping && !MainGameManager.IsPause)
         {
             //ジャンプ時の地点を保持
             atJumpPosition = transform.position;

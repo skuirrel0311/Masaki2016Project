@@ -79,6 +79,7 @@ public class LocalFlow : MonoBehaviour{
         PlayerState state = col.gameObject.GetComponent<PlayerState>();
         col.gameObject.GetComponent<PlayerControl>().IsFlowing = true;
         col.gameObject.GetComponent<Penetrate>().Energy++;
+        col.GetComponent<PlayerControl>().IsJumping = false;
     }
 
 
@@ -92,6 +93,7 @@ public class LocalFlow : MonoBehaviour{
         PlayerControl control = col.GetComponent<PlayerControl>();
         control.IsFlowing = false;
         control.IsFalling = true;
+        control.IsJumping = true;
         CameraControl cam = GameObject.Find("Camera1").GetComponent<CameraControl>();
         cam.SetNowLatitude();
         cam.IsEndFallingCamera = false;

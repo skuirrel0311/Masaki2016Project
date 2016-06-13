@@ -212,7 +212,7 @@ public class Flow : NetworkBehaviour
             col.gameObject.GetComponent<Penetrate>().Energy--;
         }
 
-
+        col.GetComponent<PlayerControl>().IsJumping = false;
 
 
     }
@@ -227,6 +227,7 @@ public class Flow : NetworkBehaviour
         PlayerControl control = col.GetComponent<PlayerControl>();
         control.IsFlowing = false;
         control.IsFalling = true;
+        control.IsJumping = true;
         CameraControl cam = GameObject.Find("Camera1").GetComponent<CameraControl>();
         cam.SetNowLatitude();
         cam.IsEndFallingCamera = false;
