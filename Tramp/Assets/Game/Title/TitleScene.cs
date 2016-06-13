@@ -32,6 +32,16 @@ public class TitleScene : MonoBehaviour
             slides.Add(spriteslide);
         }
     }
+
+    //移動済みの状態にする
+    public void ZeroPosition()
+    {
+        foreach(GameObject go in Sprites)
+        {
+            go.GetComponent<RectTransform>().anchoredPosition = new Vector3(0, go.GetComponent<RectTransform>().anchoredPosition.y);
+        }
+    }
+
     void Update()
     {
 

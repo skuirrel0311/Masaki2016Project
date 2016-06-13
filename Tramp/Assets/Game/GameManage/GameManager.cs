@@ -65,9 +65,9 @@ public class GameManager : MonoBehaviour
         {
             OldScene = TitleState.GameStart;
             obj.GetComponent<TitleScene>().isena = true;
+            obj.GetComponent<TitleScene>().ZeroPosition();
         }
         obj.SetActive(true);
-
 
     }
 
@@ -145,9 +145,14 @@ public class GameManager : MonoBehaviour
 
     void ChackBackScene()
     {
+        if (sceneState == TitleState.Title) return;
+
+        int i = (int)sceneState;
+        i--;
+        if (sceneState == TitleState.HowtoPlay) i--;
         if (GamePadInput.GetButtonDown(GamePadInput.Button.B, GamePadInput.Index.One))
         {
-            SetScene(OldScene);
+            SetScene((TitleState)i);
         }
     }
 
