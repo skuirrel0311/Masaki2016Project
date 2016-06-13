@@ -63,6 +63,8 @@ public class PlayerControl : NetworkBehaviour
     Timer landedTimer = new Timer();
     public Timer LandedTimer { get { return landedTimer; } }
 
+    Vector3 movement = Vector3.zero;
+
     //最後にあたっていた流れ
     public bool hitFix;
 
@@ -125,7 +127,7 @@ public class PlayerControl : NetworkBehaviour
     void FixedUpdate()
     {
         Vector2 leftStick = GamePadInput.GetAxis(GamePadInput.Axis.LeftStick, (GamePadInput.Index)playerNum);
-        Vector3 movement = new Vector3(leftStick.x, 0, leftStick.y);
+        movement = new Vector3(leftStick.x, 0, leftStick.y);
         //アニメーターにパラメータを送る
         bool ismove = Move(movement);
 
@@ -316,7 +318,7 @@ public class PlayerControl : NetworkBehaviour
     //本当にエリアからでたのか？
     bool AreaExit()
     {
-        Ray ray = new Ray(transform.position, Vector3.down);
+        Ray ray = new Ray(transform.position, Vector3.down + movement);
         RaycastHit hit;
         if (Physics.Raycast(ray, out hit, 100))
         {

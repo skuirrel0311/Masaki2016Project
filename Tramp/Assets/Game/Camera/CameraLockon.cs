@@ -70,7 +70,6 @@ public class CameraLockon : MonoBehaviour
     {
         if (player == null) return;
         UpdateTimer();
-
         //ロックオンの処理押された時と押している時で処理を分ける
         if (GamePadInput.GetButtonDown(GamePadInput.Button.LeftShoulder, (GamePadInput.Index)playerNum) && !MainGameManager.IsPause)
         {
@@ -111,6 +110,7 @@ public class CameraLockon : MonoBehaviour
         lockonTimer.TimerStart(0.2f); //戻る時の速さ
         AlignmentSpriteImage.GetComponent<Image>().sprite = AlignmentSprite;
         GetComponent<LineRenderer>().enabled = false;
+        control.cameraTargetPosition = player.transform.position;
     }
 
     Vector3 GetAncohrCreatePosition()
@@ -388,7 +388,11 @@ public class CameraLockon : MonoBehaviour
         //プレイヤーが移動していなかったら終了
         if (movement.magnitude == 0) return;
 
-        if (!playerControl.IsFalling && !playerControl.IsFlowing) movement.y *= 0.3f;
+        //if (!playerControl.IsFalling && !playerControl.IsFlowing) movement.y *= 0.3f;
+        //if (playerControl.IsOnGround && !playerControl.OnGroundTimer.IsLimitTime)
+        //{
+        //    cameraTargetPosition = Vector3.Lerp(cameraTargetPosition, player.transform.position, playerControl.OnGroundTimer.Progress);
+        //}
 
         //プレイヤーについていくMOMO
         cameraTargetPosition += movement;
