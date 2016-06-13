@@ -18,7 +18,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
     [SerializeField]
     GameObject FlowEffect;
 
-    GameObject camera;
+    new GameObject camera;
 
     private int playerNum;
     PlayerState playerState;

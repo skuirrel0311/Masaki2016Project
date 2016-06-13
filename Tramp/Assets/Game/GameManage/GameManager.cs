@@ -2,7 +2,6 @@
 using UnityEngine.UI;
 using GamepadInput;
 using UnityEngine.Events;
-using GamepadInput;
 using System.Collections.Generic;
 
 [System.Serializable]
@@ -17,6 +16,7 @@ public struct SelectSprites
     public Sprite NonSelectDownSprite;
 }
 
+[System.Serializable]
 public enum TitleState
 {
     Title, GameStart, CreataRoom, HowtoPlay
@@ -24,22 +24,15 @@ public enum TitleState
 
 public class GameManager : MonoBehaviour
 {
-    static public TitleState sceneState = TitleState.Title;
+    static TitleState sceneState = TitleState.Title;
 
     [SerializeField]
-    GameObject Title;
-
-    [SerializeField]
-    GameObject SelectRoom;
-
-    [SerializeField]
-    GameObject GameStart;
-
-    [SerializeField]
-    GameObject HowTo;
+    GameObject[] Scenes;
 
     bool isRoomCreateSelect;
 
+
+    //切り替え用のImage
     [SerializeField]
     Image createRoomImage;
     [SerializeField]
@@ -58,31 +51,24 @@ public class GameManager : MonoBehaviour
 
     MyNetworkManager myNetworkmanager;
 
+    TitleState OldScene;
+
     void Awake()
     {
-        UnityAction TitleSet = () =>
+        foreach (GameObject go in Scenes)
         {
-            Title.SetActive(true);
-            SelectRoom.SetActive(false);
-            GameStart.SetActive(false);
-            HowTo.SetActive(false);
-        };
-
-        switch (sceneState)
-        {
-            case TitleState.Title:
-                TitleSet.Invoke();
-                break;
-            case TitleState.CreataRoom:
-                Title.SetActive(false);
-                SelectRoom.SetActive(true);
-                GameStart.SetActive(false);
-                HowTo.SetActive(false);
-                break;
-            default:
-                TitleSet.Invoke();
-                break;
+            go.SetActive(false);
         }
+        GameObject obj = GetScene(sceneState);
+        OldScene = sceneState;
+        if (sceneState == TitleState.CreataRoom)
+        {
+            OldScene = TitleState.GameStart;
+            obj.GetComponent<TitleScene>().isena = true;
+        }
+        obj.SetActive(true);
+
+
     }
 
     void Start()
@@ -94,14 +80,13 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        ChackBackScene();
         //タイトルの場合
         if (sceneState == TitleState.Title)
         {
             if (GamepadInput.GamePadInput.GetButtonDown(GamepadInput.GamePadInput.Button.Start, GamepadInput.GamePadInput.Index.One))
             {
-                Title.SetActive(false);
-                GameStart.SetActive(true);
-                sceneState = TitleState.GameStart;
+                SetScene(TitleState.GameStart);
             }
         }
         else if (sceneState == TitleState.GameStart)
@@ -110,38 +95,24 @@ public class GameManager : MonoBehaviour
                 //部屋選択シーンへ
                 () =>
                 {
-                    sceneState = TitleState.CreataRoom;
-                    GameStart.SetActive(false);
-                    SelectRoom.SetActive(true);
+                    SetScene(TitleState.CreataRoom);
                 },
                 //ハウトゥーへ
                 () =>
                 {
-                    sceneState = TitleState.CreataRoom;
-                    GameStart.SetActive(false);
-                    HowTo.SetActive(true);
+                    SetScene(TitleState.CreataRoom);
                 },
                 GameStartImage, HowToImage, gamestartSprites);
         }
         else if (sceneState == TitleState.HowtoPlay)
         {
-            if (GamePadInput.GetButtonDown(GamePadInput.Button.B, GamePadInput.Index.One))
-            {
-                sceneState = TitleState.GameStart;
-                GameStart.SetActive(true);
-                HowTo.SetActive(false);
-            }
+
         }
         else if (sceneState == TitleState.CreataRoom)
         {
-            if (GamePadInput.GetButtonDown(GamePadInput.Button.B, GamePadInput.Index.One))
-            {
-                sceneState = TitleState.GameStart;
-                GameStart.SetActive(true);
-                SelectRoom.SetActive(false);
-            }
             ChackButtonSelect(ref isRoomCreateSelect, myNetworkmanager.StartupHost, myNetworkmanager.JoinGame, createRoomImage, joinGameImage, sprites);
         }
+
     }
 
     public static void ChackButtonSelect(ref bool selectFlag, UnityAction upCall, UnityAction downCall, Image upImage, Image downImage, SelectSprites sprites)
@@ -171,4 +142,49 @@ public class GameManager : MonoBehaviour
                 downCall.Invoke();
         }
     }
+
+    void ChackBackScene()
+    {
+        if (GamePadInput.GetButtonDown(GamePadInput.Button.B, GamePadInput.Index.One))
+        {
+            SetScene(OldScene);
+        }
+    }
+
+    void SetScene(TitleState state)
+    {
+        OldScene = sceneState;
+        sceneState = state;
+        //現在のシーンを閉じる
+        GetCurrentScene().SetActive(false);
+
+        //指定されたシーンを呼び出す
+        GameObject go = GetScene(state);
+
+        go.SetActive(true);
+        go.GetComponent<TitleScene>().StartSlideIn();
+    }
+
+    //現在のシーンを返す。なければnullを返す
+    GameObject GetCurrentScene()
+    {
+        foreach (GameObject go in Scenes)
+        {
+            if (go.activeInHierarchy) return go;
+        }
+
+        Debug.Log("null");
+        return null;
+    }
+
+    GameObject GetScene(TitleState state)
+    {
+        foreach (GameObject go in Scenes)
+        {
+            if (go.GetComponent<TitleScene>().SceneState == state) return go;
+        }
+
+        return null;
+    }
+
 }

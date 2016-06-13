@@ -6,20 +6,25 @@ public class TitleScene : MonoBehaviour
     [SerializeField]
     List<GameObject> Sprites;
 
+    //シーンの選択
+    [SerializeField]
+    public TitleState SceneState;
+
     List<SpriteSlide> slides;
 
     float slideTimeSpan = 0.1f;
     float timer = 0;
     bool isIn;
     bool isout;
-    bool isena = false;
+    public bool isena=true;
 
     void Awake()
     {
+        isena = false;
         isIn = false;
         isout = false;
         slides = new List<SpriteSlide>();
-
+        timer = 0;
         //子のオブジェクトにスライドイン用のスクリプトをアタッチ
         foreach (GameObject go in Sprites)
         {
@@ -29,6 +34,8 @@ public class TitleScene : MonoBehaviour
     }
     void Update()
     {
+
+        if (slides.Count <= 0) return;
         //スライドアウトの処理
         if (isout)
         {
@@ -38,6 +45,7 @@ public class TitleScene : MonoBehaviour
             if (slides.Count == s + 1)
             {
                 isout = false;
+                timer = 0;
             }
         }
         //スライドインの処理
@@ -56,6 +64,8 @@ public class TitleScene : MonoBehaviour
     public void StartSlideIn()
     {
         if (isIn || isout) return;
+        if (isena) return;
+        isena = true;
         timer = 0;
         isIn = true;
     }
@@ -63,14 +73,15 @@ public class TitleScene : MonoBehaviour
     public void StartSlideOut()
     {
         if (isIn || isout) return;
+        if (isena) return;
         timer = 0;
+        isena = true;
         isout = true;
     }
 
-    void OnEnable()
+    void OnDisabled()
     {
-        if (isena) return;
-        StartSlideIn();
-        isena = true;
+        isIn = false;
+        isout = false;
     }
 }

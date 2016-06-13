@@ -9,10 +9,18 @@ public class SpriteSlide : MonoBehaviour
     bool isout;
     float timer;
 
+    void Awake()
+    {
+        isIn = false;
+        isout = false;
+    }
+
     void Start()
     {
         StartPosition = GetComponent<RectTransform>().anchoredPosition;
         timer = 0;
+        isIn = false;
+        isout = false;
     }
 
     public void Update()
@@ -56,5 +64,7 @@ public class SpriteSlide : MonoBehaviour
     public void Disabled()
     {
         GetComponent<RectTransform>().anchoredPosition = StartPosition;
+        isIn = false;
+        isout = false;
     }
 }
