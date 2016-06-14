@@ -46,8 +46,27 @@ public class ThroughArea : MonoBehaviour
         }
         else
         {
+            //出て行ってなかったら
+            if (!ReallyExit(col.gameObject)) return;
             col.GetComponent<PlayerControl>().IsOnGround = false;
             col.GetComponent<PlayerControl>().Fall();
         }
+    }
+
+    //本当にプレイヤーは出て行ったのだろうか？
+    bool ReallyExit(GameObject player)
+    {
+        Ray ray = new Ray(player.transform.position, Vector3.down + player.GetComponent<PlayerControl>().movement);
+        RaycastHit hit;
+
+        if(Physics.Raycast(ray,out hit,100))
+        {
+            if (hit.transform.tag == "Area") return false;
+            //1より大きかったら出て行った
+            return hit.distance > 1;
+        }
+
+        //何にも当たらなかったら出て行った
+        return true;
     }
 }

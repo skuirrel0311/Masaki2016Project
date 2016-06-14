@@ -226,12 +226,19 @@ public class Flow : NetworkBehaviour
 
         PlayerControl control = col.GetComponent<PlayerControl>();
         control.IsFlowing = false;
+
+        if (control.IsOnGround)
+        {
+            control.Landed();
+            return;
+        }
+
         control.IsFalling = true;
         control.IsJumping = true;
         CameraControl cam = GameObject.Find("Camera1").GetComponent<CameraControl>();
         cam.SetNowLatitude();
         cam.IsEndFallingCamera = false;
-
+        col.gameObject.GetComponent<Animator>().CrossFadeInFixedTime("jump", 0.5f);
         if (!isLocalPlayer) return;
         if (!isCreatePlayer)
         {

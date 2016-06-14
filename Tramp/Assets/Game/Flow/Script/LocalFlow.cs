@@ -92,9 +92,17 @@ public class LocalFlow : MonoBehaviour{
 
         PlayerControl control = col.GetComponent<PlayerControl>();
         control.IsFlowing = false;
+
+        if (control.IsOnGround)
+        {
+            control.Landed();
+            return;
+        }
+
         control.IsFalling = true;
         control.IsJumping = true;
         CameraControl cam = GameObject.Find("Camera1").GetComponent<CameraControl>();
+        col.gameObject.GetComponent<Animator>().CrossFadeInFixedTime("jump", 0.5f);
         cam.SetNowLatitude();
         cam.IsEndFallingCamera = false;
     }

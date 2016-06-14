@@ -64,7 +64,7 @@ public class PlayerControl : NetworkBehaviour
     public Timer LandedTimer { get { return landedTimer; } }
     Timer fallTimer = new Timer();
 
-    Vector3 movement = Vector3.zero;
+    public Vector3 movement = Vector3.zero;
 
     //最後にあたっていた流れ
     public bool hitFix;
@@ -84,7 +84,6 @@ public class PlayerControl : NetworkBehaviour
         isRun = false;
         hitFix = false;
         landingEnd = false;
-        fallTimer.TimerStart(1);
         if (isLocalPlayer)
         {
             SetSratPosition();
@@ -193,6 +192,12 @@ public class PlayerControl : NetworkBehaviour
         onGroundTimer.Update();
         landedTimer.Update();
         fallTimer.Update();
+
+        if (fallTimer.IsWorking && fallTimer.IsLimitTime)
+        {
+            fallTimer.Stop(true);
+            IsJumping = true;
+        }
     }
 
     static public bool ChackCurrentAnimatorName(Animator animator, string name)
@@ -294,10 +299,13 @@ public class PlayerControl : NetworkBehaviour
 
     public void AnchorHit()
     {
+        if (IsOnGround) return;
         IsFlowing = false;
         IsFalling = true;
         cameraControl.SetNowLatitude();
         cameraControl.IsEndFallingCamera = false;
+        animator.CrossFadeInFixedTime("jump", 0.5f);
+
     }
 
     void OnCollisionExit(Collision col)
@@ -309,7 +317,7 @@ public class PlayerControl : NetworkBehaviour
         {
             Fall();
         }
-        animator.CrossFadeInFixedTime("jump", 0.5f);
+        if(!IsFlowing) animator.CrossFadeInFixedTime("jump", 0.5f);
         IsOnGround = false;
     }
 
@@ -320,6 +328,7 @@ public class PlayerControl : NetworkBehaviour
         if (!IsFalling) cameraControl.SetNowLatitude();
         cameraControl.IsEndFallingCamera = false;
         IsFalling = true;
+        fallTimer.TimerStart(1);
     }
 
     void OnTriggerEnter(Collider col)
@@ -355,17 +364,18 @@ public class PlayerControl : NetworkBehaviour
         {
             Fall();
         }
-        animator.CrossFadeInFixedTime("jump", 0.5f);
+        if(!IsFlowing) animator.CrossFadeInFixedTime("jump", 0.5f);
         IsOnGround = false;
     }
 
     //着地した
-    void Landed()
+    public void Landed()
     {
         if (IsFalling)
         {
             IsFallAfter = true;
             landedTimer.TimerStart(0.5f);
+            fallTimer.Stop(true);
         }
         IsJumping = false;
         IsFalling = false;
