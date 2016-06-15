@@ -25,6 +25,12 @@ public class MainGameManager : MonoBehaviour
     }
     private int occupied = 0;
 
+    public delegate void OnOccupieding();
+    public event OnOccupieding OnOccupiedingHnadler;
+
+    public delegate void OnOccupied();
+    public event OnOccupied OnOccupiedHnadler;
+
     // Use this for initialization
     void Start()
     {
@@ -79,17 +85,38 @@ public class MainGameManager : MonoBehaviour
     //勝利状況をチェックする
     void ChackWinner()
     {
+        int oldOccupieding = myNetManager.occuping;
+        int oldOccupied = myNetManager.occupied;
         occupied = 0;
+        myNetManager.occupied = 0;
+        myNetManager.occuping = 0;
         foreach (AppealAreaState state in AppealAreas)
         {
             if (state.isOccupation)
             {
                 if (state.isOccupiers == myNetDiscovery.isServer)
+                {
                     occupied++;
+                    myNetManager.occuping++;
+                }
                 else
+                { 
                     occupied--;
+                    myNetManager.occupied++;
+                }
             }
         }
+
+        if(oldOccupieding<myNetManager.occuping&&OnOccupiedingHnadler!=null)
+        {
+            OnOccupiedingHnadler();
+        }
+
+        if (oldOccupied < myNetManager.occupied && OnOccupiedHnadler != null)
+        {
+            OnOccupiedHnadler();
+        }
+
 
         if (occupied > 0)
             myNetManager.winner = Winner.win;
@@ -97,6 +124,7 @@ public class MainGameManager : MonoBehaviour
             myNetManager.winner = Winner.draw;
         else
             myNetManager.winner = Winner.lose;
+
     }
 
     void OunGUI()

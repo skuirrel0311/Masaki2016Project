@@ -2,7 +2,8 @@
 using UnityEngine.UI;
 using GamepadInput;
 using UnityEngine.Events;
-using System.Collections.Generic;
+using System.Collections;
+
 
 [System.Serializable]
 public struct SelectSprites
@@ -68,6 +69,7 @@ public class GameManager : MonoBehaviour
             obj.GetComponent<TitleScene>().ZeroPosition();
         }
         obj.SetActive(true);
+        GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(0,0.5f,false);
 
     }
 
@@ -110,12 +112,29 @@ public class GameManager : MonoBehaviour
         }
         else if (sceneState == TitleState.CreataRoom)
         {
-            ChackButtonSelect(ref isRoomCreateSelect, myNetworkmanager.StartupHost, myNetworkmanager.JoinGame, createRoomImage, joinGameImage, sprites);
+            ChackButtonSelect(ref isRoomCreateSelect,()=> { StartCoroutine("StartHost"); }, ()=> { StartCoroutine("JoinGame"); }, createRoomImage, joinGameImage, sprites);
         }
-
     }
 
-    public static void ChackButtonSelect(ref bool selectFlag, UnityAction upCall, UnityAction downCall, Image upImage, Image downImage, SelectSprites sprites)
+    IEnumerator StartHost()
+    {
+        GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(1,0.5f,false);
+        yield return new WaitForSeconds(0.5f);
+
+        myNetworkmanager.StartupHost();
+        yield return null;
+    }
+
+    IEnumerator joinGame()
+    {
+        GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(1, 0.5f, false);
+        yield return new WaitForSeconds(0.5f);
+
+        myNetworkmanager.JoinGame();
+        yield return null;
+    }
+
+    public void ChackButtonSelect(ref bool selectFlag, UnityAction upCall, UnityAction downCall, Image upImage, Image downImage, SelectSprites sprites)
     {
         Vector2 vec = GamePadInput.GetAxis(GamePadInput.Axis.LeftStick, GamePadInput.Index.One);
 

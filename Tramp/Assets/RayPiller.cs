@@ -5,16 +5,16 @@ public class RayPiller : MonoBehaviour
 {
 
     [SerializeField]
-    AppealAreaState appealArea;
+    AppealAreaState appealArea=null;
 
     [SerializeField]
-    Color n_Color;
+    Color n_Color=Color.white;
 
     [SerializeField]
-    Color t_Color;
+    Color t_Color= Color.white;
 
     [SerializeField]
-    Color h_Color;
+    Color h_Color= Color.white;
 
     private Renderer render;
 

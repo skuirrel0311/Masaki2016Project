@@ -45,6 +45,11 @@ public class MyNetworkManager : NetworkManager
 
     public Winner winner;
 
+    //占領している数
+    public int occuping;
+    //占領されている数
+    public int occupied;
+
     public bool isStarted = false;
     bool isJoin;
 

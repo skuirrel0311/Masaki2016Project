@@ -24,25 +24,12 @@ public class LobbyManager : NetworkBehaviour
     MyNetworkManager myNetManager;
     MyNetworkDiscovery myNetDiscoverry;
 
-    bool isSelect = false;
-    [SerializeField]
-    Image upButton;
-
-    [SerializeField]
-    Image downButton;
-
-    ColorBlock DefaultColor;
-
-    [SerializeField]
-    SelectSprites SelectSprite;
-
 
     // Use this for initialization
     void Start()
     {
         //_2pText = _2PSprite.transform.FindChild("Text").GetComponent<Text>();
         _2PPlayerObject.SetActive(false);
-        isSelect = false;
         GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(0, 0.5f, false);
     }
 
