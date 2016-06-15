@@ -14,6 +14,9 @@ public class SoundManager : MonoBehaviour
     [SerializeField]
     AudioSource Voice_B_Audio;
 
+    [SerializeField]
+    GameObject GameSetEffect;
+
     private MyNetworkManager myNetManager;
     private MyNetworkDiscovery myNetDiscovery;
 
@@ -82,13 +85,22 @@ public class SoundManager : MonoBehaviour
 
         if (mainMusic.time >= mainMusic.clip.length)
         {
+            if (isEnd) return;
+            StartCoroutine("GameSet");
             isEnd = true;
-
-            GameObject go = GameObject.FindGameObjectWithTag("NetworkManager");
-            MyNetworkManager man = go.GetComponent<MyNetworkManager>();
-            man.ServerChangeScene("Result");
         }
 
+    }
+
+    IEnumerator GameSet()
+    {
+        GameObject cam = GameObject.FindGameObjectWithTag("MainCamera");
+        GameObject inst = Instantiate(GameSetEffect,Vector3.zero,Quaternion.identity)as GameObject;
+        inst.transform.parent = cam.transform;
+        inst.transform.localPosition = new Vector3(0,0,4);
+        myNetManager.offlineScene = "Result";
+        yield return new WaitForSeconds(1);
+        myNetManager.DiscoveryShutdown();
     }
 
     void OnDestroy()
@@ -105,6 +117,6 @@ public class SoundManager : MonoBehaviour
 
     public int GetRemainingTime()
     {
-        return (int)(mainMusic.clip.length - mainMusic.time);
+        return (int)((mainMusic.clip.length - mainMusic.time));
     }
 }
