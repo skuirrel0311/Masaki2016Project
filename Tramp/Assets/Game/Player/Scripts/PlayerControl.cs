@@ -229,7 +229,7 @@ public class PlayerControl : NetworkBehaviour
 
 
         //アニメーションの再生
-        if (!ChackCurrentAnimatorName(animator, "Take 001"))
+        if (!ChackCurrentAnimatorName(animator, "Take 001")&& !ChackCurrentAnimatorName(animator, "BackRun"))
         {
             isRun = true;
             animator.SetBool("IsRun", isRun);
@@ -239,6 +239,7 @@ public class PlayerControl : NetworkBehaviour
         //向きを変える
         if (mov.z >= 0)
         {
+            animator.SetBool("BackRun", false);
             //弧を描くように移動
             Vector3 forward = Vector3.Slerp(
                 transform.forward,  //正面から
@@ -249,12 +250,14 @@ public class PlayerControl : NetworkBehaviour
         }
         else
         {
+            animator.SetBool("BackRun", true);
             //弧を描くように移動
             Vector3 forward = Vector3.Slerp(
                 transform.forward,  //正面からM
                 -movement,          //入力の角度まで
                 rotationSpeed * Time.deltaTime / Vector3.Angle(transform.forward, -movement)
                 );
+            movement *= 0.5f;
             transform.LookAt(transform.position + forward);
         }
 

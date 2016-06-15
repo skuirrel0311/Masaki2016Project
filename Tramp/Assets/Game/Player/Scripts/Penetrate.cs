@@ -77,6 +77,7 @@ public class Penetrate : NetworkBehaviour
             if (energy <= 0)
             {
                 energy = 0;
+                isPenetrate = false;
                 StopFlowRender();
             }
         }

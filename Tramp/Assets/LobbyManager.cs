@@ -61,7 +61,7 @@ public class LobbyManager : NetworkBehaviour
         if (myNetManager.isStarted && myNetDiscoverry.isServer)
         {
             NextButton.SetActive(true);
-            if(GamepadInput.GamePadInput.GetButtonDown(GamepadInput.GamePadInput.Button.B, GamepadInput.GamePadInput.Index.One))
+            if(GamepadInput.GamePadInput.GetButtonDown(GamepadInput.GamePadInput.Button.A, GamepadInput.GamePadInput.Index.One))
             {
                 OnMoveNextScene();
             }
