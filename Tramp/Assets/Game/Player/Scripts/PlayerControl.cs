@@ -72,6 +72,9 @@ public class PlayerControl : NetworkBehaviour
     [SerializeField]
     GameObject RideEffect;
 
+    [SerializeField]
+    GameObject barrierEffect;
+
     bool  landingEnd;
 
     void Start()
@@ -149,6 +152,7 @@ public class PlayerControl : NetworkBehaviour
             isRun = false;
             animator.SetBool("IsRun", isRun);
         }
+        
     }
 
     void Update()
@@ -164,16 +168,6 @@ public class PlayerControl : NetworkBehaviour
             if (!IsFalling) cameraControl.SetNowLatitude();
             cameraControl.IsEndFallingCamera = false;
             IsFalling = true;
-        }
-
-
-
-        Vector3 c = new Vector3(transform.position.x, 0, transform.position.z);
-        if (c.magnitude > EndArea)
-        {
-            c.Normalize();
-            transform.position = new Vector3(c.x * EndArea, transform.position.y, c.z * EndArea);
-            GetComponent<Rigidbody>().velocity = Vector3.zero;
         }
 
         if (GetComponent<Rigidbody>().useGravity == false)
@@ -223,9 +217,16 @@ public class PlayerControl : NetworkBehaviour
         Vector3 mov = movement;
         //入力の角度をカメラの角度に曲げる
         movement = cameraRotation * movement;
-
+        Vector3 temp = new Vector3(transform.position.x + (movement.x * 0.1f), 0, transform.position.z + (movement.z * 0.1f));
         //移動していなかったら終了
-        if (movement == Vector3.zero) return false;
+        if (movement == Vector3.zero)
+        {
+            if (temp.magnitude > EndArea)
+            {
+                OutStage(temp);
+            }
+            return false;
+        }
 
 
         //アニメーションの再生
@@ -260,11 +261,25 @@ public class PlayerControl : NetworkBehaviour
             movement *= 0.5f;
             transform.LookAt(transform.position + forward);
         }
+        
+        if (temp.magnitude > EndArea)
+        {
+            OutStage(temp);
+            return true;
+        }
 
         //body.AddForce(movement * moveSpeed,ForceMode.VelocityChange);
         movement = movement * Time.deltaTime * moveSpeed;
         transform.Translate(movement, Space.World);
         return true;
+    }
+
+    void OutStage(Vector3 c)
+    {
+            c.Normalize();
+            transform.position = new Vector3(c.x * EndArea, transform.position.y, c.z * EndArea);
+            Vector3 d = transform.position + movement + Vector3.up;
+            Destroy(Instantiate(barrierEffect, d, Quaternion.Euler(-d)), 1f);
     }
 
     void Jump()

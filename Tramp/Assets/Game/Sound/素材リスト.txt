@@ -1,0 +1,11 @@
+﻿anchor.ogg　アンカー生成音
+cancel.ogg　キャンセル音
+capture.ogg　エリア制圧完了時に鳴らす音　
+decision.ogg　決定音
+hit.ogg　　　　射撃着弾音
+lock.ogg　　　ロック音（切り替え時も鳴らす）
+m_anchor.ogg　アンカー生成ができない時に鳴らす音
+nowCap.ogg　　エリア制圧中に流す音
+ride.ogg　　　流れに乗る音
+select.ogg　　選択音
+shot.ogg　　　射撃音

@@ -30,6 +30,7 @@ public class PlayerDamage : NetworkBehaviour
             if (isLocalPlayer && !col.gameObject.GetComponent<Shot>().isLocal)
             {
                 CmdHitEffect(col.gameObject.transform.position);
+                GetComponent<PlayerState>().Damege();
                 state.animator.CrossFadeInFixedTime("damage", 0.1f);
                 Vector3 vec = col.gameObject.GetComponent<Rigidbody>().velocity;
                 vec = new Vector3(vec.x, 0, vec.z);
