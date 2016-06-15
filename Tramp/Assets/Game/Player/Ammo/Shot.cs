@@ -13,17 +13,21 @@ public class Shot : MonoBehaviour
 
     public bool isLocal=false;
 
+    Rigidbody body;
+    Vector3 movement;
+
     // Use this for initialization
     void Start()
     {
         Destroy(gameObject, 5);
-        GetComponent<Rigidbody>().AddForce(transform.forward * speed,ForceMode.Impulse);
+        movement = transform.forward * speed;
+        body = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
     void Update()
     {
-       // transform.Translate(transform.forward * speed * Time.deltaTime, Space.World);
+        body.velocity = movement;
     }
 
     void OnCollisionEnter(Collision col)
