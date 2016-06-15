@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections;
-using GamepadInput;
+using XInputDotNetPure;
 
 public class PlayerState : NetworkBehaviour
 {
@@ -80,9 +80,8 @@ public class PlayerState : NetworkBehaviour
 
             if (playerControl.enabled)
             {
-                playerControl.enabled = false;
                 //コルーチンを呼ぶのは1回のみ
-                StartCoroutine("IsDead");
+                StartCoroutine("Dead");
             }
         }
     }
@@ -100,7 +99,6 @@ public class PlayerState : NetworkBehaviour
 
     void Restoration()
     {
-        GetComponent<PlayerControl>().enabled = true;
         GetComponent<PlayerShot>().enabled = true;
         GetComponent<PlayerCreateAnchor>().enabled = true;
         animator.CrossFadeInFixedTime("wait", 0.1f);
@@ -111,14 +109,15 @@ public class PlayerState : NetworkBehaviour
     /// <summary>
     /// 死んだ場合に呼ばれる関数
     /// </summary>
-    IEnumerator IsDead()
+    IEnumerator Dead()
     {
+        animator.CrossFadeInFixedTime("dead", 0.1f);
         //操作できないようにする。
-        GetComponent<PlayerControl>().enabled = false;
         GetComponent<PlayerShot>().enabled = false;
         GetComponent<PlayerCreateAnchor>().enabled = false;
+        GamePad.SetVibration(PlayerIndex.One, 0, 0);
 
-        animator.CrossFadeInFixedTime("dead", 0.1f);
+
 
         yield return new WaitForSeconds(TimeToReturn);
         //3秒後に復活
@@ -134,7 +133,6 @@ public class PlayerState : NetworkBehaviour
     public void Damege()
     {
         CmdHpDamage();
-        if (hp == 0) StartCoroutine("IsDead");
     }
 
     [Command]
