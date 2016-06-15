@@ -125,7 +125,7 @@ public class GameManager : MonoBehaviour
         yield return null;
     }
 
-    IEnumerator joinGame()
+    IEnumerator JoinGame()
     {
         GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(1, 0.5f, false);
         yield return new WaitForSeconds(0.5f);
