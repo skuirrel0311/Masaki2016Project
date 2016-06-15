@@ -5,6 +5,15 @@ using System.Collections;
 
 public class Penetrate : NetworkBehaviour
 {
+    [SerializeField]
+    private float reduce = 0.3f;
+
+    [SerializeField]
+    private float MaxEnergy = 100;
+
+    [SerializeField]
+    private GameObject PenetrateEffect;
+
     Image PenetrateGage;
 
     public float Energy
@@ -18,13 +27,8 @@ public class Penetrate : NetworkBehaviour
             energy = Mathf.Max(Mathf.Min(MaxEnergy, value), 0);
         }
     }
-
-   [SerializeField]
-   private float reduce=0.3f;
-
     private float energy = 0;
-    [SerializeField]
-    private float MaxEnergy = 100;
+
     private bool isPenetrate;
     // Use this for initialization
     void Start()
@@ -32,6 +36,7 @@ public class Penetrate : NetworkBehaviour
         PenetrateGage = GameObject.Find("GunEnergy").GetComponent<Image>();
         isPenetrate = false;
         energy = MaxEnergy;
+        PenetrateEffect.SetActive(false);
     }
 
     // Update is called once per frame
@@ -44,6 +49,7 @@ public class Penetrate : NetworkBehaviour
             isPenetrate = !isPenetrate;
             if (isPenetrate)
             {
+                PenetrateEffect.SetActive(true);
                 GameObject[] gos = GameObject.FindGameObjectsWithTag("Flow");
                 foreach (GameObject go in gos)
                 {
@@ -78,6 +84,7 @@ public class Penetrate : NetworkBehaviour
 
     void StopFlowRender()
     {
+        PenetrateEffect.SetActive(false);
         GameObject[] gos = GameObject.FindGameObjectsWithTag("Flow");
         GetComponent<PlayerControl>().hitFix = false;
         foreach (GameObject go in gos)

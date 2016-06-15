@@ -104,6 +104,21 @@ public class Flow : NetworkBehaviour
         GetComponent<Renderer>().enabled = false;
         GetComponent<LineRenderer>().enabled = false;
         isrenderd = false;
+
+    }
+
+    void FixedUpdate()
+    {
+        if (bodys.Count <= 0) return;
+        foreach (Rigidbody go in bodys)
+        {
+            if (go.gameObject.GetComponent<PlayerControl>().hitFix) continue;
+            PlayerVector = targetPosition - (go.transform.position + Vector3.up);
+            PlayerVector.Normalize();
+            Rigidbody body = go.gameObject.GetComponent<Rigidbody>();
+            body.useGravity = false;
+            body.AddForce(PlayerVector * Time.deltaTime * speed * 50, ForceMode.Acceleration);
+        }
     }
 
     void Update()
@@ -118,6 +133,9 @@ public class Flow : NetworkBehaviour
             GetComponent<Renderer>().enabled = false;
             GetComponent<LineRenderer>().enabled = false;
         }
+
+
+
 
         if (!isCalc) return;
         transform.localScale = new Vector3(2, flowVector.magnitude * 0.5f + 1.0f, 2);
@@ -194,11 +212,7 @@ public class Flow : NetworkBehaviour
             col.gameObject.GetComponent<Penetrate>().Energy--;
         }
 
-        PlayerVector = targetPosition - (col.transform.position + Vector3.up);
-        PlayerVector.Normalize();
-        Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
-        body.useGravity = false;
-        body.AddForce(PlayerVector * Time.deltaTime * speed * 50, ForceMode.Acceleration);
+        col.GetComponent<PlayerControl>().IsJumping = false;
 
 
     }
@@ -212,13 +226,24 @@ public class Flow : NetworkBehaviour
 
         PlayerControl control = col.GetComponent<PlayerControl>();
         control.IsFlowing = false;
+
+        if (control.IsOnGround)
+        {
+            control.Landed();
+            return;
+        }
+
         control.IsFalling = true;
+        control.IsJumping = true;
         CameraControl cam = GameObject.Find("Camera1").GetComponent<CameraControl>();
         cam.SetNowLatitude();
         cam.IsEndFallingCamera = false;
-
+        col.gameObject.GetComponent<Animator>().CrossFadeInFixedTime("jump", 0.5f);
         if (!isLocalPlayer) return;
-        if (!isCreatePlayer) isrenderd = false;
+        if (!isCreatePlayer)
+        {
+            StopFlowRender();
+        }
     }
 
     void OnDestroy()

@@ -6,7 +6,6 @@ using System.Collections;
 
 public class LobbyManager : NetworkBehaviour
 {
-
     [SerializeField]
     string NextSceneName;
 
@@ -25,30 +24,18 @@ public class LobbyManager : NetworkBehaviour
     MyNetworkManager myNetManager;
     MyNetworkDiscovery myNetDiscoverry;
 
-    bool isSelect = false;
-    [SerializeField]
-    Button upButton;
-
-    [SerializeField]
-    Button downButton;
-
-    ColorBlock DefaultColor;
-
-    [SerializeField]
-    ColorBlock SelectColor;
-
 
     // Use this for initialization
     void Start()
     {
-        _2pText = _2PSprite.transform.FindChild("Text").GetComponent<Text>();
+        //_2pText = _2PSprite.transform.FindChild("Text").GetComponent<Text>();
         _2PPlayerObject.SetActive(false);
-        isSelect = false;
-        DefaultColor = upButton.colors;
+        GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(0, 0.5f, false);
     }
 
     void Update()
     {
+        //部屋選択画面の場合
         if (networkManager == null)
         {
             networkManager = GameObject.FindGameObjectWithTag("NetworkManager");
@@ -58,31 +45,33 @@ public class LobbyManager : NetworkBehaviour
 
         if (myNetManager.isStarted || !myNetDiscoverry.isServer)
         {
-            _2pText.text = "2P接続";
-            _2PSprite.GetComponent<Image>().color = Color.white;
+            //_2pText.text = "2P接続";
+            //_2PSprite.GetComponent<Image>().color = Color.white;
             _2PPlayerObject.SetActive(true);
 
         }
 
         if (!myNetManager.isStarted)
         {
-            _2pText.text = "2P未接続";
-            _2PSprite.GetComponent<Image>().color = Color.gray;
+            //_2pText.text = "2P未接続";
+            //_2PSprite.GetComponent<Image>().color = Color.gray;
             _2PPlayerObject.SetActive(false);
         }
 
         if (myNetManager.isStarted && myNetDiscoverry.isServer)
         {
             NextButton.SetActive(true);
-            GameManager.ChackButtonSelect(ref isSelect,upButton,downButton,DefaultColor,SelectColor);
+            if(GamepadInput.GamePadInput.GetButtonDown(GamepadInput.GamePadInput.Button.B, GamepadInput.GamePadInput.Index.One))
+            {
+                OnMoveNextScene();
+            }
         }
         else
         {
-            if (GamepadInput.GamePadInput.GetButtonDown(GamepadInput.GamePadInput.Button.A, GamepadInput.GamePadInput.Index.One))
-                downButton.onClick.Invoke();
             NextButton.SetActive(false);
         }
-
+        if (GamepadInput.GamePadInput.GetButtonDown(GamepadInput.GamePadInput.Button.B, GamepadInput.GamePadInput.Index.One))
+            OnDesConnect();
 
     }
 
@@ -102,7 +91,15 @@ public class LobbyManager : NetworkBehaviour
 
     public void OnDesConnect()
     {
+        StartCoroutine("SceneBack");
+        GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(1,0.5f,false);
+    }
+
+    IEnumerator  SceneBack()
+    {
+        yield return  new WaitForSeconds(0.5f);
+
         myNetManager.DiscoveryShutdown();
-        myNetManager.ServerChangeScene("Menu");
+        yield return null;
     }
 }

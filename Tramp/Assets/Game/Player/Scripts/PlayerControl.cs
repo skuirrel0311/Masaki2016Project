@@ -62,12 +62,17 @@ public class PlayerControl : NetworkBehaviour
     public Timer OnGroundTimer { get { return onGroundTimer; } }
     Timer landedTimer = new Timer();
     public Timer LandedTimer { get { return landedTimer; } }
+    Timer fallTimer = new Timer();
+
+    public Vector3 movement = Vector3.zero;
 
     //最後にあたっていた流れ
     public bool hitFix;
 
     [SerializeField]
     GameObject RideEffect;
+
+    bool  landingEnd;
 
     void Start()
     {
@@ -78,6 +83,7 @@ public class PlayerControl : NetworkBehaviour
         IsFalling = true;
         isRun = false;
         hitFix = false;
+        landingEnd = false;
         if (isLocalPlayer)
         {
             SetSratPosition();
@@ -93,7 +99,7 @@ public class PlayerControl : NetworkBehaviour
     {
         GameObject nm = GameObject.FindGameObjectWithTag("NetworkManager");
         if (nm == null) return;
-        if (nm.GetComponent<MyNetworkManager>().autoCreatePlayer&&isLocalPlayer)
+        if (nm.GetComponent<MyNetworkManager>().autoCreatePlayer && isLocalPlayer)
         {
             short s = (short)(playerControllerId + 1);
             ClientScene.AddPlayer(s);
@@ -119,28 +125,48 @@ public class PlayerControl : NetworkBehaviour
         }
     }
 
+    void FixedUpdate()
+    {
+        Vector2 leftStick = GamePadInput.GetAxis(GamePadInput.Axis.LeftStick, (GamePadInput.Index)playerNum);
+        movement = new Vector3(leftStick.x, 0, leftStick.y);
+        //アニメーターにパラメータを送る
+        bool ismove = Move();
+
+        if(ismove&& ChackCurrentAnimatorName(animator, "jump_landing"))
+        {
+            if (landingEnd) return;
+            landingEnd = true;
+            animator.CrossFadeInFixedTime("Take 001", 0.2f);
+            isRun = true;
+        }
+        else
+        {
+            landingEnd = false;
+        }
+        //街のモーションでなく、動いていなければ待ちのモーションにする
+        if (!ChackCurrentAnimatorName(animator, "wait") && !ismove)
+        {
+            isRun = false;
+            animator.SetBool("IsRun", isRun);
+        }
+    }
+
     void Update()
     {
         UpdateTimer();
-        Vector2 leftStick = GamePadInput.GetAxis(GamePadInput.Axis.LeftStick, (GamePadInput.Index)playerNum);
-        Vector3 direction = new Vector3(leftStick.x, 0, leftStick.y);
-        Move(direction);
+
+
         Jump();
 
         //ジャンプしてジャンプ開始地点よりも下に落ちた
         if (IsJumping && atJumpPosition.y > transform.position.y)
         {
-            if(!IsFalling)cameraControl.SetNowLatitude();
+            if (!IsFalling) cameraControl.SetNowLatitude();
             cameraControl.IsEndFallingCamera = false;
             IsFalling = true;
         }
 
-        //アニメーターにパラメータを送る
-        if (!ChackCurrentAnimatorName(animator, "wait") && !Move(direction))
-        {
-            isRun = false;
-            animator.SetBool("IsRun", isRun);
-        }
+
 
         Vector3 c = new Vector3(transform.position.x, 0, transform.position.z);
         if (c.magnitude > EndArea)
@@ -165,8 +191,15 @@ public class PlayerControl : NetworkBehaviour
     {
         onGroundTimer.Update();
         landedTimer.Update();
+        fallTimer.Update();
+
+        if (fallTimer.IsWorking && fallTimer.IsLimitTime)
+        {
+            fallTimer.Stop(true);
+            IsJumping = true;
+        }
     }
-    
+
     static public bool ChackCurrentAnimatorName(Animator animator, string name)
     {
         return animator.GetCurrentAnimatorStateInfo(0).IsName(name);
@@ -176,7 +209,7 @@ public class PlayerControl : NetworkBehaviour
     /// 移動
     /// </summary>
     /// <param name="movement">移動量</param>
-    bool Move(Vector3 movement)
+    bool Move()
     {
         //ポーズ中だったら終了
         if (MainGameManager.IsPause) return false;
@@ -226,14 +259,15 @@ public class PlayerControl : NetworkBehaviour
         }
 
         //body.AddForce(movement * moveSpeed,ForceMode.VelocityChange);
-        transform.Translate(movement * Time.deltaTime * moveSpeed, Space.World);
+        movement = movement * Time.deltaTime * moveSpeed;
+        transform.Translate(movement, Space.World);
         return true;
     }
 
     void Jump()
     {
         //プレイヤーがジャンプをしようとしたとき
-        if (GamePadInput.GetButtonDown(GamePadInput.Button.A, (GamePadInput.Index)playerNum) && IsOnGround && !MainGameManager.IsPause)
+        if (GamePadInput.GetButtonDown(GamePadInput.Button.A, (GamePadInput.Index)playerNum) && !IsJumping && !MainGameManager.IsPause)
         {
             //ジャンプ時の地点を保持
             atJumpPosition = transform.position;
@@ -244,8 +278,6 @@ public class PlayerControl : NetworkBehaviour
             body.AddForce(jumpVec * 100, ForceMode.Impulse);
         }
     }
-
-
 
     IEnumerator SleepHItFix()
     {
@@ -259,18 +291,21 @@ public class PlayerControl : NetworkBehaviour
         if (IsOnGround) return;
 
         if (collision.gameObject.name == "FixAnchor") AnchorHit();
-        
+
         //どうやら親のタグを取得しているみたい
-        if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Scaffold") return;
+        if (collision.gameObject.tag != "Plane" && collision.gameObject.tag != "Scaffold" && collision.gameObject.tag != "Area") return;
         Landed();
     }
 
     public void AnchorHit()
     {
+        if (IsOnGround) return;
         IsFlowing = false;
         IsFalling = true;
         cameraControl.SetNowLatitude();
         cameraControl.IsEndFallingCamera = false;
+        animator.CrossFadeInFixedTime("jump", 0.5f);
+
     }
 
     void OnCollisionExit(Collision col)
@@ -280,12 +315,20 @@ public class PlayerControl : NetworkBehaviour
         //ジャンプもしてない、流れてもいない、なのに地面から離れてたら
         if (!IsJumping && !IsFlowing)
         {
-            if(!IsFalling)cameraControl.SetNowLatitude();
-            cameraControl.IsEndFallingCamera = false;
-            IsFalling = true;
+            Fall();
         }
+        if(!IsFlowing) animator.CrossFadeInFixedTime("jump", 0.5f);
+        IsOnGround = false;
+    }
+
+    public void Fall()
+    {
         animator.CrossFadeInFixedTime("jump", 0.5f);
         IsOnGround = false;
+        if (!IsFalling) cameraControl.SetNowLatitude();
+        cameraControl.IsEndFallingCamera = false;
+        IsFalling = true;
+        fallTimer.TimerStart(1);
     }
 
     void OnTriggerEnter(Collider col)
@@ -319,21 +362,20 @@ public class PlayerControl : NetworkBehaviour
         //ジャンプもしてない、流れてもいない、なのに地面から離れてたら
         if (!IsJumping && !IsFlowing)
         {
-            if(!IsFalling)cameraControl.SetNowLatitude();
-            cameraControl.IsEndFallingCamera = false;
-            IsFalling = true;
+            Fall();
         }
-        animator.CrossFadeInFixedTime("jump", 0.5f);
+        if(!IsFlowing) animator.CrossFadeInFixedTime("jump", 0.5f);
         IsOnGround = false;
     }
-    
+
     //着地した
-    void Landed()
+    public void Landed()
     {
         if (IsFalling)
         {
             IsFallAfter = true;
             landedTimer.TimerStart(0.5f);
+            fallTimer.Stop(true);
         }
         IsJumping = false;
         IsFalling = false;

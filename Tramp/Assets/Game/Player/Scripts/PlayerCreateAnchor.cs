@@ -8,15 +8,17 @@ public class PlayerCreateAnchor : NetworkBehaviour
 {
 
     [SerializeField]
-    GameObject InstanceAnchor;
+    GameObject InstanceAnchorHost;
 
+    [SerializeField]
+    GameObject InstanceAnchorClient;
     [SerializeField]
     float UncreateDistance = 3;
 
     [SerializeField]
     GameObject FlowEffect;
 
-    GameObject camera;
+    new GameObject camera;
 
     private int playerNum;
     PlayerState playerState;
@@ -61,10 +63,8 @@ public class PlayerCreateAnchor : NetworkBehaviour
         {
             timer = 0;
             if (MainGameManager.IsPause) return;
-            if (!CheckNearAnchor())
-                return;
-
-            camera.GetComponent<CameraLockon>().IsLockOn = false;
+            if (camera.GetComponent<CameraLockon>().IsLockOn == false) return;
+            camera.GetComponent<CameraLockon>().LockOnCut();
             Debug.Log("start");
 
             //始点を決める
@@ -166,17 +166,24 @@ public class PlayerCreateAnchor : NetworkBehaviour
     void CreateAnchor()
     {
         //アンカーを置く
-        Cmd_rezobjectonserver(CreatePosition);
+        Cmd_rezobjectonserver(CreatePosition,isServer);
 
         Debug.Log("clientCallend");
     }
 
     [Command]
-    public void Cmd_rezobjectonserver(Vector3 createPosition)
+    public void Cmd_rezobjectonserver(Vector3 createPosition,bool isCreater)
     {
         Debug.Log("end1");
         GameObject obj;
-        obj = Instantiate(InstanceAnchor, createPosition, transform.rotation) as GameObject;
+        if (isCreater)
+        {
+            obj = Instantiate(InstanceAnchorHost, createPosition, transform.rotation) as GameObject;
+        }
+        else
+        {
+            obj = Instantiate(InstanceAnchorClient, createPosition, transform.rotation) as GameObject;
+        }
         obj.GetComponent<CreateFlow>().SetCreatePlayerIndex(1);
         NetworkServer.Spawn(obj);
         Debug.Log("end2");
@@ -219,6 +226,20 @@ public class PlayerCreateAnchor : NetworkBehaviour
         Ray ray = new Ray(CreatePosition, flowVector);
         float radius = 0.1f;
         List<GameObject> hits = Physics.SphereCastAll(ray, radius, flowVector.magnitude).Select(element => element.transform.gameObject).ToList();
+
+        foreach (GameObject hit in hits)
+        {
+            if (hit.tag == "Box" || hit.tag == "Plane") return false;
+        }
+
+        return true;
+    }
+
+    public  static bool IsPossibleCreateFlow(Vector3 position,Vector3 flowVec)
+    {
+        Ray ray = new Ray(position, flowVec);
+        float radius = 0.1f;
+        List<GameObject> hits = Physics.SphereCastAll(ray, radius, flowVec.magnitude).Select(element => element.transform.gameObject).ToList();
 
         foreach (GameObject hit in hits)
         {

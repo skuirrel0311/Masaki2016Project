@@ -31,15 +31,26 @@ public class ResultManager : MonoBehaviour
         switch (winner)
         {
             case Winner.win:
-                Win.SetActive(true);
-                break;
             case Winner.lose:
+                Win.SetActive(true);
                 Lose.SetActive(true);
+
+                bool isServerLose = winner == Winner.lose && MyNetworkManager.discovery.isServer == true;
+                bool isClientWin = winner == Winner.win && MyNetworkManager.discovery.isServer == false;
+
+                if (isServerLose||isClientWin)
+                {
+                    Vector2 tmp = Win.GetComponent<RectTransform>().anchoredPosition;
+                    Win.GetComponent<RectTransform>().anchoredPosition = Lose.GetComponent<RectTransform>().anchoredPosition;
+                    Lose.GetComponent<RectTransform>().anchoredPosition = tmp;
+                }
+
                 break;
             case Winner.draw:
                 Draw.SetActive(true);
                 break;
         }
+
         if (networkManager.GetComponent<MyNetworkDiscovery>().isServer)
         {
             if ((winner == Winner.win || winner == Winner.draw))

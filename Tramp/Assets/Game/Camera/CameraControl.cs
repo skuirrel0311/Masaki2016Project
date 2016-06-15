@@ -30,7 +30,7 @@ public class CameraControl : MonoBehaviour
     private GameObject cameraObj;
     private CameraLockon lockon;
 
-    private Vector3 cameraTargetPosition;
+    public Vector3 cameraTargetPosition;
     private GameObject player;
     private PlayerControl playerControl;
     private Vector3 oldPlayerPosition;
@@ -82,7 +82,11 @@ public class CameraControl : MonoBehaviour
         if (player == null) return;
         BetweenPlayerAndCamera();
 
-        if (lockon.IsLockOn) return;
+        if (lockon.IsLockOn)
+        {
+            oldPlayerPosition = player.transform.position;
+            return;
+        }
 
         lockon.AlignmentImage(1);
         Vector2 rightStick = GamePadInput.GetAxis(GamePadInput.Axis.RightStick, (GamePadInput.Index)playerNum);
@@ -184,9 +188,9 @@ public class CameraControl : MonoBehaviour
             //リープ開始
             Vector3 vec1 = SphereCoordinate(longitude, 0);
             //リープ終了時の座標
-            Vector3 vec2 = SphereCoordinate(longitude, -30);
-            Vector3 toPlayerVector = (Vector3.zero - vec2).normalized;
-            vec2 += toPlayerVector * 3;
+            Vector3 vec2 = SphereCoordinate(longitude, -17);
+            Vector3 toPlayerVector = (Vector3.down - vec2).normalized;
+            vec2 += toPlayerVector * 5;
 
             //latitudeが-120だったらtは1になる
             float t = (-1 * (latitude + 0)) / 120;
@@ -260,7 +264,7 @@ public class CameraControl : MonoBehaviour
         IsEndFallingCamera = false;
         //目的のlatitude
         float a = 60;
-        float t = (360 * Time.deltaTime) / (a - latitude);
+        float t = (240 * Time.deltaTime) / (a - latitude);
         latitude = Mathf.Lerp(latitude, a, t);
     }
 
@@ -282,9 +286,6 @@ public class CameraControl : MonoBehaviour
     private void GetTargetPosition()
     {
         Vector3 movement = player.transform.position - oldPlayerPosition;
-
-        //落ちていないときに流れていなかったら
-        if (!playerControl.IsFalling && !playerControl.IsFlowing) movement.y *= 0.3f;
 
         cameraTargetPosition += movement;
         

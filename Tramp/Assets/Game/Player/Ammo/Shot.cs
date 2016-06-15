@@ -16,7 +16,7 @@ public class Shot : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        Destroy(gameObject, 10);
+        Destroy(gameObject, 5);
         GetComponent<Rigidbody>().AddForce(transform.forward * speed,ForceMode.Impulse);
     }
 

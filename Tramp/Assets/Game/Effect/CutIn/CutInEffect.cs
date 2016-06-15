@@ -27,10 +27,12 @@ public class CutInEffect : MonoBehaviour
         {
             if (isPlay)
             {
+                //中央左
+                float Center = startRectPosition.x * 0.2f;
                 if (cutInState == CutInState.In)
                 {
                     timer += Time.deltaTime;
-                    float nextPosition = startRectPosition.x + (timer / InTime) * (0 - startRectPosition.x);
+                    float nextPosition = startRectPosition.x + (timer / InTime) * (Center - startRectPosition.x);
                     CutInImage.anchoredPosition = new Vector2(nextPosition, CutInImage.anchoredPosition.y);
                     if (timer > InTime)
                     {
@@ -40,6 +42,8 @@ public class CutInEffect : MonoBehaviour
                 else if (cutInState == CutInState.Stop)
                 {
                     timer += Time.deltaTime;
+                    float nextPosition = Center + ((timer - InTime) / StopTime) * (-Center - Center);
+                    CutInImage.anchoredPosition = new Vector2(nextPosition, CutInImage.anchoredPosition.y);
                     if (timer > InTime + StopTime)
                     {
                         cutInState = CutInState.Out;
@@ -48,7 +52,7 @@ public class CutInEffect : MonoBehaviour
                 else if (cutInState == CutInState.Out)
                 {
                     timer += Time.deltaTime;
-                    float nextPosition = startRectPosition.x + (((timer - (InTime + StopTime)) / outTime) * (0 - startRectPosition.x)) + (0 - startRectPosition.x);
+                    float nextPosition = -Center + (((timer - (InTime + StopTime)) / outTime) * (-startRectPosition.x * 2));
                     CutInImage.anchoredPosition = new Vector2(nextPosition, CutInImage.anchoredPosition.y);
                     if (timer > InTime + StopTime + outTime)
                     {
@@ -56,14 +60,21 @@ public class CutInEffect : MonoBehaviour
                         CutInImage.anchoredPosition = startRectPosition;
                         timer = 0;
                         isPlay = false;
+                        OnEnd();
                     }
                 }
             }
         }
+
+        public delegate void OnEndHandrer();
+
+        public event OnEndHandrer OnEnd =()=>{};
     }
 
     [SerializeField]
     public List<CutInElement> cutInElement=new List<CutInElement>();
+
+    private List<CutInElement> RunQue = new List<CutInElement>();
 
     // Use this for initialization
     void Start()
@@ -74,8 +85,14 @@ public class CutInEffect : MonoBehaviour
             cutInElement[i].isPlay = false;
             cutInElement[i].timer = 0;
             cutInElement[i].cutInState = CutInState.In;
+            cutInElement[i].OnEnd += () =>
+            {
+                RunQue.Remove(cutInElement[i]);
+            };
         }
 
+        MainGameManager mainGameManager = GameObject.Find("MainGameManager").GetComponent<MainGameManager>();
+        
     }
 
     public void CutInPlay(RectTransform transform)
@@ -85,16 +102,25 @@ public class CutInEffect : MonoBehaviour
             if (cie.CutInImage == transform)
             {
                 cie.isPlay = true;
+                RunQue.Add(cie);
             }
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    public void CutInPlay(int Index)
     {
-        foreach(CutInElement cie in cutInElement)
+
+                cutInElement[Index].isPlay = true;
+                RunQue.Add(cutInElement[Index]);
+
+    }
+
+    // Update is called once per frame
+    void FixedUpdate()
+    {
+        if (RunQue.Count > 0)
         {
-            cie.CutInRun();
+            RunQue[0].CutInRun();
         }
     }
 }

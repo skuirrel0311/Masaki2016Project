@@ -6,7 +6,7 @@ public class Timer : MonoBehaviour
 
     float limitTime;
 
-    bool IsWorking;
+    public bool IsWorking { get; private set; }
 
     /// <summary>
     /// 進捗(0～1)

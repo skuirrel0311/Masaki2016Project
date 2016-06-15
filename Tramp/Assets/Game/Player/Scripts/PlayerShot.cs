@@ -51,6 +51,7 @@ public class PlayerShot : NetworkBehaviour
     bool IsReloading;
 
     float shotTimer;
+    float animationTimer;
 
     GamepadInputState padState;
 
@@ -65,6 +66,7 @@ public class PlayerShot : NetworkBehaviour
         isShot = false;
         shotTimer = -1;
         vibrationTimer = 0;
+        animationTimer = -1;
     }
 
     float vibrationTimer;
@@ -114,21 +116,36 @@ public class PlayerShot : NetworkBehaviour
         if (GamePadInput.GetTrigger(GamePadInput.Trigger.RightTrigger, (GamePadInput.Index)playerNum, true) <= 0 && isLocalPlayer)
         {
             playerState.animator.SetBool("RunShotEnd", true);
+            animationTimer = -1;
             isShot = false;
         }
 
-        if(GamePadInput.GetTrigger(GamePadInput.Trigger.RightTrigger,GamePadInput.Index.One,true)>0&&isLocalPlayer&&shotTimer==-1&&!isShot)
+        if (GamePadInput.GetTrigger(GamePadInput.Trigger.RightTrigger, GamePadInput.Index.One, true) > 0 && isLocalPlayer && shotTimer == -1 && !isShot)
         {
             shotTimer = 0;
             Shot();
+            if(animationTimer==-1)
+            {
+                animationTimer = 0;
+            }
         }
 
-        if(shotTimer != -1)
+        if (shotTimer != -1)
         {
-           shotTimer += Time.deltaTime;
+            shotTimer += Time.deltaTime;
             if (shotTimer >= 0.1f)
             {
                 shotTimer = -1;
+            }
+        }
+
+        if(animationTimer!=-1)
+        {
+            animationTimer += Time.deltaTime;
+            if (animationTimer >= 0.3f)
+            {
+                playerState.animator.SetLayerWeight(1, 0);
+
             }
         }
 
@@ -141,6 +158,8 @@ public class PlayerShot : NetworkBehaviour
                 GamePad.SetVibration(PlayerIndex.One, 0, 0);
             }
         }
+
+        
     }
 
     [Command]
@@ -231,15 +250,20 @@ public class PlayerShot : NetworkBehaviour
     {
         if (isShot)
         {
-
             Vector3 localAngles = playerState.animator.GetBoneTransform(HumanBodyBones.Spine).localEulerAngles;
 
             //先にプレイヤーをカメラと同じ方向に向ける
             Vector3 cameraRotation = cameraObj.transform.eulerAngles;
 
             cameraRotation=cameraRotation - transform.rotation.eulerAngles;
-
-            playerState.animator.SetBoneLocalRotation(HumanBodyBones.Spine, Quaternion.Euler(cameraRotation.y, 180.0f,-cameraRotation.x+180.0f));
+            if (isServer)
+            {
+                playerState.animator.SetBoneLocalRotation(HumanBodyBones.Spine, Quaternion.Euler(cameraRotation.y, 180.0f, -cameraRotation.x + 180.0f));
+            }
+            else
+            {
+                playerState.animator.SetBoneLocalRotation(HumanBodyBones.Spine, Quaternion.Euler(-cameraRotation.y, 0, cameraRotation.x));
+            }
         }
 
         else
@@ -259,6 +283,11 @@ public class PlayerShot : NetworkBehaviour
     {
         int temp = stock + anchorEnergy;
         stock =  temp > stockMax ? stockMax : stock += anchorEnergy;
+    }
+
+    void OnDestroy()
+    {
+        GamePad.SetVibration(PlayerIndex.One, 0f, 0f);
     }
 
 }

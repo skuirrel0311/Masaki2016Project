@@ -42,6 +42,7 @@ public class AppealAreaState : NetworkBehaviour
     Renderer StageMesh;
 
     private static bool isDrawUI = false;
+    private MainGameManager mainManager;
 
     void Awake()
     {
@@ -58,6 +59,7 @@ public class AppealAreaState : NetworkBehaviour
         StageMesh = transform.FindChild("pSphere1").GetComponent<Renderer>();
         ShareImage = ShareImageObject.transform.FindChild("ShareImage").GetComponent<Image>();
         ShareImageObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(transform.position.x, transform.position.z);
+        mainManager = GameObject.Find("MainGameManager").GetComponent<MainGameManager>();
     }
 
     void FixedUpdate()
@@ -114,12 +116,12 @@ public class AppealAreaState : NetworkBehaviour
         //自分が占拠している
         else if (isOccupiers == RidePlayers[0].GetComponent<PlayerState>().isLocalPlayer)
         {
-            CmdChangeShare(1);
+            CmdChangeShare((float)(1.0f/(Mathf.Max(mainManager.Occupied, 0) + 1.0f)));
         }
         //相手に占拠されている
         else
         {
-            CmdChangeShare(-1);
+            CmdChangeShare((float)(-1.0f /  (Mathf.Max(mainManager.Occupied,0) + 1.0f)));
         }
 
     }
