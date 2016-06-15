@@ -17,7 +17,6 @@ public class MyNetworkManager : NetworkManager
 
     public static MyNetworkDiscovery discovery;
     public string IpAddress;
-    SoundManager soundManager;
 
     [SerializeField]
     GameObject netmanagerPrefab;
@@ -57,7 +56,6 @@ public class MyNetworkManager : NetworkManager
     void Start()
     {
         discovery = netmanagerPrefab.GetComponent<MyNetworkDiscovery>();
-        soundManager = GetComponent<SoundManager>();
         isStarted = false;
         isJoin = false;
         joinTimer = 0;
@@ -100,7 +98,6 @@ public class MyNetworkManager : NetworkManager
         if (newSceneName == "Menu")
         {
             discovery.isStartClient = false;
-            soundManager.GameEnd();
             isStarted = false;
             isJoin = false;
             joinTimer = 0;
@@ -137,12 +134,7 @@ public class MyNetworkManager : NetworkManager
 
     public override void OnClientSceneChanged(NetworkConnection conn)
     {
-        if (networkSceneName == "main")
-        {
-            // if (!GetComponent<NetworkDiscovery>().isServer)
-            soundManager.PlayMusic(discovery.isServer);
-        }
-        else
+        if (networkSceneName != "main")
         {
             autoCreatePlayer = false;
         }

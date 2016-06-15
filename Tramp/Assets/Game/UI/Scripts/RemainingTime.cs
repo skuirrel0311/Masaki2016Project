@@ -20,18 +20,12 @@ public class RemainingTime : MonoBehaviour {
 	// Use this for initialization
 	void Start ()
     {
-        soundManager = GameObject.FindGameObjectWithTag("NetworkManager").GetComponent<SoundManager>();
+        soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
     }
 	
 	// Update is called once per frame
 	void Update ()
     {
-        //取り損ねることがあるので念のため
-        if (soundManager == null)
-        {
-            soundManager = GameObject.FindGameObjectWithTag("NetworkManager").GetComponent<SoundManager>();
-            if (soundManager == null) return;
-        }
 
         int time = soundManager.GetRemainingTime();
 

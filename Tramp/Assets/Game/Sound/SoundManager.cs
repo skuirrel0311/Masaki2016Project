@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
-using System.Collections.Generic;
+using System.Collections;
 
 public class SoundManager : MonoBehaviour
 {
@@ -14,16 +14,13 @@ public class SoundManager : MonoBehaviour
     [SerializeField]
     AudioSource Voice_B_Audio;
 
-    [SerializeField]
-    AudioClip HostVoiceClip;
-
-    [SerializeField]
-    AudioClip ClientVoiceClip;
-
     private MyNetworkManager myNetManager;
     private MyNetworkDiscovery myNetDiscovery;
 
-    public void PlayMusic(bool isSever)
+    bool isEnd = false;
+    public static bool isWin;
+
+    public void PlayMusic()
     {
         mainMusic.Play();
 
@@ -39,11 +36,20 @@ public class SoundManager : MonoBehaviour
     {
         isEnd = false;
         isWin = false;
-        myNetManager = GetComponent<MyNetworkManager>();
-        myNetDiscovery = GetComponent<MyNetworkDiscovery>();
+        StartCoroutine("StartPlayMusic");
+        GameObject netMana = GameObject.FindGameObjectWithTag("NetworkManager");
+        myNetManager = netMana.GetComponent<MyNetworkManager>();
+        myNetDiscovery = netMana.GetComponent<MyNetworkDiscovery>();
     }
-    bool isEnd = false;
-    public static bool isWin;
+
+    IEnumerator StartPlayMusic()
+    {
+        yield return new WaitForSeconds(3);
+        PlayMusic();
+        yield return null;
+    }
+    
+
     // Update is called once per frame
     void Update()
     {
@@ -83,6 +89,11 @@ public class SoundManager : MonoBehaviour
             man.ServerChangeScene("Result");
         }
 
+    }
+
+    void OnDestroy()
+    {
+        GameEnd();
     }
 
     public void GameEnd()
