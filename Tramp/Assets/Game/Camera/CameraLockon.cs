@@ -137,7 +137,7 @@ public class CameraLockon : MonoBehaviour
         targetAnchor = GetTargetAnchor();
         if (targetAnchor == null) return;
         lockonTimer.TimerStart(0.2f); //ロックオンにかかる時間
-        imageTimer.TimerStart(1f);
+        imageTimer.TimerStart(0.2f);
         IsLockOn = true;
         IsEndLockOn = false;
         //プレイヤーをカメラと同じ向きに向ける

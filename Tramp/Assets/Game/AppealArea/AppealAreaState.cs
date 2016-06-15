@@ -43,6 +43,7 @@ public class AppealAreaState : NetworkBehaviour
 
     private static bool isDrawUI = false;
     private MainGameManager mainManager;
+    private MyNetworkManager myNetManager;
 
     void Awake()
     {
@@ -60,6 +61,7 @@ public class AppealAreaState : NetworkBehaviour
         ShareImage = ShareImageObject.transform.FindChild("ShareImage").GetComponent<Image>();
         ShareImageObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(transform.position.x, transform.position.z);
         mainManager = GameObject.Find("MainGameManager").GetComponent<MainGameManager>();
+        myNetManager = GameObject.FindGameObjectWithTag("NetworkManager").GetComponent<MyNetworkManager>();
     }
 
     void FixedUpdate()
@@ -113,15 +115,29 @@ public class AppealAreaState : NetworkBehaviour
             ChangeOccupiers(RidePlayers[0].GetComponent<PlayerState>().isLocalPlayer);
             CmdChangeShare(1);
         }
-        //自分が占拠している
-        else if (isOccupiers == RidePlayers[0].GetComponent<PlayerState>().isLocalPlayer)
+        //サーバー
+        else if (RidePlayers[0].GetComponent<PlayerState>().isLocalPlayer)
         {
-            CmdChangeShare((float)(1.0f/(Mathf.Max(mainManager.Occupied, 0) + 1.0f)));
+            if (isOccupiers)
+            {
+                CmdChangeShare((float)(1.0f / (Mathf.Max(myNetManager.occuping, 0) + 1.0f)));
+            }
+            else
+            {
+                CmdChangeShare((float)(-1.0f / (Mathf.Max(myNetManager.occuping, 0) + 1.0f)));
+            }
         }
-        //相手に占拠されている
+        //クライアント
         else
         {
-            CmdChangeShare((float)(-1.0f /  (Mathf.Max(mainManager.Occupied,0) + 1.0f)));
+            if (!isOccupiers)
+            {
+                CmdChangeShare((float)(1.0f / (Mathf.Max(myNetManager.occupied, 0) + 1.0f)));
+            }
+            else
+            {
+                CmdChangeShare((float)(-1.0f / (Mathf.Max(myNetManager.occupied, 0) + 1.0f)));
+            }
         }
 
     }

@@ -20,6 +20,12 @@ public class ResultManager : MonoBehaviour
     [SerializeField]
     GameObject ClientPlayer;
 
+    [SerializeField]
+    Text SeverText;
+
+    [SerializeField]
+    Text ClientText;
+
     GameObject networkManager;
 
     // Use this for initialization
@@ -53,13 +59,19 @@ public class ResultManager : MonoBehaviour
 
         if (networkManager.GetComponent<MyNetworkDiscovery>().isServer)
         {
-            if ((winner == Winner.win || winner == Winner.draw))
+            SeverText.text = networkManager.GetComponent<MyNetworkManager>().occuping.ToString();
+            ClientText.text = networkManager.GetComponent<MyNetworkManager>().occupied.ToString();
+
+            if ((winner == Winner.win || winner == Winner.draw)) 
                 ClientPlayer.GetComponent<Animator>().CrossFadeInFixedTime("lose",0);
             else
                 HostPlayer.GetComponent<Animator>().CrossFadeInFixedTime("lose", 0);
         }
         else
         {
+            ClientText.text = networkManager.GetComponent<MyNetworkManager>().occuping.ToString();
+            SeverText.text = networkManager.GetComponent<MyNetworkManager>().occupied.ToString();
+
             if ((winner == Winner.win || winner == Winner.draw))
                 HostPlayer.GetComponent<Animator>().CrossFadeInFixedTime("lose", 0);
             else
