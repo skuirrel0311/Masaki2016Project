@@ -203,7 +203,7 @@ ModelImporter:
     - serializedVersion: 16
       name: t_fall
       takeName: t_fall
-      firstFrame: 2.7
+      firstFrame: 3
       lastFrame: 10
       wrapMode: 0
       orientationOffsetY: 0
@@ -216,7 +216,7 @@ ModelImporter:
       loopBlendOrientation: 1
       loopBlendPositionY: 1
       loopBlendPositionXZ: 1
-      keepOriginalOrientation: 0
+      keepOriginalOrientation: 1
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
       heightFromFeet: 0

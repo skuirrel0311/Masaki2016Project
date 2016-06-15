@@ -84,20 +84,8 @@ public class ResultManager : MonoBehaviour
     {
         if (GamepadInput.GamePadInput.GetButtonDown(GamepadInput.GamePadInput.Button.Start, GamepadInput.GamePadInput.Index.One))
         {
-            MyNetworkManager man = networkManager.GetComponent<MyNetworkManager>();
-            MyNetworkDiscovery dis = networkManager.GetComponent<MyNetworkDiscovery>();
-
-            if (dis.isServer)
-            {
-                man.StopHost();
-                man.StopServer();
-            }
-            else
-            {
-                man.StopClient();
-            }
-            man.DiscoveryShutdown();
-            man.ServerChangeScene("Menu");
+            networkManager.GetComponent<MyNetworkManager>().offlineScene = "Menu";
+            networkManager.GetComponent<MyNetworkManager>().ServerChangeScene("Menu");
         }
     }
 }
