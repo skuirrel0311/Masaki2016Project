@@ -119,6 +119,8 @@ public class CameraControl : MonoBehaviour
     /// </summary>
     void BetweenPlayerAndCamera()
     {
+        //TwinWall,TwinScaffold,LongScaffold,lowScaffold
+
         Vector3 direction = (player.transform.position + Vector3.up) - cameraObj.transform.position;
         Ray ray = new Ray(cameraObj.transform.position, direction);
 
@@ -129,16 +131,44 @@ public class CameraControl : MonoBehaviour
         if (hitList.Count == 0) return;
 
         //containsでlinehitに無くてtagがBoxのものを判定しwhereで無かったものをlistに格納
-        lineHitObjects.AddRange(hitList.Where(n => (!lineHitObjects.Contains(n)) && n.tag == "Box"));
+        lineHitObjects.AddRange(hitList.Where(n => (!lineHitObjects.Contains(n)) && (n.tag == "Box" || n.tag == "Scaffold")));
+
 
         //半透明にする
-        lineHitObjects.ForEach(n => SetAlpha(n, 0.3f));
+        foreach (GameObject g in lineHitObjects) Debug.Log("hit = " + g.transform.parent.name);
+
+        //半透明にする
+        foreach(GameObject n in lineHitObjects)
+        {
+            string parentName = n.transform.parent.name;
+            //このオブジェクトも半透明にする
+            if (parentName == "TwinWall" || parentName == "TwinScaffold" || parentName == "LongScaffold" || parentName == "lowScaffold")
+            {
+                Transform parent = n.transform.parent;
+                foreach (Transform t in parent) SetAlpha(t.gameObject, 0.3f);
+            }
+            else
+            {
+                SetAlpha(n, 0.3f);
+            }
+        }
 
         //今回ヒットしなかったものは透明度をリセットし、リムーブする。
         lineHitObjects.RemoveAll(n =>
         {
             if (hitList.Contains(n)) return false;
-            ResetAlpha(n);
+
+            string parentName = n.transform.parent.name;
+            //このオブジェクトも半透明にする
+            if (parentName == "TwinWall" || parentName == "TwinScaffold" || parentName == "LongScaffold" || parentName == "lowScaffold")
+            {
+                Transform parent = n.transform.parent;
+                foreach (Transform t in parent) ResetAlpha(t.gameObject);
+            }
+            else
+            {
+                ResetAlpha(n);
+            }
             return true;
         });
     }
