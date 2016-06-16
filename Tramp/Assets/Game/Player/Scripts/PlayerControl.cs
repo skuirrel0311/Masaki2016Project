@@ -75,7 +75,7 @@ public class PlayerControl : NetworkBehaviour
     [SerializeField]
     GameObject barrierEffect;
 
-    bool  landingEnd;
+    bool landingEnd;
 
     void Start()
     {
@@ -134,8 +134,10 @@ public class PlayerControl : NetworkBehaviour
         movement = new Vector3(leftStick.x, 0, leftStick.y);
         //アニメーターにパラメータを送る
         bool ismove = Move();
+        if (!GetComponent<PlayerState>().IsAlive) return;
 
-        if(ismove&& ChackCurrentAnimatorName(animator, "jump_landing"))
+
+        if (ismove && ChackCurrentAnimatorName(animator, "jump_landing"))
         {
             if (landingEnd) return;
             landingEnd = true;
@@ -152,13 +154,13 @@ public class PlayerControl : NetworkBehaviour
             isRun = false;
             animator.SetBool("IsRun", isRun);
         }
-        
+
     }
 
     void Update()
     {
+        if (!GetComponent<PlayerState>().IsAlive) return;
         UpdateTimer();
-
 
         Jump();
 
@@ -219,7 +221,7 @@ public class PlayerControl : NetworkBehaviour
         movement = cameraRotation * movement;
         Vector3 temp = new Vector3(transform.position.x + (movement.x * 0.1f), 0, transform.position.z + (movement.z * 0.1f));
         //移動していなかったら終了
-        if (movement == Vector3.zero)
+        if (movement == Vector3.zero || !GetComponent<PlayerState>().IsAlive)
         {
             if (temp.magnitude > EndArea)
             {
@@ -228,9 +230,8 @@ public class PlayerControl : NetworkBehaviour
             return false;
         }
 
-
         //アニメーションの再生
-        if (!ChackCurrentAnimatorName(animator, "Take 001")&& !ChackCurrentAnimatorName(animator, "BackRun"))
+        if (!ChackCurrentAnimatorName(animator, "Take 001") && !ChackCurrentAnimatorName(animator, "BackRun"))
         {
             isRun = true;
             animator.SetBool("IsRun", isRun);
@@ -261,7 +262,7 @@ public class PlayerControl : NetworkBehaviour
             movement *= 0.5f;
             transform.LookAt(transform.position + forward);
         }
-        
+
         if (temp.magnitude > EndArea)
         {
             OutStage(temp);
@@ -276,10 +277,12 @@ public class PlayerControl : NetworkBehaviour
 
     void OutStage(Vector3 c)
     {
-            c.Normalize();
-            transform.position = new Vector3(c.x * EndArea, transform.position.y, c.z * EndArea);
-            Vector3 d = transform.position + movement + Vector3.up;
-            Destroy(Instantiate(barrierEffect, d, Quaternion.Euler(-d)), 1f);
+        c.Normalize();
+        transform.position = new Vector3(c.x * EndArea, transform.position.y, c.z * EndArea);
+        Vector3 mov = transform.position - Vector3.zero;
+        mov = (mov * 1.01f);
+        float effectRotationY = Mathf.Atan2(mov.x, mov.z) * Mathf.Rad2Deg;
+        Destroy(Instantiate(barrierEffect, mov + Vector3.up, Quaternion.Euler(0,effectRotationY,0)), 0.3f);
     }
 
     void Jump()
@@ -335,7 +338,7 @@ public class PlayerControl : NetworkBehaviour
         {
             Fall();
         }
-        if(!IsFlowing) animator.CrossFadeInFixedTime("jump", 0.5f);
+        if (!IsFlowing) animator.CrossFadeInFixedTime("jump", 0.5f);
         IsOnGround = false;
     }
 
@@ -382,7 +385,7 @@ public class PlayerControl : NetworkBehaviour
         {
             Fall();
         }
-        if(!IsFlowing) animator.CrossFadeInFixedTime("jump", 0.5f);
+        if (!IsFlowing) animator.CrossFadeInFixedTime("jump", 0.5f);
         IsOnGround = false;
     }
 
