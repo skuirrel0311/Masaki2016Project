@@ -293,6 +293,7 @@ public class PlayerControl : NetworkBehaviour
             IsOnGround = false;
             animator.CrossFadeInFixedTime("jump", 0.5f);
             //body.isKinematic = true;
+            transform.position += (Vector3.up * 0.1f);
             body.AddForce(jumpVec * 100, ForceMode.Impulse);
         }
     }
