@@ -20,12 +20,12 @@ public class AnchorHit : MonoBehaviour {
         FlowEffect =GameObject.Find("FlowEffect"+CreateFlow.flowEffectCount);
     }
 
-    void OnCollisionEnter(Collision col)
+    void OnTriggerEnter(Collider col)
     {
         if (col.gameObject.tag == "Ammo") AmmoHit(col);
     }
 
-    void AmmoHit(Collision col)
+    void AmmoHit(Collider col)
     {
         if (col.gameObject.tag == "Ammo")
         {
