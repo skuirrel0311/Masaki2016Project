@@ -134,8 +134,6 @@ public class PlayerControl : NetworkBehaviour
         movement = new Vector3(leftStick.x, 0, leftStick.y);
         //アニメーターにパラメータを送る
         bool ismove = Move();
-        if (!GetComponent<PlayerState>().IsAlive) return;
-
 
         if (ismove && ChackCurrentAnimatorName(animator, "jump_landing"))
         {
@@ -159,7 +157,6 @@ public class PlayerControl : NetworkBehaviour
 
     void Update()
     {
-        if (!GetComponent<PlayerState>().IsAlive) return;
         UpdateTimer();
 
         Jump();
@@ -192,7 +189,7 @@ public class PlayerControl : NetworkBehaviour
         if (fallTimer.IsWorking && fallTimer.IsLimitTime)
         {
             fallTimer.Stop(true);
-            IsJumping = true;
+            if(!IsOnGround)IsJumping = true;
         }
     }
 
@@ -221,7 +218,7 @@ public class PlayerControl : NetworkBehaviour
         movement = cameraRotation * movement;
         Vector3 temp = new Vector3(transform.position.x + (movement.x * 0.1f), 0, transform.position.z + (movement.z * 0.1f));
         //移動していなかったら終了
-        if (movement == Vector3.zero || !GetComponent<PlayerState>().IsAlive)
+        if (movement == Vector3.zero)
         {
             if (temp.magnitude > EndArea)
             {
@@ -275,7 +272,7 @@ public class PlayerControl : NetworkBehaviour
         return true;
     }
 
-    void OutStage(Vector3 c)
+    public void OutStage(Vector3 c)
     {
         c.Normalize();
         transform.position = new Vector3(c.x * EndArea, transform.position.y, c.z * EndArea);

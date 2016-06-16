@@ -50,10 +50,13 @@ public class PlayerState : NetworkBehaviour
 
     private int playerIndex = 1;
 
+    PlayerControl control;
+
     void Awake()
     {
         playerIndex = GetComponent<PlayerControl>().playerNum;
         animator = GetComponentInChildren<Animator>();
+        control = GetComponent<PlayerControl>();
         Initialize();
     }
 
@@ -91,16 +94,16 @@ public class PlayerState : NetworkBehaviour
     void Initialize()
     {
         hp = maxHp;
-        PlayerControl playerControl = GetComponent<PlayerControl>();
         animator.CrossFadeInFixedTime("wait", 0.1f);
-        playerControl.SetSratPosition();
-        playerControl.enabled = true;
+        control.SetSratPosition();
+        control.enabled = true;
     }
 
     void Restoration()
     {
         GetComponent<PlayerShot>().enabled = true;
         GetComponent<PlayerCreateAnchor>().enabled = true;
+        control.enabled = true;
         animator.CrossFadeInFixedTime("wait", 0.1f);
 
         CmdHpReset();
@@ -115,11 +118,15 @@ public class PlayerState : NetworkBehaviour
         //操作できないようにする。
         GetComponent<PlayerShot>().enabled = false;
         GetComponent<PlayerCreateAnchor>().enabled = false;
+        control.enabled = false;
         GamePad.SetVibration(PlayerIndex.One, 0, 0);
-
-
-
-        yield return new WaitForSeconds(TimeToReturn);
+        float time = 0;
+        while(time < TimeToReturn)
+        {
+            time += Time.deltaTime;
+            control.OutStage(transform.position);
+            yield return null;
+        }
         //3秒後に復活
         Restoration();
     }
