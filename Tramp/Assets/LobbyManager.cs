@@ -31,6 +31,7 @@ public class LobbyManager : NetworkBehaviour
         //_2pText = _2PSprite.transform.FindChild("Text").GetComponent<Text>();
         _2PPlayerObject.SetActive(false);
         GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(0, 0.5f, false);
+        //SceneManager.LoadSceneAsync("main");
     }
 
     void Update()
@@ -79,7 +80,7 @@ public class LobbyManager : NetworkBehaviour
     {
         if (NextSceneName == "main")
             RpcAutoCreatePlayer();
-
+        
         myNetManager.ServerChangeScene(NextSceneName);
     }
 

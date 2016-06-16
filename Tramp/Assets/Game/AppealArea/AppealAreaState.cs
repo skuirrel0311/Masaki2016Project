@@ -120,11 +120,11 @@ public class AppealAreaState : NetworkBehaviour
         {
             if (isOccupiers)
             {
-                CmdChangeShare((float)(1.0f / (Mathf.Max(myNetManager.occuping, 0) + 1.0f)));
+                CmdChangeShare((float)(1.0f+(Mathf.Max(myNetManager.occupied, 0) / 1.0f)));
             }
             else
             {
-                CmdChangeShare((float)(-1.0f / (Mathf.Max(myNetManager.occuping, 0) + 1.0f)));
+                CmdChangeShare((float)(-1.0f - (Mathf.Max(myNetManager.occupied, 0) / 1.0f)));
             }
         }
         //クライアント
@@ -132,11 +132,11 @@ public class AppealAreaState : NetworkBehaviour
         {
             if (!isOccupiers)
             {
-                CmdChangeShare((float)(1.0f / (Mathf.Max(myNetManager.occupied, 0) + 1.0f)));
+                CmdChangeShare((float)(1.0f+(Mathf.Max(myNetManager.occuping, 0) / 1.0f)));
             }
             else
             {
-                CmdChangeShare((float)(-1.0f / (Mathf.Max(myNetManager.occupied, 0) + 1.0f)));
+                CmdChangeShare((float)(-1.0f- (Mathf.Max(myNetManager.occuping, 0) /  1.0f)));
             }
         }
 

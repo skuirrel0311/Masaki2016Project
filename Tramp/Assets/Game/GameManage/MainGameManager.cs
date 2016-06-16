@@ -109,11 +109,13 @@ public class MainGameManager : MonoBehaviour
 
         if(oldOccupieding<myNetManager.occuping&&OnOccupiedingHnadler!=null)
         {
+            Debug.Log("Clientでた？");
             OnOccupiedingHnadler();
         }
 
         if (oldOccupied < myNetManager.occupied && OnOccupiedHnadler != null)
         {
+            Debug.Log("Clientでた？");
             OnOccupiedHnadler();
         }
 

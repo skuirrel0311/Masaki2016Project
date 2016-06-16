@@ -8,6 +8,7 @@
 		_Delay("Delay by Distance", float) = 0.02
 		_Bend("Bend", float) = 0.3
 		_MainTex("Base (RGB)", 2D) = "white" {}
+	    _NoiseTex("Noise", 2D) = "white" {}
 	}
 		SubShader{
 		Tags{
@@ -33,6 +34,7 @@
 	uniform float _WaveFactorY;
 	uniform float4 _BaseColor;
 	uniform sampler2D _MainTex;
+	uniform sampler2D _NoiseTex;
 
 	struct v2f {
 		float4 position : SV_POSITION;
@@ -51,7 +53,7 @@
 		float angleZ = wave + delay + bendZ;
 		float lean = sin((v.texcoord.y + 0.5) * PI) - 1.0;
 
-		v.vertex.x += _WaveFactorX * sin(angleX) * lean;
+		v.vertex.x += -_WaveFactorX * sin(angleX) * lean;
 		v.vertex.y += (_WaveFactorX + _WaveFactorZ) * _WaveCorrection * (1.0 - pow(cos(angleX), 2.0)) * lean;
 		v.vertex.z += _WaveFactorZ * sin(angleZ) * lean;
 
@@ -65,7 +67,7 @@
 
 	fixed4 frag(v2f i) : COLOR{
 		fixed4 tex = tex2D(_MainTex, i.uv);
-	tex.rgb *= _BaseColor * i.color.rgb;
+	tex.rgb *= _BaseColor * i.color.rgb*2;
 	tex.a *= i.color.a;
 	return tex;
 	}

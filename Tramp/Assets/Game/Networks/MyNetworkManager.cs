@@ -64,7 +64,7 @@ public class MyNetworkManager : NetworkManager
 
     void Update()
     {
-        if (PlayerCount >= 3 || !discovery.isServer)
+        if (PlayerCount >= 2 || !discovery.isServer)
         {
             isStarted = true;
         }
@@ -107,7 +107,6 @@ public class MyNetworkManager : NetworkManager
 
     public override void OnServerConnect(NetworkConnection conn)
     {
-        PlayerCount++;
         base.OnServerConnect(conn);
     }
 
@@ -229,6 +228,19 @@ public class MyNetworkManager : NetworkManager
         NetworkTransport.Shutdown();
         NetworkTransport.Init();
         discovery.isStartClient = false;
+    }
+
+    public delegate void OnSeverReadeyHandler();
+
+    public event OnSeverReadeyHandler OnServerReadyEvent;
+
+    public override void OnServerReady(NetworkConnection conn)
+    {
+        if (OnServerReadyEvent != null)
+            OnServerReadyEvent();
+
+        playercount++;
+        base.OnServerReady(conn);
     }
 
     public override void OnClientError(NetworkConnection conn, int errorCode)

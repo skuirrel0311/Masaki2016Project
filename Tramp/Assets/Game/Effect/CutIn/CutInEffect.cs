@@ -23,7 +23,7 @@ public class CutInEffect : MonoBehaviour
         [HideInInspector]
         public Vector2 startRectPosition;
         public CutInState cutInState;
-        public void CutInRun()
+        public void CutInRun(List<CutInElement> elements)
         {
             if (isPlay)
             {
@@ -60,19 +60,15 @@ public class CutInEffect : MonoBehaviour
                         CutInImage.anchoredPosition = startRectPosition;
                         timer = 0;
                         isPlay = false;
-                        OnEnd();
+                        elements.Remove(this);
                     }
                 }
             }
         }
-
-        public delegate void OnEndHandrer();
-
-        public event OnEndHandrer OnEnd =()=>{};
     }
 
     [SerializeField]
-    public List<CutInElement> cutInElement=new List<CutInElement>();
+    public List<CutInElement> cutInElement = new List<CutInElement>();
 
     private List<CutInElement> RunQue = new List<CutInElement>();
 
@@ -85,18 +81,14 @@ public class CutInEffect : MonoBehaviour
             cutInElement[i].isPlay = false;
             cutInElement[i].timer = 0;
             cutInElement[i].cutInState = CutInState.In;
-            cutInElement[i].OnEnd += () =>
-            {
-                RunQue.Remove(cutInElement[i]);
-            };
         }
 
         //イベントに処理を設定
         MainGameManager mainGameManager = GameObject.Find("MainGameManager").GetComponent<MainGameManager>();
-        GameObject.Find("Canvas").GetComponent<RemainingTime>().OnOneMinHandler+=()=>
-        {
-            CutInPlay(0);
-        };
+        GameObject.Find("Canvas").GetComponent<RemainingTime>().OnOneMinHandler += () =>
+          {
+              CutInPlay(0);
+          };
 
         mainGameManager.OnOccupiedingHnadler += () =>
         {
@@ -107,7 +99,7 @@ public class CutInEffect : MonoBehaviour
         {
             CutInPlay(2);
         };
-        
+
     }
 
     public void CutInPlay(RectTransform transform)
@@ -125,8 +117,8 @@ public class CutInEffect : MonoBehaviour
     public void CutInPlay(int Index)
     {
 
-                cutInElement[Index].isPlay = true;
-                RunQue.Add(cutInElement[Index]);
+        cutInElement[Index].isPlay = true;
+        RunQue.Add(cutInElement[Index]);
 
     }
 
@@ -135,7 +127,7 @@ public class CutInEffect : MonoBehaviour
     {
         if (RunQue.Count > 0)
         {
-            RunQue[0].CutInRun();
+            RunQue[0].CutInRun(RunQue);
         }
     }
 }
