@@ -91,7 +91,22 @@ public class CutInEffect : MonoBehaviour
             };
         }
 
+        //イベントに処理を設定
         MainGameManager mainGameManager = GameObject.Find("MainGameManager").GetComponent<MainGameManager>();
+        GameObject.Find("Canvas").GetComponent<RemainingTime>().OnOneMinHandler+=()=>
+        {
+            CutInPlay(0);
+        };
+
+        mainGameManager.OnOccupiedingHnadler += () =>
+        {
+            CutInPlay(3);
+        };
+
+        mainGameManager.OnOccupiedHnadler += () =>
+        {
+            CutInPlay(2);
+        };
         
     }
 
