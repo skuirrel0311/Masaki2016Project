@@ -34,7 +34,7 @@ public class PlayerControl : NetworkBehaviour
     public bool IsFlowing;
 
     [SerializeField]
-    private float EndArea = 59;
+    public float EndArea = 59;
 
     /// <summary>
     /// ジャンプ中

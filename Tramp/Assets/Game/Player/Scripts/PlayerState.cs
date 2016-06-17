@@ -82,10 +82,8 @@ public class PlayerState : NetworkBehaviour
     {
         if (!IsAlive)
         {
-            //操作できない
-            PlayerControl playerControl = GetComponent<PlayerControl>();
-
-            if (playerControl.enabled)
+            if (!isLocalPlayer) return;
+            if (GetComponent<PlayerControl>().enabled)
             {
                 //コルーチンを呼ぶのは1回のみ
                 StartCoroutine("Dead");
@@ -128,11 +126,12 @@ public class PlayerState : NetworkBehaviour
         while(time < TimeToReturn)
         {
             time += Time.deltaTime;
-            control.OutStage(transform.position);
+            if(transform.position.magnitude > control.EndArea) control.OutStage(transform.position);
             yield return null;
         }
         //3秒後に復活
         Restoration();
+        hp = maxHp;
     }
 
     public override void OnStartLocalPlayer()
