@@ -7,16 +7,21 @@ public class ThroughArea : MonoBehaviour
     //メッシュがトリガーか？
     bool IsTrigger = false;
 
+    Vector3 oldPlayerPositon;
+
+    //waitのモーションでいた時間
+    float waitTime;
+
     // Use this for initialization
     void Start()
     {
         areaCollider = transform.FindChild("pSphere1").GetComponent<MeshCollider>();
         areaTrigger = transform.FindChild("AppealAreaTrigger").GetComponent<MeshCollider>();
+        oldPlayerPositon = Vector3.zero;
     }
 
     void OnTriggerEnter(Collider col)
     {
-
         if (col.transform.tag != "Player") return;
         if (IsTrigger) return;
         //床の座標よりもプレイヤーの座標が高ければ戻る
@@ -31,8 +36,20 @@ public class ThroughArea : MonoBehaviour
 
         if (areaCollider.isTrigger) return;
         //エリアに乗っているだろう
+        Vector3 movement = oldPlayerPositon - col.transform.position;
+
+        if (movement.magnitude != 0) waitTime = 0;
+        else waitTime += Time.deltaTime;
 
         col.GetComponent<PlayerControl>().IsFalling = false;
+
+        PlayerState state = col.GetComponent<PlayerState>();
+        if(waitTime > 4) state.IsAppeal = true;
+        else state.IsAppeal = false;
+        state.animator.SetBool("IsAppeal", state.IsAppeal);
+
+
+        oldPlayerPositon = col.transform.position;
     }
 
     void OnTriggerExit(Collider col)
@@ -48,8 +65,11 @@ public class ThroughArea : MonoBehaviour
         {
             //出て行ってなかったら
             if (!ReallyExit(col.gameObject)) return;
+
+            //出て行った
             col.GetComponent<PlayerControl>().IsOnGround = false;
             col.GetComponent<PlayerControl>().Fall();
+            col.GetComponent<PlayerState>().IsAppeal = false;
         }
     }
 

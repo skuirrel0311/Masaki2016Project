@@ -48,6 +48,11 @@ public class PlayerState : NetworkBehaviour
     /// </summary>
     public bool IsAreaOwner;
 
+    /// <summary>
+    /// アピール中
+    /// </summary>
+    public bool IsAppeal;
+
     private int playerIndex = 1;
 
     PlayerControl control;
@@ -75,7 +80,6 @@ public class PlayerState : NetworkBehaviour
 
     void Update()
     {
-        //animator.SetBool("HaveItem", IsPossessionOfItem);
         if (!IsAlive)
         {
             //操作できない
