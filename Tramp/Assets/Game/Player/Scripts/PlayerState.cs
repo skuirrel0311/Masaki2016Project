@@ -56,12 +56,14 @@ public class PlayerState : NetworkBehaviour
     private int playerIndex = 1;
 
     PlayerControl control;
+    CameraLockon lockon;
 
     void Awake()
     {
         playerIndex = GetComponent<PlayerControl>().playerNum;
         animator = GetComponentInChildren<Animator>();
         control = GetComponent<PlayerControl>();
+        lockon = GameObject.Find("Camera1").GetComponent<CameraLockon>();
         Initialize();
     }
 
@@ -90,8 +92,7 @@ public class PlayerState : NetworkBehaviour
             }
         }
     }
-
-
+    
     [Client]
     void Initialize()
     {
@@ -106,6 +107,7 @@ public class PlayerState : NetworkBehaviour
         GetComponent<PlayerShot>().enabled = true;
         GetComponent<PlayerCreateAnchor>().enabled = true;
         control.enabled = true;
+        lockon.enabled = true;
         animator.CrossFadeInFixedTime("wait", 0.1f);
 
         CmdHpReset();
@@ -121,6 +123,7 @@ public class PlayerState : NetworkBehaviour
         GetComponent<PlayerShot>().enabled = false;
         GetComponent<PlayerCreateAnchor>().enabled = false;
         control.enabled = false;
+        lockon.enabled = true;
         GamePad.SetVibration(PlayerIndex.One, 0, 0);
         float time = 0;
         while(time < TimeToReturn)
@@ -160,7 +163,6 @@ public class PlayerState : NetworkBehaviour
 
     void OnGUI()
     {
-
         if (!isLocalPlayer) return;
         GUIStyle style = new GUIStyle();
         style.fontSize = 30;

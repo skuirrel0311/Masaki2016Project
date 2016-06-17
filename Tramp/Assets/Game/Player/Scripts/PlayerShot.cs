@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
-using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.UI;
+using System.Linq;
 using GamepadInput;
 using XInputDotNetPure;
 
@@ -41,6 +43,9 @@ public class PlayerShot : NetworkBehaviour
     int anchorEnergy = 20;
     public int Stock { get { return stock; } }
 
+    public GameObject adversary;
+    Text playerNameText;
+
     //弾を連射中か
     bool isShot;
 
@@ -67,6 +72,11 @@ public class PlayerShot : NetworkBehaviour
         shotTimer = -1;
         vibrationTimer = 0;
         animationTimer = -1;
+
+        List<Text> playersNameText = new List<Text>();
+        playersNameText.Add(GameObject.Find("playerNameText1").GetComponent<Text>());
+        playersNameText.Add(GameObject.Find("playerNameText2").GetComponent<Text>());
+        playersNameText.ForEach(n => n.enabled = false);
     }
 
     float vibrationTimer;
@@ -113,6 +123,17 @@ public class PlayerShot : NetworkBehaviour
 
     void Update()
     {
+        if (adversary == null)
+        {
+            adversary = GetAdversary();
+            if(adversary != null)
+            {
+                LoadText();
+            }
+        }
+
+        ShowNameText();
+
         if (GamePadInput.GetTrigger(GamePadInput.Trigger.RightTrigger, (GamePadInput.Index)playerNum, true) <= 0 && isLocalPlayer)
         {
             playerState.animator.SetBool("RunShotEnd", true);
@@ -160,6 +181,13 @@ public class PlayerShot : NetworkBehaviour
         }
 
         
+    }
+
+    void LoadText()
+    {
+        string name = adversary.name == "Player1 1(Clone)" ? "playerNameText1" : "playerNameText2";
+        playerNameText = GameObject.Find(name).GetComponent<Text>();
+        playerNameText.enabled = true;
     }
 
     [Command]
@@ -235,14 +263,7 @@ public class PlayerShot : NetworkBehaviour
     /// </summary>
     GameObject GetAdversary()
     {
-        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
-
-        foreach (GameObject obj in players)
-        {
-            if (obj.Equals(gameObject)) continue;
-            return obj;
-        }
-        return null;
+        return GameObject.FindGameObjectsWithTag("Player").ToList().Find(n => !n.Equals(gameObject));
     }
 
     public float testnum=0;
@@ -272,11 +293,19 @@ public class PlayerShot : NetworkBehaviour
         }
     }
 
-    void OnGUI()
+    void ShowNameText()
     {
-        if (IsReload) GUI.TextField(new Rect(500, 100, 200, 25), "Push_X Reload or Touch Anchor");
+        if (adversary == null) return;
+        if (!adversary.GetComponentInChildren<IsRendered>().WasRendered)return;
 
-        if (IsReloading) GUI.TextField(new Rect(500, 100, 110, 25), "Now Reloading…");
+        //相手のプレイヤーが見えていたら
+
+        //x(0～1),y(0～1)
+        Vector3 textPosition = cam.WorldToViewportPoint(adversary.transform.position + (Vector3.up * 2));
+        textPosition.x = (textPosition.x * 1280) - (1280 * 0.5f);
+        textPosition.y = (textPosition.y * 720) - (720 * 0.5f);
+
+        playerNameText.rectTransform.anchoredPosition = textPosition;
     }
 
     public void AnchorHit()
