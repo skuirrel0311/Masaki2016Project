@@ -54,6 +54,17 @@ public class GameManager : MonoBehaviour
 
     TitleState OldScene;
 
+    [SerializeField]
+    AudioClip cancelSE;
+    [SerializeField]
+    AudioClip decisionSE;
+    [SerializeField]
+    AudioClip selectSE;
+    AudioSource audioSource;
+
+    float oldVecY = 0;
+    bool oldSelectFlag = true;
+
     void Awake()
     {
         foreach (GameObject go in Scenes)
@@ -78,6 +89,7 @@ public class GameManager : MonoBehaviour
         isRoomCreateSelect = true;
         GameObject go = GameObject.FindGameObjectWithTag("NetworkManager");
         myNetworkmanager = go.GetComponent<MyNetworkManager>();
+        audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
     }
 
     void Update()
@@ -86,8 +98,9 @@ public class GameManager : MonoBehaviour
         //タイトルの場合
         if (sceneState == TitleState.Title)
         {
-            if (GamepadInput.GamePadInput.GetButtonDown(GamepadInput.GamePadInput.Button.Start, GamepadInput.GamePadInput.Index.One))
+            if (GamePadInput.GetButtonDown(GamePadInput.Button.Start, GamePadInput.Index.One))
             {
+                audioSource.PlayOneShot(decisionSE);
                 SetScene(TitleState.GameStart);
             }
         }
@@ -140,8 +153,10 @@ public class GameManager : MonoBehaviour
 
         if (vec.y > 0) selectFlag = true;
         else if (vec.y < 0) selectFlag = false;
+        if (oldVecY == 0 && vec.y != 0 && oldSelectFlag != selectFlag) audioSource.PlayOneShot(selectSE);
 
-
+        oldSelectFlag = selectFlag;
+        oldVecY = vec.y;
         if (selectFlag)
         {
             upImage.sprite = sprites.SelectUpSprite;
@@ -159,6 +174,7 @@ public class GameManager : MonoBehaviour
                 upCall.Invoke();
             else
                 downCall.Invoke();
+            audioSource.PlayOneShot(decisionSE);
         }
     }
 
@@ -172,6 +188,7 @@ public class GameManager : MonoBehaviour
         if (GamePadInput.GetButtonDown(GamePadInput.Button.B, GamePadInput.Index.One))
         {
             SetScene((TitleState)i);
+            audioSource.PlayOneShot(cancelSE);
         }
     }
 

@@ -10,10 +10,15 @@ public class FixAnchorHit : MonoBehaviour
 
     List<GameObject> connectionFlows;
 
+    [SerializeField]
+    AudioClip hitSE;
+    AudioSource audioSource;
+
     // Use this for initialization
     void Start()
     {
         connectionFlows = new List<GameObject>();
+        audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
     }
 
     public void ConnectionFlow(GameObject flow)
@@ -26,6 +31,7 @@ public class FixAnchorHit : MonoBehaviour
         Debug.Log("Call Fix Anchor OnTrigger");
         if (col.tag == "Ammo")
         {
+            audioSource.PlayOneShot(hitSE);
             DestroyConnctions();
             Destroy(col.gameObject);
             Instantiate(HitEffect,transform.position,transform.rotation);

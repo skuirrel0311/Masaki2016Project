@@ -49,6 +49,10 @@ public class PlayerShot : NetworkBehaviour
     //弾を連射中か
     bool isShot;
 
+    [SerializeField]
+    AudioClip shotSE;
+    AudioSource audioSource;
+
     /// <summary>
     /// リロードする必要があるか？
     /// </summary>
@@ -77,6 +81,8 @@ public class PlayerShot : NetworkBehaviour
         playersNameText.Add(GameObject.Find("playerNameText1").GetComponent<Text>());
         playersNameText.Add(GameObject.Find("playerNameText2").GetComponent<Text>());
         playersNameText.ForEach(n => n.enabled = false);
+
+        audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
     }
 
     float vibrationTimer;
@@ -106,7 +112,7 @@ public class PlayerShot : NetworkBehaviour
         isShot = true;
 
         shotPosition.LookAt(targetPosition);
-
+        audioSource.PlayOneShot(shotSE);
         if (isServer)
         {
             GameObject go = Instantiate(Ammo, shotPosition.position, shotPosition.rotation) as GameObject;

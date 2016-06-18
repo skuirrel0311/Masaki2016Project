@@ -75,6 +75,8 @@ public class PlayerControl : NetworkBehaviour
     [SerializeField]
     GameObject barrierEffect;
 
+    AudioSource audioSource;
+
     bool landingEnd;
 
     void Start()
@@ -94,7 +96,8 @@ public class PlayerControl : NetworkBehaviour
             cameraControl.SetPlayer(gameObject);
             cameraObj = GameObject.FindGameObjectWithTag("MainCamera");
         }
-
+        audioSource = GetComponent<AudioSource>();
+        audioSource.Stop();
         RideEffect.SetActive(false);
     }
 
@@ -171,12 +174,14 @@ public class PlayerControl : NetworkBehaviour
 
         if (GetComponent<Rigidbody>().useGravity == false)
         {
+            if (!RideEffect.activeInHierarchy) audioSource.Play();
             RideEffect.SetActive(true);
             RideEffect.transform.LookAt(RideEffect.transform.position - GetComponent<Rigidbody>().velocity.normalized);
         }
         else
         {
             RideEffect.SetActive(false);
+            audioSource.Stop();
         }
     }
 

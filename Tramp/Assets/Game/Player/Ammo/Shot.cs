@@ -22,12 +22,17 @@ public class Shot : MonoBehaviour
     Rigidbody body;
     Vector3 movement;
 
+    [SerializeField]
+    AudioClip hitSE;
+    AudioSource audioSource;
+
     // Use this for initialization
     void Start()
     {
         Destroy(gameObject, 5);
         movement = transform.forward * speed;
         body = GetComponent<Rigidbody>();
+        audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -51,6 +56,7 @@ public class Shot : MonoBehaviour
         for (int i = 0; i < 5; i++){
             Destroy(Instantiate(barrierEffect, mov, Quaternion.Euler(0, effectRotationY, 0)), 0.3f);
         }
+        audioSource.PlayOneShot(hitSE);
         Destroy(gameObject);
     }
 
@@ -59,6 +65,7 @@ public class Shot : MonoBehaviour
         if (col.gameObject.tag == "Player") return;
         if (col.gameObject.tag == "Ammo") return;
         Debug.Log("Ammohit");
+        audioSource.PlayOneShot(hitSE);
         Instantiate(HitEffect,transform.position,transform.rotation);
         Destroy(gameObject);
     }

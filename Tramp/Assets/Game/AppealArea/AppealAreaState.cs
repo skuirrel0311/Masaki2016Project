@@ -45,6 +45,14 @@ public class AppealAreaState : NetworkBehaviour
     private MainGameManager mainManager;
     private MyNetworkManager myNetManager;
 
+    [SerializeField]
+    AudioClip occupiersSE;
+    [SerializeField]
+    AudioClip completeSE;
+
+    AudioSource audioSource;
+    public AudioSource loopAudioSource;
+
     void Awake()
     {
         ShareImageHost = GameObject.Find("ShareImageHost");
@@ -62,6 +70,8 @@ public class AppealAreaState : NetworkBehaviour
         ShareImageObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(transform.position.x, transform.position.z);
         mainManager = GameObject.Find("MainGameManager").GetComponent<MainGameManager>();
         myNetManager = GameObject.FindGameObjectWithTag("NetworkManager").GetComponent<MyNetworkManager>();
+        audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
+        loopAudioSource = GetComponent<AudioSource>();
     }
 
     void FixedUpdate()
@@ -223,5 +233,7 @@ public class AppealAreaState : NetworkBehaviour
     void RpcAreaEffect()
     {
         Instantiate(AreaEffect, transform.position, transform.rotation);
+        loopAudioSource.Stop();
+        audioSource.PlayOneShot(completeSE);
     }
 }

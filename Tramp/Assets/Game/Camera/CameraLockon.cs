@@ -44,6 +44,12 @@ public class CameraLockon : MonoBehaviour
     //状態
     private bool IsEndLockOn;       //ロックオンが終わったか？
     public bool IsLockOn;           //ロックオン開始
+
+    [SerializeField]
+    AudioClip lockonSE;
+    [SerializeField]
+    AudioClip missSE;
+    AudioSource audioSource;
     #endregion
 
     void Start()
@@ -53,6 +59,7 @@ public class CameraLockon : MonoBehaviour
         IsEndLockOn = false;
         canvasRect = GameObject.Find("Canvas").GetComponent<RectTransform>();
         GetComponent<LineRenderer>().enabled = false;
+        audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
     }
 
     public void SetPlayer(GameObject player)
@@ -73,10 +80,15 @@ public class CameraLockon : MonoBehaviour
         //ロックオンの処理押された時と押している時で処理を分ける
         if (GamePadInput.GetButtonDown(GamePadInput.Button.LeftShoulder, (GamePadInput.Index)playerNum) && !MainGameManager.IsPause)
         {
-            if (!IsLockOn) CameraLockOnStart();
+            if (!IsLockOn)
+            {
+                CameraLockOnStart();
+                audioSource.PlayOneShot(lockonSE);
+            }
             else
             {
                 LockOnCut();
+                audioSource.PlayOneShot(missSE);
             }
         }
         if (IsLockOn && targetAnchor != null)
@@ -91,6 +103,7 @@ public class CameraLockon : MonoBehaviour
             {
                 //targetAnchor = null;
                 LockOnCut();
+                audioSource.PlayOneShot(missSE);
             }
             PlayerTrace();
             oldPlayerPosition = player.transform.position;
@@ -166,7 +179,10 @@ public class CameraLockon : MonoBehaviour
         Vector2 inputVec = GamePadInput.GetAxis(GamePadInput.Axis.RightStick, GamePadInput.Index.One);
         if (oldInputVec == 0 && inputVec != Vector2.zero)
         {
+            GameObject temp = targetAnchor;
             targetAnchor = GetSideAnchor(inputVec);
+            //違うものをロックオンしていたら
+            if(!targetAnchor.Equals(temp))audioSource.PlayOneShot(lockonSE);
         }
         oldInputVec = inputVec.x;
         //アンカーのある方向を取得

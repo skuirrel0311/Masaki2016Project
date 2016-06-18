@@ -47,6 +47,12 @@ public class PlayerCreateAnchor : NetworkBehaviour
     [SerializeField]
     private float ShotDistance=1;
 
+    [SerializeField]
+    AudioClip createSE;
+    [SerializeField]
+    AudioClip missSE;
+    AudioSource audioSource;
+
     // Use this for initialization
     void Start()
     {
@@ -54,6 +60,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
         camera = GameObject.Find("Camera1");
         playerState = GetComponent<PlayerState>();
         cameraObj = GameObject.Find("ThirdPersonCamera");
+        audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -63,7 +70,11 @@ public class PlayerCreateAnchor : NetworkBehaviour
         {
             timer = 0;
             if (MainGameManager.IsPause) return;
-            if (camera.GetComponent<CameraLockon>().IsLockOn == false) return;
+            if (camera.GetComponent<CameraLockon>().IsLockOn == false)
+            {
+                audioSource.PlayOneShot(missSE);
+                return;
+            }
             camera.GetComponent<CameraLockon>().LockOnCut();
             Debug.Log("start");
 
@@ -74,7 +85,11 @@ public class PlayerCreateAnchor : NetworkBehaviour
             GetTargetAnchor();
 
             //始点と終点の間に異物混入
-            if (!IsPossibleCreateFlow()) return;
+            if (!IsPossibleCreateFlow())
+            {
+                audioSource.PlayOneShot(missSE);
+                return;
+            }
 
             //アンカーを置く
             CreateAnchor();
@@ -167,7 +182,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
     {
         //アンカーを置く
         Cmd_rezobjectonserver(CreatePosition,isServer);
-
+        audioSource.PlayOneShot(createSE);
         Debug.Log("clientCallend");
     }
 
