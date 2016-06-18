@@ -30,6 +30,8 @@ public class CameraLockon : MonoBehaviour
     private Sprite AlignmentSprite = null;
     [SerializeField]
     private Sprite LockOnSprite = null;
+    [SerializeField]
+    private GameObject LockOnUI = null;
 
     private RectTransform canvasRect;
 
@@ -60,6 +62,7 @@ public class CameraLockon : MonoBehaviour
         canvasRect = GameObject.Find("Canvas").GetComponent<RectTransform>();
         GetComponent<LineRenderer>().enabled = false;
         audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
+        LockOnUI.SetActive(false);
     }
 
     public void SetPlayer(GameObject player)
@@ -76,6 +79,9 @@ public class CameraLockon : MonoBehaviour
     void Update()
     {
         if (player == null) return;
+        LockOnUI.SetActive(IsLockOn);
+        if (IsLockOn) SetUI();
+
         UpdateTimer();
         //ロックオンの処理押された時と押している時で処理を分ける
         if (GamePadInput.GetButtonDown(GamePadInput.Button.LeftShoulder, (GamePadInput.Index)playerNum) && !MainGameManager.IsPause)
@@ -115,6 +121,20 @@ public class CameraLockon : MonoBehaviour
         {
             LockOnCut();
         }
+    }
+
+    void SetUI()
+    {
+        Image image = LockOnUI.GetComponent<Image>();
+
+        //どこに表示するか?
+        Vector3 anchorPosition = cameraObj.GetComponent<Camera>().WorldToViewportPoint(player.transform.position + (Vector3.up + Vector3.right));
+
+        //canvasのrectのサイズの1/2を引く。
+        float x = (anchorPosition.x * canvasRect.sizeDelta.x) - (canvasRect.sizeDelta.x * 0.5f);
+        float y = (anchorPosition.y * canvasRect.sizeDelta.y) - (canvasRect.sizeDelta.y * 0.5f);
+
+        image.rectTransform.anchoredPosition = new Vector2(x, y);
     }
 
     public void LockOnCut()
