@@ -44,14 +44,14 @@ public class AppealAreaState : NetworkBehaviour
     private static bool isDrawUI = false;
     private MainGameManager mainManager;
     private MyNetworkManager myNetManager;
-
+    
     [SerializeField]
     AudioClip occupiersSE;
     [SerializeField]
     AudioClip completeSE;
 
     AudioSource audioSource;
-    public AudioSource loopAudioSource;
+    AudioSource loopAudioSource;
 
     void Awake()
     {
@@ -72,6 +72,8 @@ public class AppealAreaState : NetworkBehaviour
         myNetManager = GameObject.FindGameObjectWithTag("NetworkManager").GetComponent<MyNetworkManager>();
         audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
         loopAudioSource = GetComponent<AudioSource>();
+        loopAudioSource.Stop();
+        loopAudioSource.clip = null;
     }
 
     void FixedUpdate()
@@ -116,8 +118,15 @@ public class AppealAreaState : NetworkBehaviour
     //占有度に変化があるときの処理
     void UpdateShare()
     {
-        if (RidePlayers.Count != 1) return;
+        if (RidePlayers.Count != 1)
+        {
+            loopAudioSource.Stop();
+            loopAudioSource.clip = null;
+            return;
+        }
         if (!isServer) return;
+
+        RpcOccupiersSE();
 
         //誰にも占拠されていない
         if (share == 0)
@@ -149,7 +158,6 @@ public class AppealAreaState : NetworkBehaviour
                 CmdChangeShare((float)(-1.0f- (Mathf.Max(myNetManager.occuping, 0) /  1.0f)));
             }
         }
-
     }
 
     void ShareUI()
@@ -230,10 +238,26 @@ public class AppealAreaState : NetworkBehaviour
     }
 
     [ClientRpc]
+    void RpcOccupiersSE()
+    {
+        if (!RidePlayers[0].GetComponent<PlayerState>().isLocalPlayer) return;
+        if (isServer != isOccupiers) return;
+        if (isOccupation) return;
+
+
+
+        if (loopAudioSource.clip != null) return;
+
+        loopAudioSource.clip = occupiersSE;
+        loopAudioSource.Play();
+    }
+
+    [ClientRpc]
     void RpcAreaEffect()
     {
-        Instantiate(AreaEffect, transform.position, transform.rotation);
+        Instantiate(AreaEffect, StageMesh.transform.position, StageMesh.transform.rotation);
         loopAudioSource.Stop();
+        loopAudioSource.clip = null;
         audioSource.PlayOneShot(completeSE);
     }
 }
