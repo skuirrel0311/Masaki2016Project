@@ -80,7 +80,7 @@ public class GameManager : MonoBehaviour
             obj.GetComponent<TitleScene>().ZeroPosition();
         }
         obj.SetActive(true);
-        GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(0,0.5f,false);
+
 
     }
 
@@ -90,6 +90,9 @@ public class GameManager : MonoBehaviour
         GameObject go = GameObject.FindGameObjectWithTag("NetworkManager");
         myNetworkmanager = go.GetComponent<MyNetworkManager>();
         audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
+
+        if (!myNetworkmanager.isJoin)
+            GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(0, 0.5f, false);
     }
 
     void Update()

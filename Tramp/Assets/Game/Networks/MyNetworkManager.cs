@@ -51,7 +51,7 @@ public class MyNetworkManager : NetworkManager
     public int occupied;
 
     public bool isStarted = false;
-    bool isJoin;
+    public bool isJoin;
 
     // Use this for initialization
     void Start()

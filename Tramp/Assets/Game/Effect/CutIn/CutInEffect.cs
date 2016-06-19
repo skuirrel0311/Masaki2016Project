@@ -23,6 +23,9 @@ public class CutInEffect : MonoBehaviour
         [HideInInspector]
         public Vector2 startRectPosition;
         public CutInState cutInState;
+
+
+
         public void CutInRun(List<CutInElement> elements)
         {
             if (isPlay)
@@ -72,6 +75,7 @@ public class CutInEffect : MonoBehaviour
 
     private List<CutInElement> RunQue = new List<CutInElement>();
 
+    GameObject mainGameManager;
     // Use this for initialization
     void Start()
     {
@@ -83,22 +87,7 @@ public class CutInEffect : MonoBehaviour
             cutInElement[i].cutInState = CutInState.In;
         }
 
-        //イベントに処理を設定
-        MainGameManager mainGameManager = GameObject.Find("MainGameManager").GetComponent<MainGameManager>();
-        GameObject.Find("Canvas").GetComponent<RemainingTime>().OnOneMinHandler += () =>
-          {
-              CutInPlay(0);
-          };
 
-        mainGameManager.OnOccupiedingHnadler += () =>
-        {
-            CutInPlay(3);
-        };
-
-        mainGameManager.OnOccupiedHnadler += () =>
-        {
-            CutInPlay(2);
-        };
 
     }
 
@@ -125,9 +114,38 @@ public class CutInEffect : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        if(mainGameManager==null)
+        {
+            SetMainGameManagerEvent();
+        }
+
         if (RunQue.Count > 0)
         {
             RunQue[0].CutInRun(RunQue);
         }
+    }
+
+    void SetMainGameManagerEvent()
+    {
+        //イベントに処理を設定
+        mainGameManager = GameObject.Find("MainGameManager");
+        if (mainGameManager == null) return;
+
+        MainGameManager mgm = mainGameManager.GetComponent<MainGameManager>();
+
+        GameObject.Find("Canvas").GetComponent<RemainingTime>().OnOneMinHandler += () =>
+        {
+            CutInPlay(0);
+        };
+
+        mgm.OnOccupiedingHnadler += () =>
+        {
+            CutInPlay(3);
+        };
+
+        mgm.OnOccupiedHnadler += () =>
+        {
+            CutInPlay(2);
+        };
     }
 }

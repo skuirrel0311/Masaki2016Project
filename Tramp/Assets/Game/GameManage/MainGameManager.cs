@@ -45,12 +45,12 @@ public class MainGameManager : NetworkBehaviour
 
     public delegate void OnOccupied();
     public event OnOccupied OnOccupiedHnadler;
+    private bool isStart;
 
     void Awake()
     {
         Debug.Log("main Awake");
     }
-
 
     // Use this for initialization
     void Start()
@@ -61,20 +61,29 @@ public class MainGameManager : NetworkBehaviour
         myNetManager = networkManager.GetComponent<MyNetworkManager>();
         myNetDiscovery = networkManager.GetComponent<MyNetworkDiscovery>();
         soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
-
+        isStart = false;
         NetworkServer.RegisterHandler(MainMsgType.Start, OnStart);
 
         if (!myNetDiscovery.isServer)
+        {
             MyNetworkManager.networkClient.Send(MainMsgType.Start, new StartMessage());
+            StartCoroutine("SendToStart");
+        }
 
         Debug.Log(MyNetworkManager.networkSceneName);
     }
 
-    //IEnumerator SendToStart()
-    //{
-    //    yield return new WaitForSeconds(3);
-    //    MyNetworkManager.networkClient.Send(MainMsgType.Start, new StartMessage());
-    //}
+    IEnumerator SendToStart()
+    {
+        yield return new WaitForSeconds(1);
+        while (true)
+        {
+            if (isStart) break;
+            MyNetworkManager.networkClient.Send(MainMsgType.Start, new StartMessage());
+            yield return new WaitForSeconds(1);
+        }
+        yield return null;
+    }
 
     public void OnStart(NetworkMessage msg)
     {
@@ -88,6 +97,7 @@ public class MainGameManager : NetworkBehaviour
         ClientScene.AddPlayer(MyNetworkManager.networkClient.connection, 0);
         soundManager.PlayMusic();
         StartEffect.SetActive(true);
+        isStart = true;
     }
 
 
