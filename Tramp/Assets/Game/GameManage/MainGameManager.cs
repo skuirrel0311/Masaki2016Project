@@ -1,9 +1,20 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using GamepadInput;
 using System.Collections.Generic;
+using System.Collections;
 
-public class MainGameManager : MonoBehaviour
+public class MainGameManager : NetworkBehaviour
 {
+    class MainMsgType
+    {
+        public static short Start = MsgType.Highest + 2;
+    }
+
+    public class StartMessage : MessageBase
+    {
+    }
+
     public static bool IsPause
     {
         get { return isPause; }
@@ -14,9 +25,13 @@ public class MainGameManager : MonoBehaviour
     private GameObject networkManager;
     private MyNetworkManager myNetManager;
     private MyNetworkDiscovery myNetDiscovery;
+    private SoundManager soundManager;
 
     [SerializeField]
     private List<AppealAreaState> AppealAreas;
+
+    [SerializeField]
+    private GameObject StartEffect;
 
     public int Occupied
     {
@@ -31,6 +46,12 @@ public class MainGameManager : MonoBehaviour
     public delegate void OnOccupied();
     public event OnOccupied OnOccupiedHnadler;
 
+    void Awake()
+    {
+        Debug.Log("main Awake");
+    }
+
+
     // Use this for initialization
     void Start()
     {
@@ -39,9 +60,36 @@ public class MainGameManager : MonoBehaviour
         networkManager = GameObject.FindGameObjectWithTag("NetworkManager");
         myNetManager = networkManager.GetComponent<MyNetworkManager>();
         myNetDiscovery = networkManager.GetComponent<MyNetworkDiscovery>();
+        soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
 
+        NetworkServer.RegisterHandler(MainMsgType.Start, OnStart);
 
+        if (!myNetDiscovery.isServer)
+            MyNetworkManager.networkClient.Send(MainMsgType.Start, new StartMessage());
+
+        Debug.Log(MyNetworkManager.networkSceneName);
     }
+
+    //IEnumerator SendToStart()
+    //{
+    //    yield return new WaitForSeconds(3);
+    //    MyNetworkManager.networkClient.Send(MainMsgType.Start, new StartMessage());
+    //}
+
+    public void OnStart(NetworkMessage msg)
+    {
+        RpcAddPlayer();
+    }
+
+    [ClientRpc]
+    public void RpcAddPlayer()
+    {
+        //if (ClientScene.localPlayers.Count > 0) return;
+        ClientScene.AddPlayer(MyNetworkManager.networkClient.connection, 0);
+        soundManager.PlayMusic();
+        StartEffect.SetActive(true);
+    }
+
 
     // Update is called once per frame
     void Update()
@@ -100,14 +148,14 @@ public class MainGameManager : MonoBehaviour
                     myNetManager.occuping++;
                 }
                 else
-                { 
+                {
                     occupied--;
                     myNetManager.occupied++;
                 }
             }
         }
 
-        if(oldOccupieding<myNetManager.occuping&&OnOccupiedingHnadler!=null)
+        if (oldOccupieding < myNetManager.occuping && OnOccupiedingHnadler != null)
         {
             Debug.Log("Clientでた？");
             OnOccupiedingHnadler();
@@ -134,5 +182,10 @@ public class MainGameManager : MonoBehaviour
         if (!isPause) return;
 
         GUI.Label(new Rect(0, 0, 200, 100), "Aボタンで戻る");
+    }
+
+    void OnDestroy()
+    {
+        NetworkServer.UnregisterHandler(MainMsgType.Start);
     }
 }

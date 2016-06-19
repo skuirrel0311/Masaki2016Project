@@ -50,7 +50,8 @@ public class TitleScene : MonoBehaviour
         if (isout)
         {
             timer += Time.deltaTime;
-            int s = (int)(timer / slideTimeSpan);
+            int s =Mathf.Max(Mathf.Min(slides.Count-1,(int)(timer / slideTimeSpan)),0);
+
             slides[s].SlideOut();
             if (slides.Count == s + 1)
             {
@@ -62,7 +63,7 @@ public class TitleScene : MonoBehaviour
         else if (isIn)
         {
             timer += Time.deltaTime;
-            int s = (int)(timer / slideTimeSpan);
+            int s = Mathf.Max(Mathf.Min(slides.Count - 1, (int)(timer / slideTimeSpan)), 0);
             slides[s].SlideIn();
             if (slides.Count == s + 1)
             {

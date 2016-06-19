@@ -16,6 +16,7 @@ public class MyNetworkManager : NetworkManager
 {
 
     public static MyNetworkDiscovery discovery;
+    public static NetworkClient networkClient;
     public string IpAddress;
 
     [SerializeField]
@@ -64,7 +65,7 @@ public class MyNetworkManager : NetworkManager
 
     void Update()
     {
-        if (PlayerCount >= 2 || !discovery.isServer)
+        if (PlayerCount >= 3 || !discovery.isServer)
         {
             isStarted = true;
         }
@@ -76,11 +77,12 @@ public class MyNetworkManager : NetworkManager
         if (isJoin)
         {
             joinTimer += Time.deltaTime;
-            if (joinTimer > 1)
+            if (joinTimer > 5)
             {
                 isJoin = false;
                 DiscoveryShutdown();
                 Debug.Log("JoinFaild");
+                GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(0, 0.5f, false);
             }
         }
     }
@@ -107,6 +109,7 @@ public class MyNetworkManager : NetworkManager
 
     public override void OnServerConnect(NetworkConnection conn)
     {
+        playercount++;
         base.OnServerConnect(conn);
     }
 
@@ -137,7 +140,6 @@ public class MyNetworkManager : NetworkManager
         {
             autoCreatePlayer = false;
         }
-
         base.OnClientSceneChanged(conn);
     }
 
@@ -153,7 +155,7 @@ public class MyNetworkManager : NetworkManager
         discovery.broadcastData = PlayerCount.ToString() + "," + networkPort;
         discovery.StartAsServer();
         Debug.Log("Start:" + serverBindAddress + ":" + serverBindToIP);
-        StartHost();
+        networkClient = StartHost();
     }
 
     //ButtonJoinGameボタンを押した時に実行
@@ -239,7 +241,7 @@ public class MyNetworkManager : NetworkManager
         if (OnServerReadyEvent != null)
             OnServerReadyEvent();
 
-        playercount++;
+
         base.OnServerReady(conn);
     }
 
