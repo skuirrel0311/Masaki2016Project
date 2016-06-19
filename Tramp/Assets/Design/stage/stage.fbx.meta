@@ -11,12 +11,14 @@ ModelImporter:
     100006: polySurface8
     100008: polySurface9
     100010: //RootNode
+    100012: polySurface2
     400000: locator1
     400002: pCylinder5
     400004: polySurface10
     400006: polySurface8
     400008: polySurface9
     400010: //RootNode
+    400012: polySurface2
     2300000: pCylinder5
     2300002: polySurface10
     2300004: polySurface8
