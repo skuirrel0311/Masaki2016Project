@@ -39,17 +39,9 @@ public class SoundManager : MonoBehaviour
     {
         isEnd = false;
         isWin = false;
-        StartCoroutine("StartPlayMusic");
         GameObject netMana = GameObject.FindGameObjectWithTag("NetworkManager");
         myNetManager = netMana.GetComponent<MyNetworkManager>();
         myNetDiscovery = netMana.GetComponent<MyNetworkDiscovery>();
-    }
-
-    IEnumerator StartPlayMusic()
-    {
-        yield return new WaitForSeconds(3);
-        PlayMusic();
-        yield return null;
     }
     
 

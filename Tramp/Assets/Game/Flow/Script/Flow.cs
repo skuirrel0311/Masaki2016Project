@@ -188,7 +188,7 @@ public class Flow : NetworkBehaviour
         Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
         bodys.Add(body);
         body.useGravity = false;
-        body.velocity = transform.up * body.velocity.magnitude;
+        body.velocity = transform.up * body.velocity.magnitude*1.1f;
         col.gameObject.GetComponent<Animator>().CrossFadeInFixedTime("ride", 0.1f);
     }
 

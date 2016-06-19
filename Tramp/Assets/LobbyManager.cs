@@ -24,14 +24,12 @@ public class LobbyManager : NetworkBehaviour
     MyNetworkManager myNetManager;
     MyNetworkDiscovery myNetDiscoverry;
 
-
     // Use this for initialization
     void Start()
     {
         //_2pText = _2PSprite.transform.FindChild("Text").GetComponent<Text>();
         _2PPlayerObject.SetActive(false);
         GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(0, 0.5f, false);
-        //SceneManager.LoadSceneAsync("main");
     }
 
     void Update()
@@ -62,7 +60,7 @@ public class LobbyManager : NetworkBehaviour
         if (myNetManager.isStarted && myNetDiscoverry.isServer)
         {
             NextButton.SetActive(true);
-            if(GamepadInput.GamePadInput.GetButtonDown(GamepadInput.GamePadInput.Button.A, GamepadInput.GamePadInput.Index.One))
+            if (GamepadInput.GamePadInput.GetButtonDown(GamepadInput.GamePadInput.Button.A, GamepadInput.GamePadInput.Index.One))
             {
                 OnMoveNextScene();
             }
@@ -78,27 +76,27 @@ public class LobbyManager : NetworkBehaviour
 
     public void OnMoveNextScene()
     {
-        if (NextSceneName == "main")
-            RpcAutoCreatePlayer();
-        
-        myNetManager.ServerChangeScene(NextSceneName);
+        //RpcAutoCreatePlayer();
+        myNetManager.ServerChangeScene("load");
+        //asyncOperation.allowSceneActivation = true;
+        // asyncOperation.allowSceneActivation = true;
     }
 
     [ClientRpc]
     public void RpcAutoCreatePlayer()
     {
-        networkManager.GetComponent<MyNetworkManager>().autoCreatePlayer = true;
+        MyNetworkManager.networkSceneName = "main";
     }
 
     public void OnDesConnect()
     {
         StartCoroutine("SceneBack");
-        GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(1,0.5f,false);
+        GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(1, 0.5f, false);
     }
 
-    IEnumerator  SceneBack()
+    IEnumerator SceneBack()
     {
-        yield return  new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.5f);
 
         myNetManager.DiscoveryShutdown();
         yield return null;
