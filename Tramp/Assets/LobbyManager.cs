@@ -13,7 +13,7 @@ public class LobbyManager : NetworkBehaviour
     GameObject NextButton;
 
     [SerializeField]
-    GameObject _2PSprite;
+    GameObject NextButton1;
 
     [SerializeField]
     GameObject _2PPlayerObject;
@@ -60,6 +60,7 @@ public class LobbyManager : NetworkBehaviour
         if (myNetManager.isStarted && myNetDiscoverry.isServer)
         {
             NextButton.SetActive(true);
+            NextButton1.SetActive(false);
             if (GamepadInput.GamePadInput.GetButtonDown(GamepadInput.GamePadInput.Button.A, GamepadInput.GamePadInput.Index.One))
             {
                 OnMoveNextScene();
@@ -67,7 +68,10 @@ public class LobbyManager : NetworkBehaviour
         }
         else
         {
-            NextButton.SetActive(false);
+            if (myNetDiscoverry.isServer){
+                NextButton.SetActive(false);
+                NextButton1.SetActive(true);
+            }
         }
         if (GamepadInput.GamePadInput.GetButtonDown(GamepadInput.GamePadInput.Button.B, GamepadInput.GamePadInput.Index.One))
             OnDesConnect();
