@@ -68,12 +68,12 @@ public class AppealAreaState : NetworkBehaviour
         StageMesh = transform.FindChild("pSphere1").GetComponent<Renderer>();
         ShareImage = ShareImageObject.transform.FindChild("ShareImage").GetComponent<Image>();
         ShareImageObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(transform.position.x, transform.position.z);
-        mainManager = GameObject.Find("MainGameManager").GetComponent<MainGameManager>();
         myNetManager = GameObject.FindGameObjectWithTag("NetworkManager").GetComponent<MyNetworkManager>();
         audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
         loopAudioSource = GetComponent<AudioSource>();
         loopAudioSource.Stop();
         loopAudioSource.clip = null;
+        mainManager = GameObject.Find("MainGameManager").GetComponent<MainGameManager>();
     }
 
     void FixedUpdate()
@@ -83,6 +83,14 @@ public class AppealAreaState : NetworkBehaviour
 
     void Update()
     {
+        if(mainManager==null)
+        {
+            mainManager = GameObject.Find("MainGameManager").GetComponent<MainGameManager>();
+            if (mainManager == null)
+                return;
+        }
+
+
         //占有度のアップデート
         UpdateShare();
 
