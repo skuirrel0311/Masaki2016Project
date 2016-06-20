@@ -23,6 +23,7 @@ public class ThroughArea : MonoBehaviour
     void OnTriggerEnter(Collider col)
     {
         if (col.transform.tag != "Player") return;
+        if (!col.GetComponent<PlayerControl>().isLocalPlayer) return;
         if (IsTrigger) return;
         //床の座標よりもプレイヤーの座標が高ければ戻る
         if ((col.gameObject.transform.position.y + 0.5f > transform.position.y)) return;

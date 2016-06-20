@@ -347,6 +347,7 @@ public class PlayerControl : NetworkBehaviour
 
     public void Fall()
     {
+        if (!isLocalPlayer) return;
         animator.CrossFadeInFixedTime("jump", 0.5f);
         IsOnGround = false;
         if (!IsFalling) cameraControl.SetNowLatitude();

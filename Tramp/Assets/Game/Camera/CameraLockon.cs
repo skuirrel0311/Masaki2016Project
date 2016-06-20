@@ -76,11 +76,15 @@ public class CameraLockon : MonoBehaviour
         lockonTimer.TimerStart(0.2f);
     }
 
+    void FixedUpdate()
+    {
+        if (IsLockOn) SetUI();
+    }
+
     void Update()
     {
         if (player == null) return;
         LockOnUI.SetActive(IsLockOn);
-        if (IsLockOn) SetUI();
 
         UpdateTimer();
         //ロックオンの処理押された時と押している時で処理を分ける
@@ -89,7 +93,6 @@ public class CameraLockon : MonoBehaviour
             if (!IsLockOn)
             {
                 CameraLockOnStart();
-                audioSource.PlayOneShot(lockonSE);
             }
             else
             {
@@ -125,16 +128,14 @@ public class CameraLockon : MonoBehaviour
 
     void SetUI()
     {
-        Image image = LockOnUI.GetComponent<Image>();
-
         //どこに表示するか?
-        Vector3 anchorPosition = cameraObj.GetComponent<Camera>().WorldToViewportPoint(player.transform.position + (Vector3.up + Vector3.right));
+        Vector3 anchorPosition = cameraObj.GetComponent<Camera>().WorldToViewportPoint(player.transform.position + Vector3.up + (transform.rotation * Vector3.left));
 
         //canvasのrectのサイズの1/2を引く。
         float x = (anchorPosition.x * canvasRect.sizeDelta.x) - (canvasRect.sizeDelta.x * 0.5f);
         float y = (anchorPosition.y * canvasRect.sizeDelta.y) - (canvasRect.sizeDelta.y * 0.5f);
 
-        image.rectTransform.anchoredPosition = new Vector2(x, y);
+        LockOnUI.GetComponent<Image>().rectTransform.anchoredPosition = new Vector2(x, y);
     }
 
     public void LockOnCut()
@@ -168,7 +169,12 @@ public class CameraLockon : MonoBehaviour
     private void CameraLockOnStart()
     {
         targetAnchor = GetTargetAnchor();
-        if (targetAnchor == null) return;
+        if (targetAnchor == null)
+        {
+            audioSource.PlayOneShot(missSE);
+            return;
+        }
+        audioSource.PlayOneShot(lockonSE);
         lockonTimer.TimerStart(0.2f); //ロックオンにかかる時間
         imageTimer.TimerStart(0.2f);
         IsLockOn = true;
