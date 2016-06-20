@@ -77,6 +77,8 @@ public class PlayerControl : NetworkBehaviour
 
     AudioSource audioSource;
 
+    SoundManager soundManager;
+
     bool landingEnd;
 
     void Start()
@@ -97,6 +99,7 @@ public class PlayerControl : NetworkBehaviour
             cameraObj = GameObject.FindGameObjectWithTag("MainCamera");
         }
         audioSource = GetComponent<AudioSource>();
+        soundManager = GameObject.Find("SoundManager").GetComponent<SoundManager>();
         audioSource.Stop();
         RideEffect.SetActive(false);
     }
@@ -211,6 +214,8 @@ public class PlayerControl : NetworkBehaviour
     {
         //ポーズ中だったら終了
         if (MainGameManager.IsPause) return false;
+        if (!MainGameManager.isGameStart) return false;
+        if (soundManager.isEnd) return false;
 
         // body.velocity = new Vector3(0,body.velocity.y,0);
         //カメラの角度のx､zは見ない

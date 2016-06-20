@@ -20,7 +20,7 @@ public class SoundManager : MonoBehaviour
     private MyNetworkManager myNetManager;
     private MyNetworkDiscovery myNetDiscovery;
 
-    bool isEnd = false;
+    public bool isEnd = false;
     public static bool isWin;
 
     public void PlayMusic()

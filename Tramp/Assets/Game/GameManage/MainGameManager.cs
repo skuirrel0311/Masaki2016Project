@@ -27,6 +27,8 @@ public class MainGameManager : NetworkBehaviour
 
     private static bool isPause;
 
+    public static bool isGameStart;
+
     private GameObject networkManager;
     private MyNetworkManager myNetManager;
     private MyNetworkDiscovery myNetDiscovery;
@@ -61,6 +63,7 @@ public class MainGameManager : NetworkBehaviour
     void Start()
     {
         isPause = false;
+        isGameStart = false;
         Time.timeScale = 1.0f;
         networkManager = GameObject.FindGameObjectWithTag("NetworkManager");
         myNetManager = networkManager.GetComponent<MyNetworkManager>();
@@ -101,9 +104,16 @@ public class MainGameManager : NetworkBehaviour
     {
         //if (ClientScene.localPlayers.Count > 0) return;
         ClientScene.AddPlayer(MyNetworkManager.networkClient.connection, 0);
-        soundManager.PlayMusic();
+        StartCoroutine("GameStart");
         StartEffect.SetActive(true);
         isStart = true;
+    }
+
+    IEnumerator GameStart()
+    {
+        yield return new WaitForSeconds(2.5f);
+        soundManager.PlayMusic();
+        isGameStart = true;
     }
 
     void Update()
@@ -223,6 +233,7 @@ public class MainGameManager : NetworkBehaviour
     void OnDestroy()
     {
         NetworkServer.UnregisterHandler(MainMsgType.Start);
+        isGameStart = false;
     }
 
 }

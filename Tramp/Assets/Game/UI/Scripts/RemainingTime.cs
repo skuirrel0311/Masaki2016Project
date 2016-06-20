@@ -39,6 +39,12 @@ public class RemainingTime : MonoBehaviour
 
         int time = soundManager.GetRemainingTime();
 
+        if (!MainGameManager.isGameStart)
+            time = 180;
+
+        if (soundManager.isEnd)
+            time = 0;
+
         if (time < 60 && MInute.color != Color.red)
         {
 

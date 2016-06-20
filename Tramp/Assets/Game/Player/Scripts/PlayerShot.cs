@@ -49,6 +49,8 @@ public class PlayerShot : NetworkBehaviour
     //弾を連射中か
     bool isShot;
 
+    bool isIK;
+
     [SerializeField]
     AudioClip shotSE;
     AudioSource audioSource;
@@ -76,6 +78,7 @@ public class PlayerShot : NetworkBehaviour
         shotTimer = -1;
         vibrationTimer = 0;
         animationTimer = -1;
+        isIK = false;
 
         List<Text> playersNameText = new List<Text>();
         playersNameText.Add(GameObject.Find("playerNameText1").GetComponent<Text>());
@@ -90,6 +93,7 @@ public class PlayerShot : NetworkBehaviour
     void Shot()
     {
         playerState.animator.SetLayerWeight(1, 1);
+        isIK = true;
 
         GamePadState padState = GamePad.GetState(PlayerIndex.One);
 
@@ -172,7 +176,7 @@ public class PlayerShot : NetworkBehaviour
             if (animationTimer >= 0.3f)
             {
                 playerState.animator.SetLayerWeight(1, 0);
-
+                isIK = false;
             }
         }
 
@@ -275,7 +279,7 @@ public class PlayerShot : NetworkBehaviour
     public float testnum=0;
     void OnAnimatorIK(int layerIndex)
     {
-        if (isShot)
+        if (isShot&&isIK)
         {
             Vector3 localAngles = playerState.animator.GetBoneTransform(HumanBodyBones.Spine).localEulerAngles;
 
@@ -296,6 +300,7 @@ public class PlayerShot : NetworkBehaviour
         else
         {
             playerState.animator.SetLayerWeight(layerIndex, 0);
+            isIK = false;
         }
     }
 
