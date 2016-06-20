@@ -9,9 +9,14 @@ public class MainGameManager : NetworkBehaviour
     class MainMsgType
     {
         public static short Start = MsgType.Highest + 2;
+        public static short GameEnd = MsgType.Highest + 3;
     }
 
     public class StartMessage : MessageBase
+    {
+    }
+
+    public class GameEndMessage : MessageBase
     {
     }
 
@@ -63,6 +68,7 @@ public class MainGameManager : NetworkBehaviour
         soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
         isStart = false;
         NetworkServer.RegisterHandler(MainMsgType.Start, OnStart);
+        NetworkServer.RegisterHandler(MainMsgType.GameEnd, OnGameEnd);
 
         if (!myNetDiscovery.isServer)
         {
@@ -100,8 +106,6 @@ public class MainGameManager : NetworkBehaviour
         isStart = true;
     }
 
-
-    // Update is called once per frame
     void Update()
     {
         if (GamePadInput.GetButtonDown(GamePadInput.Button.Start, GamePadInput.Index.One))
@@ -187,6 +191,28 @@ public class MainGameManager : NetworkBehaviour
 
     }
 
+    public void GameEnd()
+    {
+        myNetManager.offlineScene = "Result";
+
+        if (!myNetManager.PlayerisServer)
+        {
+            StartCoroutine("gameSet");
+        }
+    }
+
+    IEnumerator gameSet()
+    {
+        yield return new WaitForSeconds(3);
+        MyNetworkManager.networkClient.Send(MainMsgType.GameEnd, new GameEndMessage());
+        yield return null;
+    }
+
+    public void OnGameEnd(NetworkMessage msg)
+    {
+        myNetManager.DiscoveryShutdown();
+    }
+
     void OunGUI()
     {
         if (!isPause) return;
@@ -198,4 +224,5 @@ public class MainGameManager : NetworkBehaviour
     {
         NetworkServer.UnregisterHandler(MainMsgType.Start);
     }
+
 }

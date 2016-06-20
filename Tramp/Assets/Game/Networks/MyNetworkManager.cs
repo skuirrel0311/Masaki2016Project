@@ -124,8 +124,8 @@ public class MyNetworkManager : NetworkManager
 
     public override void OnClientDisconnect(NetworkConnection conn)
     {
-        offlineScene = "Error";
-        StopClient();
+        if (offlineScene != "Result")
+            offlineScene = "Error";
         DiscoveryShutdown();
         base.OnClientDisconnect(conn);
     }
@@ -133,7 +133,8 @@ public class MyNetworkManager : NetworkManager
     public override void OnServerDisconnect(NetworkConnection conn)
     {
         PlayerCount--;
-        offlineScene = "Error";
+        if (offlineScene != "Result")
+            offlineScene = "Error";
         if (networkSceneName == "main")
             DiscoveryShutdown();
         base.OnServerDisconnect(conn);
