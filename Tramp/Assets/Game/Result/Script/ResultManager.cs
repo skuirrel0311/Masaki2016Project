@@ -32,7 +32,8 @@ public class ResultManager : MonoBehaviour
     void Start()
     {
         networkManager = GameObject.FindGameObjectWithTag("NetworkManager");
-        Winner winner = networkManager.GetComponent<MyNetworkManager>().winner;
+        MyNetworkManager mynet = networkManager.GetComponent<MyNetworkManager>();
+        Winner winner = mynet.winner;
 
         switch (winner)
         {
@@ -41,8 +42,8 @@ public class ResultManager : MonoBehaviour
                 Win.SetActive(true);
                 Lose.SetActive(true);
 
-                bool isServerLose = winner == Winner.lose && MyNetworkManager.discovery.isServer == true;
-                bool isClientWin = winner == Winner.win && MyNetworkManager.discovery.isServer == false;
+                bool isServerLose = winner == Winner.lose &&mynet.PlayerisServer;
+                bool isClientWin = winner == Winner.win && !mynet.PlayerisServer;
 
                 if (isServerLose||isClientWin)
                 {
@@ -57,24 +58,24 @@ public class ResultManager : MonoBehaviour
                 break;
         }
 
-        if (networkManager.GetComponent<MyNetworkDiscovery>().isServer)
+        if (mynet.PlayerisServer)
         {
-            SeverText.text = networkManager.GetComponent<MyNetworkManager>().occuping.ToString();
-            ClientText.text = networkManager.GetComponent<MyNetworkManager>().occupied.ToString();
+            SeverText.text = mynet.occuping.ToString();
+            ClientText.text = mynet.occupied.ToString();
 
-            if ((winner == Winner.win || winner == Winner.draw)) 
+            if (winner == Winner.win) 
                 ClientPlayer.GetComponent<Animator>().CrossFadeInFixedTime("lose",0);
-            else
+            else  if(winner==Winner.lose)
                 HostPlayer.GetComponent<Animator>().CrossFadeInFixedTime("lose", 0);
         }
         else
         {
-            ClientText.text = networkManager.GetComponent<MyNetworkManager>().occuping.ToString();
-            SeverText.text = networkManager.GetComponent<MyNetworkManager>().occupied.ToString();
+            ClientText.text = mynet.occuping.ToString();
+            SeverText.text = mynet.occupied.ToString();
 
-            if ((winner == Winner.win || winner == Winner.draw))
+            if (winner == Winner.win)
                 HostPlayer.GetComponent<Animator>().CrossFadeInFixedTime("lose", 0);
-            else
+            else if (winner == Winner.lose)
                 ClientPlayer.GetComponent<Animator>().CrossFadeInFixedTime("lose", 0);
         }
     }
@@ -82,7 +83,9 @@ public class ResultManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (GamepadInput.GamePadInput.GetButtonDown(GamepadInput.GamePadInput.Button.Start, GamepadInput.GamePadInput.Index.One))
+        bool inputStart= GamepadInput.GamePadInput.GetButtonDown(GamepadInput.GamePadInput.Button.Start, GamepadInput.GamePadInput.Index.One);
+        bool inputA = GamepadInput.GamePadInput.GetButtonDown(GamepadInput.GamePadInput.Button.A, GamepadInput.GamePadInput.Index.One);
+        if (inputA||inputStart)
         {
             networkManager.GetComponent<MyNetworkManager>().offlineScene = "Menu";
             networkManager.GetComponent<MyNetworkManager>().ServerChangeScene("Menu");

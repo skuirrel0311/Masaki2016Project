@@ -240,6 +240,7 @@ public class AppealAreaState : NetworkBehaviour
     [ClientRpc]
     void RpcOccupiersSE()
     {
+        if (RidePlayers.Count <= 0) return;
         if (!RidePlayers[0].GetComponent<PlayerState>().isLocalPlayer) return;
         if (isServer != isOccupiers) return;
         if (isOccupation) return;

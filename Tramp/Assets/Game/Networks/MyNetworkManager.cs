@@ -53,6 +53,8 @@ public class MyNetworkManager : NetworkManager
     public bool isStarted = false;
     public bool isJoin;
 
+    public bool PlayerisServer;
+
     // Use this for initialization
     void Start()
     {
@@ -61,6 +63,7 @@ public class MyNetworkManager : NetworkManager
         isJoin = false;
         joinTimer = 0;
         winner = Winner.draw;
+        PlayerisServer = false;
     }
 
     void Update()
@@ -121,6 +124,7 @@ public class MyNetworkManager : NetworkManager
 
     public override void OnClientDisconnect(NetworkConnection conn)
     {
+        offlineScene = "Error";
         StopClient();
         DiscoveryShutdown();
         base.OnClientDisconnect(conn);
@@ -129,6 +133,7 @@ public class MyNetworkManager : NetworkManager
     public override void OnServerDisconnect(NetworkConnection conn)
     {
         PlayerCount--;
+        offlineScene = "Error";
         if (networkSceneName == "main")
             DiscoveryShutdown();
         base.OnServerDisconnect(conn);
@@ -156,6 +161,7 @@ public class MyNetworkManager : NetworkManager
         discovery.StartAsServer();
         Debug.Log("Start:" + serverBindAddress + ":" + serverBindToIP);
         networkClient = StartHost();
+        PlayerisServer = true;
     }
 
     //ButtonJoinGameボタンを押した時に実行
@@ -171,6 +177,7 @@ public class MyNetworkManager : NetworkManager
         discovery.StartAsClient();
         isJoin = true;
         joinTimer = 0;
+        PlayerisServer = false;
     }
 
     public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId)

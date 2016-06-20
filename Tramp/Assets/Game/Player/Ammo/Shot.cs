@@ -13,6 +13,9 @@ public class Shot : MonoBehaviour
 
     [SerializeField]
     GameObject barrierEffect;
+
+    [SerializeField]
+    GameObject ShotEffect;
     
     [SerializeField]
     private float EndArea = 47.2f;
@@ -33,6 +36,7 @@ public class Shot : MonoBehaviour
         movement = transform.forward * speed;
         body = GetComponent<Rigidbody>();
         audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
+        Instantiate(ShotEffect,transform.position,transform.rotation);
     }
 
     // Update is called once per frame

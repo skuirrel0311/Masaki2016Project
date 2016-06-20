@@ -1,10 +1,14 @@
 fileFormatVersion: 2
 guid: 898c9e3c0343b6f4ca2514569289778e
-timeCreated: 1458295956
+timeCreated: 1466385123
 licenseType: Pro
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - HitEffect: {fileID: 193728, guid: 51ac6cd9aee513d4f829502e7ce9146a, type: 2}
+  - barrierEffect: {instanceID: 0}
+  - ShotEffect: {fileID: 122296, guid: 9883cad22e8cf6f45beb61909164a331, type: 2}
+  - hitSE: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
