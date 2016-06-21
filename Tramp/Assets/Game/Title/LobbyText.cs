@@ -36,13 +36,13 @@ public class LobbyText : NetworkBehaviour
         if (myNetDiscoverry.isServer)
         {
             youIsToru.SetActive(true);
-            connecting.SetActive(true);
         }
         else
         {
             youIsHana.SetActive(true);
-            connecting.SetActive(false);
         }
+
+        connecting.SetActive(!myNetManager.isStarted);
     }
 
     void GetNetworkManager()
