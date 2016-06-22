@@ -7,7 +7,7 @@ public class AppealAreaState : NetworkBehaviour
 {
     //占有度
     [SyncVar]
-    private float share;
+    public float share;
 
     //どちらが占領中か
     [SyncVar]
@@ -209,7 +209,7 @@ public class AppealAreaState : NetworkBehaviour
     }
 
     [Client]
-    void ChangeOccupiers(bool isSev)
+    public void ChangeOccupiers(bool isSev)
     {
         if (isSev)
         {
@@ -231,6 +231,12 @@ public class AppealAreaState : NetworkBehaviour
     void CmdChangeClinetOccupiers()
     {
         isOccupiers = false;
+    }
+
+    [ClientCallback]
+    public void ShareMax()
+    {
+        CmdChangeShare(100.0f);
     }
 
     [Command]

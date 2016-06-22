@@ -31,11 +31,8 @@ public class PlayerDamage : NetworkBehaviour
             {
                 CmdHitEffect(col.gameObject.transform.position);
                 GetComponent<PlayerState>().Damege();
-                if(state.IsAlive) state.animator.CrossFadeInFixedTime("damage", 0.1f);
-                Vector3 vec = col.gameObject.GetComponent<Rigidbody>().velocity;
-                vec = new Vector3(vec.x, 0, vec.z);
-                vec.Normalize();
-                gameObject.GetComponent<Rigidbody>().AddForce(vec * InpulusPower, ForceMode.Impulse);
+                if(state.IsAlive && !state.IsInvincible) state.animator.CrossFadeInFixedTime("damage", 0.1f);
+                if (!state.IsInvincible) Blow(col.gameObject);
                 isInpuls = true;
                 Destroy(col.gameObject);
             }
@@ -44,6 +41,14 @@ public class PlayerDamage : NetworkBehaviour
                 Destroy(col.gameObject);
             }
         }
+    }
+
+    void Blow(GameObject ammo)
+    {
+        Vector3 vec = ammo.GetComponent<Rigidbody>().velocity;
+        vec = new Vector3(vec.x, 0, vec.z);
+        vec.Normalize();
+        gameObject.GetComponent<Rigidbody>().AddForce(vec * InpulusPower, ForceMode.Impulse);
     }
     [Command]
     void CmdHitEffect(Vector3 position)

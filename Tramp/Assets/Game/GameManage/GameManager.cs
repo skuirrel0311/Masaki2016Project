@@ -101,7 +101,7 @@ public class GameManager : MonoBehaviour
         //タイトルの場合
         if (sceneState == TitleState.Title)
         {
-            if (GamePadInput.GetButtonDown(GamePadInput.Button.Start, GamePadInput.Index.One))
+            if (GamePadInput.GetButtonDown(GamePadInput.Button.Start, GamePadInput.Index.One)|| GamePadInput.GetButtonDown(GamePadInput.Button.A, GamePadInput.Index.One))
             {
                 audioSource.PlayOneShot(decisionSE);
                 SetScene(TitleState.GameStart);
