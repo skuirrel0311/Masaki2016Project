@@ -76,11 +76,11 @@ public class Flow : NetworkBehaviour
         //作ったプレイヤーに合わせて色を替える
         if (whichCreatePlayer)
         {
-            GetComponent<Renderer>().materials[0].SetColor("_Color", Color.blue);
+            GetComponent<Renderer>().materials[0].SetColor("_Color", new Color(41.0f/255.0f,139.0f/255.0f,252.0f/255.0f));
         }
         else
         {
-            GetComponent<Renderer>().materials[0].SetColor("_Color", new Color(0.5f, 0, 0));
+            GetComponent<Renderer>().materials[0].SetColor("_Color", new Color(243.0f/255.0f,59.0f/255.0f,133.0f/255.0f));
         }
 
         //接続先が固定のアンカーだったら自分の情報を固定のアンカーに送るふぃｘ

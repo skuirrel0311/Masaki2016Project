@@ -133,11 +133,16 @@ public class CutInEffect : MonoBehaviour
 
         MainGameManager mgm = mainGameManager.GetComponent<MainGameManager>();
 
-        GameObject.Find("Canvas").GetComponent<RemainingTime>().OnOneMinHandler += () =>
+        RemainingTime Timer = GameObject.Find("Canvas").GetComponent<RemainingTime>();
+
+        Timer.OnOneMinHandler += () =>
         {
             CutInPlay(0);
         };
-
+        Timer.OnTenSceHandler += () =>
+        {
+            CutInPlay(1);
+        };
         mgm.OnOccupiedingHnadler += () =>
         {
             CutInPlay(3);

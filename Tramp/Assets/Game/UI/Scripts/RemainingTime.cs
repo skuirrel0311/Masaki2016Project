@@ -21,6 +21,8 @@ public class RemainingTime : MonoBehaviour
 
     private SoundManager soundManager;
 
+    bool Lastsec;
+
     public delegate void OnOneMin();
     public event OnOneMin OnOneMinHandler;
 
@@ -31,6 +33,7 @@ public class RemainingTime : MonoBehaviour
     void Start()
     {
         soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
+        Lastsec = false;
     }
 
     // Update is called once per frame
@@ -54,6 +57,15 @@ public class RemainingTime : MonoBehaviour
             //nullでなければ実行
             if (OnOneMinHandler != null)
                 OnOneMinHandler();
+        }
+
+        if(time<30&&!Lastsec)
+        {
+            Lastsec = true;
+            if(OnTenSceHandler!=null)
+            {
+                OnTenSceHandler();
+            }
         }
 
         MInute.sprite = NumberSprites[(int)time / 60];

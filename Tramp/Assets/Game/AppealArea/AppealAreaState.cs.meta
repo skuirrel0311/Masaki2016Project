@@ -1,10 +1,19 @@
 fileFormatVersion: 2
 guid: 4caeacd358d752a48aa15760f82cdd5c
-timeCreated: 1463374956
+timeCreated: 1466594749
 licenseType: Pro
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - SeverTexture: {instanceID: 0}
+  - ClientTexture: {instanceID: 0}
+  - NeutralTexture: {instanceID: 0}
+  - AreaEffect: {instanceID: 0}
+  - ShareImageObject: {instanceID: 0}
+  - ServerImage: {fileID: 21300000, guid: eb22cd5a585ff4542b650aac553f8178, type: 3}
+  - ClientImage: {fileID: 21300000, guid: 65da3faa20c7a394bbdfd4e61ff28ef0, type: 3}
+  - occupiersSE: {instanceID: 0}
+  - completeSE: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

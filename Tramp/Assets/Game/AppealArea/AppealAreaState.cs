@@ -39,6 +39,12 @@ public class AppealAreaState : NetworkBehaviour
 
     private Image ShareImage;
 
+    [SerializeField]
+    Sprite ServerImage;
+
+    [SerializeField]
+    Sprite ClientImage;
+
     Renderer StageMesh;
 
     private static bool isDrawUI = false;
@@ -79,18 +85,14 @@ public class AppealAreaState : NetworkBehaviour
     void FixedUpdate()
     {
         isDrawUI = false;
-    }
-
-    void Update()
-    {
-        if(mainManager==null)
+        if (mainManager == null)
         {
             mainManager = GameObject.FindGameObjectWithTag("MainGameManager").GetComponent<MainGameManager>();
             if (mainManager == null)
                 return;
         }
 
-        if(myNetManager==null)
+        if (myNetManager == null)
         {
             myNetManager = GameObject.FindGameObjectWithTag("NetworkManager").GetComponent<MyNetworkManager>();
             if (myNetManager == null)
@@ -101,7 +103,23 @@ public class AppealAreaState : NetworkBehaviour
 
         //占有度のアップデート
         UpdateShare();
+    }
 
+    void Update()
+    {
+        if (mainManager == null)
+        {
+            mainManager = GameObject.FindGameObjectWithTag("MainGameManager").GetComponent<MainGameManager>();
+            if (mainManager == null)
+                return;
+        }
+
+        if (myNetManager == null)
+        {
+            myNetManager = GameObject.FindGameObjectWithTag("NetworkManager").GetComponent<MyNetworkManager>();
+            if (myNetManager == null)
+                return;
+        }
         //乗っている間の表示処理
         ShareUI();
 
@@ -180,12 +198,12 @@ public class AppealAreaState : NetworkBehaviour
     {
         if (isOccupiers == true)
         {
-            ShareImage.color = Color.white;
+            ShareImage.sprite = ServerImage;
             ShareImage.fillAmount = share / 100;
         }
         else
         {
-            ShareImage.color = Color.red;
+            ShareImage.sprite = ClientImage;
             ShareImage.fillAmount = share / 100;
         }
 
