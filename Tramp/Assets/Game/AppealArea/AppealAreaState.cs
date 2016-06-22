@@ -68,11 +68,11 @@ public class AppealAreaState : NetworkBehaviour
         StageMesh = transform.FindChild("pSphere1").GetComponent<Renderer>();
         ShareImage = ShareImageObject.transform.FindChild("ShareImage").GetComponent<Image>();
         ShareImageObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(transform.position.x, transform.position.z);
-        myNetManager = GameObject.FindGameObjectWithTag("NetworkManager").GetComponent<MyNetworkManager>();
         audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
         loopAudioSource = GetComponent<AudioSource>();
         loopAudioSource.Stop();
         loopAudioSource.clip = null;
+        myNetManager = GameObject.FindGameObjectWithTag("NetworkManager").GetComponent<MyNetworkManager>();
         mainManager = GameObject.FindGameObjectWithTag("MainGameManager").GetComponent<MainGameManager>();
     }
 
@@ -85,11 +85,19 @@ public class AppealAreaState : NetworkBehaviour
     {
         if(mainManager==null)
         {
-            mainManager = GameObject.Find("MainGameManager").GetComponent<MainGameManager>();
+            mainManager = GameObject.FindGameObjectWithTag("MainGameManager").GetComponent<MainGameManager>();
             if (mainManager == null)
                 return;
         }
 
+        if(myNetManager==null)
+        {
+            myNetManager = GameObject.FindGameObjectWithTag("NetworkManager").GetComponent<MyNetworkManager>();
+            if (myNetManager == null)
+                return;
+        }
+
+        ShareImageObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(transform.position.x, transform.position.z);
 
         //占有度のアップデート
         UpdateShare();
