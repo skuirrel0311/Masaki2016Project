@@ -104,9 +104,13 @@ public class MainGameManager : NetworkBehaviour
     {
         //if (ClientScene.localPlayers.Count > 0) return;
         ClientScene.AddPlayer(MyNetworkManager.networkClient.connection, 0);
+        isStart = true;
+    }
+
+    public void EndAddPlayer()
+    {
         StartCoroutine("GameStart");
         StartEffect.SetActive(true);
-        isStart = true;
     }
 
     IEnumerator GameStart()

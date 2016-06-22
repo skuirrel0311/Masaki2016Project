@@ -73,7 +73,7 @@ public class AppealAreaState : NetworkBehaviour
         loopAudioSource = GetComponent<AudioSource>();
         loopAudioSource.Stop();
         loopAudioSource.clip = null;
-        mainManager = GameObject.Find("MainGameManager").GetComponent<MainGameManager>();
+        mainManager = GameObject.FindGameObjectWithTag("MainGameManager").GetComponent<MainGameManager>();
     }
 
     void FixedUpdate()

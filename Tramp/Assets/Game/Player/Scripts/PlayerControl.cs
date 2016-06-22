@@ -201,6 +201,13 @@ public class PlayerControl : NetworkBehaviour
         }
     }
 
+    public override void OnStartLocalPlayer()
+    {
+        GameObject.FindGameObjectWithTag("MainGameManager").GetComponent<MainGameManager>().EndAddPlayer();
+
+        base.OnStartLocalPlayer();
+    }
+
     static public bool ChackCurrentAnimatorName(Animator animator, string name)
     {
         return animator.GetCurrentAnimatorStateInfo(0).IsName(name);
