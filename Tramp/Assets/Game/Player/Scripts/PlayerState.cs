@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using XInputDotNetPure;
 
 public class PlayerState : NetworkBehaviour
@@ -43,6 +45,8 @@ public class PlayerState : NetworkBehaviour
         }
     }
 
+    public bool IsInvincible;
+
     /// <summary>
     /// アピールエリアの所有権を持っているか？
     /// </summary>
@@ -57,6 +61,8 @@ public class PlayerState : NetworkBehaviour
 
     PlayerControl control;
     CameraLockon lockon;
+
+    bool IsDead;
 
     void Awake()
     {
@@ -85,8 +91,10 @@ public class PlayerState : NetworkBehaviour
         if (!IsAlive)
         {
             if (!isLocalPlayer) return;
-            if (GetComponent<PlayerControl>().enabled)
+            if (!IsDead)
             {
+                IsDead = true;
+                control.enabled = false;
                 //コルーチンを呼ぶのは1回のみ
                 StartCoroutine("Dead");
             }
@@ -100,6 +108,7 @@ public class PlayerState : NetworkBehaviour
         animator.CrossFadeInFixedTime("wait", 0.1f);
         control.SetSratPosition();
         control.enabled = true;
+        IsInvincible = false;
     }
 
     void Restoration()
@@ -109,7 +118,7 @@ public class PlayerState : NetworkBehaviour
         control.enabled = true;
         lockon.enabled = true;
         animator.CrossFadeInFixedTime("wait", 0.1f);
-
+        IsDead = false;
         CmdHpReset();
     }
 
@@ -122,9 +131,13 @@ public class PlayerState : NetworkBehaviour
         //操作できないようにする。
         GetComponent<PlayerShot>().enabled = false;
         GetComponent<PlayerCreateAnchor>().enabled = false;
-        control.enabled = false;
         lockon.enabled = true;
         GamePad.SetVibration(PlayerIndex.One, 0, 0);
+        //殺したプレイヤーにはご褒美を
+        if (isLocalPlayer)
+        {
+            KillPlayer();
+        }
         float time = 0;
         while(time < TimeToReturn)
         {
@@ -135,6 +148,30 @@ public class PlayerState : NetworkBehaviour
         //3秒後に復活
         Restoration();
         hp = maxHp;
+
+        IsInvincible = true;
+        yield return new WaitForSeconds(1);
+        IsInvincible = false;
+    }
+
+    //殺したときに呼ばれる
+    void KillPlayer()
+    {
+        if (!isLocalPlayer) return;
+        //アピールエリア(AppealAreaState)を取得
+        List<AppealAreaState> areaList = GameObject.FindGameObjectsWithTag("Area").Where(area => area.name == "AppealArea").Select(area => area.GetComponent<AppealAreaState>()).ToList();
+        //自分が占拠したエリアを取得(殺されたほう)
+        areaList.Where(area => area.isOccupiers == isServer || area.share == 0);
+        //なかったらreturn
+        if(areaList.Count == 0) return;
+
+        int randomIndex = Random.Range(0, areaList.Count -1);
+
+        areaList[randomIndex].ShareMax();
+
+        //殺したほうの占拠フラグにする
+        areaList[randomIndex].ChangeOccupiers(!isServer);
+
     }
 
     public override void OnStartLocalPlayer()
@@ -145,6 +182,7 @@ public class PlayerState : NetworkBehaviour
 
     public void Damege()
     {
+        if (IsInvincible) return;
         CmdHpDamage();
     }
 
