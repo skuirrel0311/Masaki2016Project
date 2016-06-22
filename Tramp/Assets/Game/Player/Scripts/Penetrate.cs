@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
-using System.Collections;
 
 public class Penetrate : NetworkBehaviour
 {
@@ -13,6 +12,12 @@ public class Penetrate : NetworkBehaviour
 
     [SerializeField]
     private GameObject PenetrateEffect;
+
+    [SerializeField]
+    Material penetrateMaterial;
+
+    Renderer renderer;
+    Material defaultMaterial;
 
     Image PenetrateGage;
 
@@ -36,7 +41,11 @@ public class Penetrate : NetworkBehaviour
         PenetrateGage = GameObject.Find("GunEnergy").GetComponent<Image>();
         isPenetrate = false;
         energy = MaxEnergy;
+        foreach (ParticleSystem p in PenetrateEffect.GetComponentsInChildren<ParticleSystem>()) p.playbackSpeed = 2f;
         PenetrateEffect.SetActive(false);
+
+        //renderer = GetComponentInChildren<Renderer>();
+        //defaultMaterial = renderer.material;
     }
 
     // Update is called once per frame
@@ -49,6 +58,7 @@ public class Penetrate : NetworkBehaviour
             isPenetrate = !isPenetrate;
             if (isPenetrate)
             {
+                //renderer.material = penetrateMaterial;
                 PenetrateEffect.SetActive(true);
                 GameObject[] gos = GameObject.FindGameObjectsWithTag("Flow");
                 foreach (GameObject go in gos)
@@ -73,7 +83,8 @@ public class Penetrate : NetworkBehaviour
 
         if(isPenetrate)
         {
-            energy-=reduce ;
+            energy-=reduce;
+
             if (energy <= 0)
             {
                 energy = 0;
@@ -85,6 +96,7 @@ public class Penetrate : NetworkBehaviour
 
     void StopFlowRender()
     {
+        //renderer.material = defaultMaterial;
         PenetrateEffect.SetActive(false);
         GameObject[] gos = GameObject.FindGameObjectsWithTag("Flow");
         GetComponent<PlayerControl>().hitFix = false;
