@@ -11,7 +11,7 @@ public class SpriteRotate : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update ()
+	void FixedUpdate ()
     {
         rectTransform.Rotate(1,1,1);
 	}
