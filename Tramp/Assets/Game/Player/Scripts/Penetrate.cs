@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
+using System.Collections;
 
 public class Penetrate : NetworkBehaviour
 {
@@ -12,6 +13,9 @@ public class Penetrate : NetworkBehaviour
 
     [SerializeField]
     private GameObject PenetrateEffect;
+
+    private ParticleSystem ring;
+    private GameObject lightParticle;
 
     [SerializeField]
     Material penetrateMaterial;
@@ -35,14 +39,22 @@ public class Penetrate : NetworkBehaviour
     private float energy = 0;
 
     private bool isPenetrate;
+
+    [SerializeField]
+    AudioClip enableSE;
+    [SerializeField]
+    AudioClip disableSE;
+    AudioSource audioSource;
     // Use this for initialization
     void Start()
     {
         PenetrateGage = GameObject.Find("GunEnergy").GetComponent<Image>();
         isPenetrate = false;
         energy = MaxEnergy;
-        foreach (ParticleSystem p in PenetrateEffect.GetComponentsInChildren<ParticleSystem>()) p.playbackSpeed = 2f;
         PenetrateEffect.SetActive(false);
+        audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
+        ring = PenetrateEffect.transform.FindChild("ring").GetComponent<ParticleSystem>();
+        lightParticle = PenetrateEffect.transform.FindChild("light").gameObject;
 
         //renderer = GetComponentInChildren<Renderer>();
         //defaultMaterial = renderer.material;
@@ -60,6 +72,7 @@ public class Penetrate : NetworkBehaviour
             {
                 //renderer.material = penetrateMaterial;
                 PenetrateEffect.SetActive(true);
+                audioSource.PlayOneShot(enableSE);
                 GameObject[] gos = GameObject.FindGameObjectsWithTag("Flow");
                 foreach (GameObject go in gos)
                 {
@@ -97,7 +110,8 @@ public class Penetrate : NetworkBehaviour
     void StopFlowRender()
     {
         //renderer.material = defaultMaterial;
-        PenetrateEffect.SetActive(false);
+        audioSource.PlayOneShot(disableSE);
+        StartCoroutine("ReversePlayParticle");
         GameObject[] gos = GameObject.FindGameObjectsWithTag("Flow");
         GetComponent<PlayerControl>().hitFix = false;
         foreach (GameObject go in gos)
@@ -108,5 +122,21 @@ public class Penetrate : NetworkBehaviour
                 go.GetComponent<LineRenderer>().enabled = false;
             }
         }
+    }
+
+    IEnumerator ReversePlayParticle()
+    {
+        lightParticle.SetActive(false);
+        float time = 0;
+        while (time < 1)
+        {
+            float progress = 1 - (time / 1);
+            ring.startLifetime = 1.5f * progress * progress;
+            time += Time.deltaTime;
+            yield return null;
+        }
+        ring.startLifetime = 1.5f;
+        lightParticle.SetActive(true);
+        PenetrateEffect.SetActive(false);
     }
 }
