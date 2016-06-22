@@ -21,7 +21,7 @@ public class MyNetworkDiscovery : NetworkDiscovery {
         int intData;
         string[] s = data.Split(',');
         if (!int.TryParse(s[0],out intData) ) return;
-        if (intData > 1) return;
+        if (intData > 2) return;
 
         if (!int.TryParse(s[1], out intData)) return;
         networkManager.networkPort = intData;
