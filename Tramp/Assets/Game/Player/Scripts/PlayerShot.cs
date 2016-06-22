@@ -44,7 +44,7 @@ public class PlayerShot : NetworkBehaviour
     public int Stock { get { return stock; } }
 
     public GameObject adversary;
-    Text playerNameText;
+    public Text playerNameText;
 
     //弾を連射中か
     bool isShot;
@@ -307,10 +307,14 @@ public class PlayerShot : NetworkBehaviour
     void ShowNameText()
     {
         if (adversary == null) return;
-        if (!adversary.GetComponentInChildren<IsRendered>().WasRendered)return;
+        if (!adversary.GetComponentInChildren<IsRendered>().WasRendered)
+        {
+            playerNameText.enabled = false;
+            return;
+        }
 
         //相手のプレイヤーが見えていたら
-
+        playerNameText.enabled = true;
         //x(0～1),y(0～1)
         Vector3 textPosition = cam.WorldToViewportPoint(adversary.transform.position + (Vector3.up * 2));
         textPosition.x = (textPosition.x * 1280) - (1280 * 0.5f);
