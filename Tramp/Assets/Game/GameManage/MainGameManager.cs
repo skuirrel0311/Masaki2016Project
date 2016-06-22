@@ -35,7 +35,7 @@ public class MainGameManager : NetworkBehaviour
     private SoundManager soundManager;
 
     [SerializeField]
-    private List<AppealAreaState> AppealAreas;
+    public List<AppealAreaState> AppealAreas;
 
     [SerializeField]
     private GameObject StartEffect;

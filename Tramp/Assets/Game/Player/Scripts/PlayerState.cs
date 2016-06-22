@@ -96,6 +96,7 @@ public class PlayerState : NetworkBehaviour
                 IsDead = true;
                 control.enabled = false;
                 //コルーチンを呼ぶのは1回のみ
+                KillPlayer();
                 StartCoroutine("Dead");
             }
         }
@@ -134,10 +135,7 @@ public class PlayerState : NetworkBehaviour
         lockon.enabled = true;
         GamePad.SetVibration(PlayerIndex.One, 0, 0);
         //殺したプレイヤーにはご褒美を
-        if (isLocalPlayer)
-        {
-            KillPlayer();
-        }
+        
         float time = 0;
         while(time < TimeToReturn)
         {
@@ -157,21 +155,26 @@ public class PlayerState : NetworkBehaviour
     //殺したときに呼ばれる
     void KillPlayer()
     {
-        if (!isLocalPlayer) return;
-        //アピールエリア(AppealAreaState)を取得
-        List<AppealAreaState> areaList = GameObject.FindGameObjectsWithTag("Area").Where(area => area.name == "AppealArea").Select(area => area.GetComponent<AppealAreaState>()).ToList();
-        //自分が占拠したエリアを取得(殺されたほう)
-        areaList.Where(area => area.isOccupiers == isServer || area.share == 0);
-        //なかったらreturn
-        if(areaList.Count == 0) return;
+        CmdKillGet(isServer);
 
-        int randomIndex = Random.Range(0, areaList.Count -1);
+    }
+
+    [Command]
+    void CmdKillGet(bool isKilled)
+    {
+        //アピールエリア(AppealAreaState)を取得
+        List<AppealAreaState> areaList = GameObject.FindGameObjectWithTag("MainGameManager").GetComponent<MainGameManager>().AppealAreas;
+        //自分が占拠したエリアを取得(殺されたほう)
+        areaList.Where(area => (area.isOccupation && area.isOccupiers == isKilled) || !area.isOccupation);
+        //なかったらreturn
+        if (areaList.Count == 0) return;
+
+        int randomIndex = Random.Range(0, areaList.Count - 1);
 
         areaList[randomIndex].ShareMax();
 
         //殺したほうの占拠フラグにする
-        areaList[randomIndex].ChangeOccupiers(!isServer);
-
+        areaList[randomIndex].ChangeOccupiers(!isKilled);
     }
 
     public override void OnStartLocalPlayer()

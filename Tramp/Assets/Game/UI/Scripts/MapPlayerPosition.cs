@@ -36,9 +36,7 @@ public class MapPlayerPosition : MonoBehaviour
         HostPlayerSprite.anchoredPosition = new Vector2(HostPlayerObject.transform.position.x, HostPlayerObject.transform.position.z);
         ClientPlayerSprite.anchoredPosition = new Vector2(ClientPlayerObject.transform.position.x, ClientPlayerObject.transform.position.z);
 
-        HostPlayerSprite.localRotation = Quaternion.Euler(0,0,HostPlayerObject.transform.localRotation.y);
-        ClientPlayerSprite.localRotation = Quaternion.Euler(0, 0, ClientPlayerObject.transform.localRotation.y);
-
-
+        HostPlayerSprite.localRotation = Quaternion.Euler(0,0,HostPlayerObject.transform.rotation.y);
+        ClientPlayerSprite.localRotation = Quaternion.Euler(0, 0, ClientPlayerObject.transform.rotation.y);
     }
 }
