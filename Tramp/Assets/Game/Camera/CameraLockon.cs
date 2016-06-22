@@ -97,7 +97,7 @@ public class CameraLockon : MonoBehaviour
             else
             {
                 LockOnCut();
-                audioSource.PlayOneShot(missSE);
+                //audioSource.PlayOneShot(missSE);
             }
         }
         if (IsLockOn && targetAnchor != null)

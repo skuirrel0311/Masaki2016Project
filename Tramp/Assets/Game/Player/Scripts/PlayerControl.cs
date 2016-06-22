@@ -75,6 +75,8 @@ public class PlayerControl : NetworkBehaviour
     [SerializeField]
     GameObject barrierEffect;
 
+    [SerializeField]
+    AudioClip rideSE;
     AudioSource audioSource;
 
     SoundManager soundManager;
@@ -98,7 +100,8 @@ public class PlayerControl : NetworkBehaviour
             cameraControl.SetPlayer(gameObject);
             cameraObj = GameObject.FindGameObjectWithTag("MainCamera");
         }
-        audioSource = GetComponent<AudioSource>();
+        audioSource = GetComponent<PlayerSound>().LoopAoudioSource;
+        audioSource.clip = rideSE;
         soundManager = GameObject.Find("SoundManager").GetComponent<SoundManager>();
         audioSource.Stop();
         RideEffect.SetActive(false);
@@ -221,7 +224,7 @@ public class PlayerControl : NetworkBehaviour
     {
         //ポーズ中だったら終了
         if (MainGameManager.IsPause) return false;
-        if (!MainGameManager.isGameStart) return false;
+        //if (!MainGameManager.isGameStart) return false;
         if (soundManager.isEnd) return false;
 
         // body.velocity = new Vector3(0,body.velocity.y,0);
