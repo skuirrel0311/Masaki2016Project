@@ -77,6 +77,7 @@ public class Penetrate : NetworkBehaviour
             if (isPenetrate)
             {
                 //renderer.material = penetrateMaterial;
+                InitializeParticle();
                 PenetrateEffect.SetActive(true);
                 enableAudioSource.Play();
                 GameObject[] gos = GameObject.FindGameObjectsWithTag("Flow");
@@ -136,12 +137,18 @@ public class Penetrate : NetworkBehaviour
         float time = 0;
         while (time < 1)
         {
+            if (isPenetrate) yield break;
             float progress = 1 - (time / 1);
             ring.startLifetime = 1.5f * progress * progress;
             time += Time.deltaTime;
-            if (isPenetrate) break;
             yield return null;
         }
+        if (isPenetrate) yield break;
+        InitializeParticle();
+    }
+
+    void InitializeParticle()
+    {
         ring.startLifetime = 1.5f;
         lightParticle.SetActive(true);
         PenetrateEffect.SetActive(false);
