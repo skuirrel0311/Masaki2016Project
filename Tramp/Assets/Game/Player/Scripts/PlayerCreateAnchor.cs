@@ -174,7 +174,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
         //カメラの向いている方向にプレイヤーを向ける
         float rotationY = cameraObj.transform.eulerAngles.y;
         transform.rotation = Quaternion.Euler(0, rotationY, 0);
-        CreatePosition = transform.position + transform.forward * 2 + Vector3.up;
+        CreatePosition = transform.position + Vector3.up;
     }
 
     [ClientCallback]

@@ -347,7 +347,7 @@ public class PlayerControl : NetworkBehaviour
         IsFalling = true;
         cameraControl.SetNowLatitude();
         cameraControl.IsEndFallingCamera = false;
-        animator.CrossFadeInFixedTime("jump", 0.5f);
+        JumpAnimationPlay();
 
     }
 
@@ -360,14 +360,14 @@ public class PlayerControl : NetworkBehaviour
         {
             Fall();
         }
-        if (!IsFlowing) animator.CrossFadeInFixedTime("jump", 0.5f);
+        JumpAnimationPlay();
         IsOnGround = false;
     }
 
     public void Fall()
     {
         if (!isLocalPlayer) return;
-        animator.CrossFadeInFixedTime("jump", 0.5f);
+        JumpAnimationPlay();
         IsOnGround = false;
         if (!IsFalling) cameraControl.SetNowLatitude();
         cameraControl.IsEndFallingCamera = false;
@@ -408,7 +408,7 @@ public class PlayerControl : NetworkBehaviour
         {
             Fall();
         }
-        if (!IsFlowing) animator.CrossFadeInFixedTime("jump", 0.5f);
+        JumpAnimationPlay();
         IsOnGround = false;
     }
 
@@ -426,8 +426,17 @@ public class PlayerControl : NetworkBehaviour
         IsOnGround = true;
         IsFlowing = false;
         body.isKinematic = false;
-        animator.CrossFadeInFixedTime("jump_landing", 0.1f);
         onGroundTimer.TimerStart(0.4f);
         atJumpPosition = transform.position;
+        if (ChackCurrentAnimatorName(animator, "dead")) return;
+        animator.CrossFadeInFixedTime("jump_landing", 0.1f);
+    }
+
+    private void JumpAnimationPlay()
+    {
+        if (IsFlowing) return;
+        if (ChackCurrentAnimatorName(animator, "dead")) return;
+
+        animator.CrossFadeInFixedTime("jump", 0.5f);
     }
 }

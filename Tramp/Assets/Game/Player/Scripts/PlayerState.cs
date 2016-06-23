@@ -82,7 +82,7 @@ public class PlayerState : NetworkBehaviour
     void Start()
     {
         GameObject map = GameObject.Find("Map");
-        if ((!MyNetworkManager.discovery.isServer&&!isLocalPlayer)|| (MyNetworkManager.discovery.isServer && isLocalPlayer))
+        if ((!MyNetworkManager.discovery.isServer && !isLocalPlayer) || (MyNetworkManager.discovery.isServer && isLocalPlayer))
         {
             map.GetComponent<MapPlayerPosition>().SetHostPlayer(gameObject);
         }
@@ -106,7 +106,7 @@ public class PlayerState : NetworkBehaviour
             }
         }
     }
-    
+
     [Client]
     void Initialize()
     {
@@ -139,12 +139,12 @@ public class PlayerState : NetworkBehaviour
         lockon.enabled = true;
         GamePad.SetVibration(PlayerIndex.One, 0, 0);
         //殺したプレイヤーにはご褒美を
-        
+
         float time = 0;
-        while(time < TimeToReturn)
+        while (time < TimeToReturn)
         {
             time += Time.deltaTime;
-            if(transform.position.magnitude > control.EndArea) control.OutStage(transform.position);
+            if (transform.position.magnitude > control.EndArea) control.OutStage(transform.position);
             yield return null;
         }
         //3秒後に復活
@@ -172,7 +172,7 @@ public class PlayerState : NetworkBehaviour
         //なかったらreturn
         if (areaList.Count == 0) return;
 
-        int randomIndex = Random.Range(0, areaList.Count - 1);
+        int randomIndex = Random.Range(0, areaList.Count);
 
         areaList[randomIndex].ShareMax();
 
