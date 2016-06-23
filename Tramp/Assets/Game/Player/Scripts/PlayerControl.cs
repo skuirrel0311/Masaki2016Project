@@ -227,7 +227,7 @@ public class PlayerControl : NetworkBehaviour
     {
         //ポーズ中だったら終了
         if (MainGameManager.IsPause) return false;
-        //if (!MainGameManager.isGameStart) return false;
+        if (!MainGameManager.isGameStart) return false;
         if (soundManager.isEnd) return false;
 
         // body.velocity = new Vector3(0,body.velocity.y,0);

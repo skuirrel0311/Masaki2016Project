@@ -14,9 +14,12 @@ public class MapPlayerPosition : MonoBehaviour
     GameObject HostPlayerObject;
     GameObject ClientPlayerObject;
 
+    GameObject Camera;
+
     // Use this for initialization
     void Start()
     {
+        Camera = GameObject.FindGameObjectWithTag("MainCamera");
     }
 
     public void SetHostPlayer(GameObject go)
@@ -36,7 +39,15 @@ public class MapPlayerPosition : MonoBehaviour
         HostPlayerSprite.anchoredPosition = new Vector2(HostPlayerObject.transform.position.x, HostPlayerObject.transform.position.z);
         ClientPlayerSprite.anchoredPosition = new Vector2(ClientPlayerObject.transform.position.x, ClientPlayerObject.transform.position.z);
 
-        HostPlayerSprite.localRotation= Quaternion.Euler(0,0,-HostPlayerObject.transform.eulerAngles.y);
-        ClientPlayerSprite.localRotation= Quaternion.Euler(0, 0, -ClientPlayerObject.transform.eulerAngles.y);
+        if (MyNetworkManager.discovery.isServer)
+        {
+            HostPlayerSprite.localRotation = Quaternion.Euler(0, 0, -Camera.transform.eulerAngles.y);
+            ClientPlayerSprite.localRotation = Quaternion.Euler(0, 0, -ClientPlayerObject.transform.eulerAngles.y);
+        }
+        else
+        {
+            HostPlayerSprite.localRotation = Quaternion.Euler(0, 0, -HostPlayerObject.transform.eulerAngles.y);
+            ClientPlayerSprite.localRotation = Quaternion.Euler(0, 0, -Camera.transform.eulerAngles.y);
+        }
     }
 }
