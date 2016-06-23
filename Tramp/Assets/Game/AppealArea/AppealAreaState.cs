@@ -103,6 +103,13 @@ public class AppealAreaState : NetworkBehaviour
 
         //占有度のアップデート
         UpdateShare();
+
+        if (isOccupation)
+        {
+            if (loopAudioSource.clip == null) return;
+            loopAudioSource.Stop();
+            loopAudioSource.clip = null;
+        }
     }
 
     void Update()
@@ -154,14 +161,13 @@ public class AppealAreaState : NetworkBehaviour
     {
         if (RidePlayers.Count != 1)
         {
+            //占有量変更ストップ
             loopAudioSource.Stop();
             loopAudioSource.clip = null;
             return;
         }
         if (!isServer) return;
-
-        RpcOccupiersSE();
-
+        
         //誰にも占拠されていない
         if (share == 0)
         {
@@ -192,6 +198,8 @@ public class AppealAreaState : NetworkBehaviour
                 CmdChangeShare((float)(-1.0f- (Mathf.Max(myNetManager.occuping, 0) /  1.0f)));
             }
         }
+
+        RpcOccupiersSE();
     }
 
     void ShareUI()
@@ -260,6 +268,7 @@ public class AppealAreaState : NetworkBehaviour
     [Command]
     void CmdChangeShare(float value)
     {
+        if (!isServer) return;
         share += value;
         if (share >= 100)
         {
@@ -284,9 +293,7 @@ public class AppealAreaState : NetworkBehaviour
         if (!RidePlayers[0].GetComponent<PlayerState>().isLocalPlayer) return;
         if (isServer != isOccupiers) return;
         if (isOccupation) return;
-
-
-
+        
         if (loopAudioSource.clip != null) return;
 
         loopAudioSource.clip = occupiersSE;

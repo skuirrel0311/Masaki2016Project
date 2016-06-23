@@ -124,7 +124,6 @@ public class CameraLockon : MonoBehaviour
                 LockOnCut();
                 audioSource.PlayOneShot(missSE);
             }
-            PlayerTrace();
             oldPlayerPosition = player.transform.position;
             AnchorLockOn();
             return;
