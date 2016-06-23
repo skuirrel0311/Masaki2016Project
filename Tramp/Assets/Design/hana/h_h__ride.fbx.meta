@@ -207,7 +207,7 @@ ModelImporter:
     - serializedVersion: 16
       name: h__ride
       takeName: h__ride
-      firstFrame: 2.4
+      firstFrame: 2.7
       lastFrame: 20
       wrapMode: 0
       orientationOffsetY: 0
