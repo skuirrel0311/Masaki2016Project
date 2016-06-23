@@ -100,7 +100,6 @@ public class PlayerState : NetworkBehaviour
             if (!IsDead)
             {
                 IsDead = true;
-                control.enabled = false;
                 //コルーチンを呼ぶのは1回のみ
                 KillPlayer();
                 StartCoroutine("Dead");

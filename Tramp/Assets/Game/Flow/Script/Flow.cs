@@ -182,8 +182,9 @@ public class Flow : NetworkBehaviour
     void OnTriggerEnter(Collider col)
     {
         if (col.tag != "Player") return;
-        if (!col.gameObject.GetComponent<NetworkBehaviour>().isLocalPlayer) return;
         FlowRender();
+        if (!col.gameObject.GetComponent<NetworkBehaviour>().isLocalPlayer) return;
+
         Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
         bodys.Add(body);
         if (col.gameObject.GetComponent<PlayerControl>().hitFix) return;
@@ -221,7 +222,7 @@ public class Flow : NetworkBehaviour
     {
         if (col.tag != "Player") return;
 
-        if (!isLocalPlayer&&!isCreatePlayer)
+        if (!isCreatePlayer)
         {
             StopFlowRender();
         }
