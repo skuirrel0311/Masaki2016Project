@@ -44,7 +44,8 @@ public class Penetrate : NetworkBehaviour
     AudioClip enableSE;
     [SerializeField]
     AudioClip disableSE;
-    AudioSource audioSource;
+    AudioSource enableAudioSource;
+    AudioSource disableAudioSource;
     // Use this for initialization
     void Start()
     {
@@ -52,7 +53,12 @@ public class Penetrate : NetworkBehaviour
         isPenetrate = false;
         energy = MaxEnergy;
         PenetrateEffect.SetActive(false);
-        audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
+        enableAudioSource = GetComponent<PlayerSound>().EnableAudioSource;
+        disableAudioSource = GetComponent<PlayerSound>().DisableAudioSource;
+
+        enableAudioSource.clip = enableSE;
+        disableAudioSource.clip = disableSE;
+
         ring = PenetrateEffect.transform.FindChild("ring").GetComponent<ParticleSystem>();
         lightParticle = PenetrateEffect.transform.FindChild("light").gameObject;
 
@@ -71,8 +77,9 @@ public class Penetrate : NetworkBehaviour
             if (isPenetrate)
             {
                 //renderer.material = penetrateMaterial;
+                InitializeParticle();
                 PenetrateEffect.SetActive(true);
-                audioSource.PlayOneShot(enableSE);
+                enableAudioSource.Play();
                 GameObject[] gos = GameObject.FindGameObjectsWithTag("Flow");
                 foreach (GameObject go in gos)
                 {
@@ -110,7 +117,7 @@ public class Penetrate : NetworkBehaviour
     void StopFlowRender()
     {
         //renderer.material = defaultMaterial;
-        audioSource.PlayOneShot(disableSE);
+        disableAudioSource.Play();
         StartCoroutine("ReversePlayParticle");
         GameObject[] gos = GameObject.FindGameObjectsWithTag("Flow");
         GetComponent<PlayerControl>().hitFix = false;
@@ -130,11 +137,18 @@ public class Penetrate : NetworkBehaviour
         float time = 0;
         while (time < 1)
         {
+            if (isPenetrate) yield break;
             float progress = 1 - (time / 1);
             ring.startLifetime = 1.5f * progress * progress;
             time += Time.deltaTime;
             yield return null;
         }
+        if (isPenetrate) yield break;
+        InitializeParticle();
+    }
+
+    void InitializeParticle()
+    {
         ring.startLifetime = 1.5f;
         lightParticle.SetActive(true);
         PenetrateEffect.SetActive(false);
