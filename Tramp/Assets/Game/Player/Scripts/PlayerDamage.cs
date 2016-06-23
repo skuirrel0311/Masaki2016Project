@@ -9,8 +9,6 @@ public class PlayerDamage : NetworkBehaviour
     GameObject HitEffect;
     private PlayerState state;
 
-    GameObject camera;
-
     [SerializeField]
     float InpulusPower = 1000;
 
@@ -19,7 +17,6 @@ public class PlayerDamage : NetworkBehaviour
     void Start()
     {
         state = gameObject.GetComponent<PlayerState>();
-        camera = GameObject.FindGameObjectWithTag("MainCamera");
         isInpuls = false;
     }
 

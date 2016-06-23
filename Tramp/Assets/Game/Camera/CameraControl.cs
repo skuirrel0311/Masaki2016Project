@@ -109,7 +109,11 @@ public class CameraControl : MonoBehaviour
         GetTargetPosition();
         SphereCameraControl();
 
-        cameraObj.transform.localRotation = Quaternion.Lerp(Quaternion.Euler(0, cameraObj.transform.localRotation.y, 0), cameraObj.transform.localRotation, 1 - lockon.LockonTimer.Progress);
+        //戻るときにしか使わない
+        if (!lockon.LockonTimer.IsLimitTime)
+        {
+            cameraObj.transform.localRotation = Quaternion.Lerp(Quaternion.Euler(0, 0, 0), cameraObj.transform.localRotation, 1 - lockon.LockonTimer.Progress);
+        }
 
         oldPlayerPosition = player.transform.position;
     }

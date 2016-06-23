@@ -106,7 +106,7 @@ public class PlayerShot : NetworkBehaviour
         Vector3 targetPosition = GetTargetPosition();
 
         //先にプレイヤーをカメラと同じ方向に向ける
-        Quaternion cameraRotation = cameraObj.transform.rotation;
+        Quaternion cameraRotation = cam.transform.rotation;
         cameraRotation.x = 0;
         cameraRotation.z = 0;
 
@@ -284,7 +284,7 @@ public class PlayerShot : NetworkBehaviour
             Vector3 localAngles = playerState.animator.GetBoneTransform(HumanBodyBones.Spine).localEulerAngles;
 
             //先にプレイヤーをカメラと同じ方向に向ける
-            Vector3 cameraRotation = cameraObj.transform.eulerAngles;
+            Vector3 cameraRotation = cam.transform.eulerAngles;
 
             cameraRotation=cameraRotation - transform.rotation.eulerAngles;
             if (isServer)

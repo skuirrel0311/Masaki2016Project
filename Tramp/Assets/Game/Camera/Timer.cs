@@ -21,12 +21,12 @@ public class Timer : MonoBehaviour
     /// <summary>
     /// タイマーを起動させます
     /// </summary>
-    public void TimerStart(float limitTime)
+    public void TimerStart(float limitTime, bool IsLimitTime = false)
     {
         time = 0;
         this.limitTime = limitTime;
         IsWorking = true;
-        IsLimitTime = false;
+        this.IsLimitTime = IsLimitTime;
     }
 
     /// <summary>

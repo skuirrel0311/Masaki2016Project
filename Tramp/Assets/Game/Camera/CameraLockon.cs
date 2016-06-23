@@ -74,6 +74,7 @@ public class CameraLockon : MonoBehaviour
         playerNum = player.GetComponent<PlayerControl>().playerNum;
 
         lockonTimer.TimerStart(0.2f);
+        LockOnCut();
     }
 
     void FixedUpdate()
@@ -87,6 +88,15 @@ public class CameraLockon : MonoBehaviour
         LockOnUI.SetActive(IsLockOn);
 
         UpdateTimer();
+
+        if(targetAnchor == null && IsLockOn)
+        {
+            //cameraObj.transform.localRotation = Quaternion.Euler(0,cameraObj.transform.localRotation.y,0);
+            LockOnCut();
+            return;
+        }
+
+
         //ロックオンの処理押された時と押している時で処理を分ける
         if (GamePadInput.GetButtonDown(GamePadInput.Button.LeftShoulder, (GamePadInput.Index)playerNum) && !MainGameManager.IsPause)
         {
@@ -118,11 +128,6 @@ public class CameraLockon : MonoBehaviour
             oldPlayerPosition = player.transform.position;
             AnchorLockOn();
             return;
-        }
-
-        if (targetAnchor == null)
-        {
-            LockOnCut();
         }
     }
 
@@ -277,9 +282,6 @@ public class CameraLockon : MonoBehaviour
             targetAnchor = GetLowAngleAnchor(anchorList);
             //todo:一番角度の低いアンカーが取得できない場合があるっぽい
         }
-
-
-
         return targetAnchor;
     }
 
