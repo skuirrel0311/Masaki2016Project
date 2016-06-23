@@ -112,7 +112,7 @@ public class MyNetworkManager : NetworkManager
 
     public override void OnServerConnect(NetworkConnection conn)
     {
-        playercount++;
+        PlayerCount++;
         base.OnServerConnect(conn);
     }
 
