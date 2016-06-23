@@ -80,6 +80,7 @@ public class PlayerControl : NetworkBehaviour
     AudioSource audioSource;
 
     SoundManager soundManager;
+    PlayerState state;
 
     bool landingEnd;
 
@@ -100,6 +101,7 @@ public class PlayerControl : NetworkBehaviour
             cameraControl.SetPlayer(gameObject);
             cameraObj = GameObject.FindGameObjectWithTag("MainCamera");
         }
+        state=GetComponent<PlayerState>();
         audioSource = GetComponent<PlayerSound>().LoopAoudioSource;
         audioSource.clip = rideSE;
         soundManager = GameObject.Find("SoundManager").GetComponent<SoundManager>();
@@ -139,6 +141,7 @@ public class PlayerControl : NetworkBehaviour
 
     void FixedUpdate()
     {
+        if (state.ISDead) return;
         Vector2 leftStick = GamePadInput.GetAxis(GamePadInput.Axis.LeftStick, (GamePadInput.Index)playerNum);
         movement = new Vector3(leftStick.x, 0, leftStick.y);
         //アニメーターにパラメータを送る
@@ -304,6 +307,7 @@ public class PlayerControl : NetworkBehaviour
 
     void Jump()
     {
+        if (state.ISDead) return;
         //プレイヤーがジャンプをしようとしたとき
         if (GamePadInput.GetButtonDown(GamePadInput.Button.A, (GamePadInput.Index)playerNum) && !IsJumping && !MainGameManager.IsPause)
         {

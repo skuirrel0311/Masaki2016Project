@@ -60,9 +60,10 @@ public class LocalFlow : MonoBehaviour{
     void OnTriggerEnter(Collider col)
     {
         if (col.tag != "Player") return;
-        if (col.gameObject.GetComponent<PlayerControl>().hitFix) return;
+
         Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
         bodys.Add(body);
+        if (col.gameObject.GetComponent<PlayerControl>().hitFix) return;
         body.useGravity = false;
         body.velocity = transform.up * body.velocity.magnitude;
         col.gameObject.GetComponent<Animator>().CrossFadeInFixedTime("ride", 0.1f);

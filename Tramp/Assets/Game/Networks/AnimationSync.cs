@@ -12,6 +12,7 @@ public class AnimationSync : NetworkBehaviour
     [SyncVar]
     float weight;
 
+
     // Use this for initialization
     void Start()
     {
@@ -23,7 +24,6 @@ public class AnimationSync : NetworkBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
-
         if ((animator.GetLayerWeight(1) != oldWeight) && isLocalPlayer)
         {
             CmdSetWeight(animator.GetLayerWeight(1));

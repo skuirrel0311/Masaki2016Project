@@ -62,6 +62,12 @@ public class PlayerState : NetworkBehaviour
     PlayerControl control;
     CameraLockon lockon;
 
+    public bool ISDead
+    {
+        get { return IsDead; }
+        set { IsDead = value; }
+    }
+
     bool IsDead;
 
     void Awake()
@@ -108,7 +114,6 @@ public class PlayerState : NetworkBehaviour
         hp = maxHp;
         animator.CrossFadeInFixedTime("wait", 0.1f);
         control.SetSratPosition();
-        control.enabled = true;
         IsInvincible = false;
     }
 
@@ -116,7 +121,6 @@ public class PlayerState : NetworkBehaviour
     {
         GetComponent<PlayerShot>().enabled = true;
         GetComponent<PlayerCreateAnchor>().enabled = true;
-        control.enabled = true;
         lockon.enabled = true;
         animator.CrossFadeInFixedTime("wait", 0.1f);
         IsDead = false;
@@ -157,7 +161,6 @@ public class PlayerState : NetworkBehaviour
     void KillPlayer()
     {
         CmdKillGet(isServer);
-
     }
 
     [Command]

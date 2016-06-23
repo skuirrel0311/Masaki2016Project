@@ -183,10 +183,10 @@ public class Flow : NetworkBehaviour
     {
         if (col.tag != "Player") return;
         if (!col.gameObject.GetComponent<NetworkBehaviour>().isLocalPlayer) return;
-        if (col.gameObject.GetComponent<PlayerControl>().hitFix) return;
         FlowRender();
         Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
         bodys.Add(body);
+        if (col.gameObject.GetComponent<PlayerControl>().hitFix) return;
         body.useGravity = false;
         body.velocity = transform.up * body.velocity.magnitude*1.1f;
         col.gameObject.GetComponent<Animator>().CrossFadeInFixedTime("ride", 0.1f);
@@ -220,6 +220,11 @@ public class Flow : NetworkBehaviour
     void OnTriggerExit(Collider col)
     {
         if (col.tag != "Player") return;
+
+        if (!isLocalPlayer&&!isCreatePlayer)
+        {
+            StopFlowRender();
+        }
         Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
         body.useGravity = true;
         bodys.Remove(body);
@@ -232,18 +237,13 @@ public class Flow : NetworkBehaviour
             control.Landed();
             return;
         }
-
         control.IsFalling = true;
         control.IsJumping = true;
         CameraControl cam = GameObject.Find("Camera1").GetComponent<CameraControl>();
         cam.SetNowLatitude();
         cam.IsEndFallingCamera = false;
         col.gameObject.GetComponent<Animator>().CrossFadeInFixedTime("jump", 0.5f);
-        if (!isLocalPlayer) return;
-        if (!isCreatePlayer)
-        {
-            StopFlowRender();
-        }
+
     }
 
     void OnDestroy()
