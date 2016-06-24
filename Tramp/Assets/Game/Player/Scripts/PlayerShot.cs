@@ -9,6 +9,9 @@ using XInputDotNetPure;
 public class PlayerShot : NetworkBehaviour
 {
     [SerializeField]
+    bool assist = false; //アシストを受けるか？
+
+    [SerializeField]
     GameObject Ammo;
 
     [SerializeField]
@@ -46,7 +49,11 @@ public class PlayerShot : NetworkBehaviour
     int anchorEnergy = 20;
     public int Stock { get { return stock; } }
 
+    //相手プレイヤー(localPlayerではない)
     public GameObject adversary;
+    [SerializeField]
+    private Material apparentMaterial; //はっきり見えるマテリアル
+    private Material[] defaultMaterial; //もともとついてるマテリアル
     public Text playerNameText;
 
     //弾を連射中か
@@ -147,6 +154,8 @@ public class PlayerShot : NetworkBehaviour
 
         ShowNameText();
 
+        ChangeAdversaryPlayer();
+
         if (GamePadInput.GetTrigger(GamePadInput.Trigger.RightTrigger, (GamePadInput.Index)playerNum, true) <= 0 && isLocalPlayer)
         {
             playerState.animator.SetBool("RunShotEnd", true);
@@ -192,8 +201,6 @@ public class PlayerShot : NetworkBehaviour
                 GamePad.SetVibration(PlayerIndex.One, 0, 0);
             }
         }
-
-        
     }
 
     void LoadText()
@@ -213,7 +220,15 @@ public class PlayerShot : NetworkBehaviour
 
     Vector3 GetTargetPosition()
     {
-        if (LookPlayer()) return GetAdversary().transform.position + Vector3.up;
+        if (assist && LookPlayer(5))
+        {
+            //初回のみ取得
+            if (defaultMaterial == null) defaultMaterial = adversary.GetComponentInChildren<SkinnedMeshRenderer>().materials;
+            adversary.GetComponentInChildren<SkinnedMeshRenderer>().material = apparentMaterial;
+            return adversary.transform.position + Vector3.up;
+        }
+
+        if (defaultMaterial != null) adversary.GetComponentInChildren<SkinnedMeshRenderer>().materials = defaultMaterial;
 
         //カメラの中心座標からレイを飛ばす
         Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
@@ -234,13 +249,11 @@ public class PlayerShot : NetworkBehaviour
     /// <summary>
     /// 対戦相手が見えるかどうか？
     /// </summary>
-    bool LookPlayer()
+    bool LookPlayer(int range)
     {
-        GameObject obj = GetAdversary();
+        if (adversary == null) return false;
 
-        if (obj == null) return false;
-
-        Vector3 toPlayerVector = obj.transform.position - cameraObj.transform.position;
+        Vector3 toPlayerVector = adversary.transform.position - cameraObj.transform.position;
         Vector3 cameraForward = cameraObj.transform.forward;
 
         float verticalAngle = VerticalAngle(toPlayerVector, cameraObj.transform.forward);
@@ -248,7 +261,15 @@ public class PlayerShot : NetworkBehaviour
         float horizontalAngle = Vector2.Angle(new Vector2(toPlayerVector.x, toPlayerVector.z),
             new Vector2(cameraForward.x, cameraForward.z));
 
-        return verticalAngle < 5 && horizontalAngle < 5;
+        return verticalAngle < range && horizontalAngle < range;
+    }
+
+    //指定した距離より近いか？
+    bool NearPlayer(float distance)
+    {
+        if (adversary == null) return false;
+        
+        return Vector3.Distance(transform.position,adversary.transform.position) < distance;
     }
 
     /// <summary>
@@ -337,4 +358,18 @@ public class PlayerShot : NetworkBehaviour
         GamePad.SetVibration(PlayerIndex.One, 0f, 0f);
     }
 
+    void ChangeAdversaryPlayer()
+    {
+        if(adversary == null)return;
+        if (LookPlayer(10) && !NearPlayer(8))
+        {
+            //初回のみ取得
+            if (defaultMaterial == null) defaultMaterial = adversary.GetComponentInChildren<SkinnedMeshRenderer>().materials;
+            adversary.GetComponentInChildren<SkinnedMeshRenderer>().material = apparentMaterial;
+        }
+        else
+        {
+            if (defaultMaterial != null) adversary.GetComponentInChildren<SkinnedMeshRenderer>().materials = defaultMaterial;
+        }
+    }
 }
