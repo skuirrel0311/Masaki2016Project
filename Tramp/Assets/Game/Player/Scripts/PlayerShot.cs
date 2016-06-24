@@ -54,7 +54,7 @@ public class PlayerShot : NetworkBehaviour
     [SerializeField]
     private Material apparentMaterial; //はっきり見えるマテリアル
     private Material[] defaultMaterial; //もともとついてるマテリアル
-    public Text playerNameText;
+    public Image playerName;
 
     //弾を連射中か
     bool isShot;
@@ -92,10 +92,10 @@ public class PlayerShot : NetworkBehaviour
         animationTimer = -1;
         isIK = false;
 
-        List<Text> playersNameText = new List<Text>();
-        playersNameText.Add(GameObject.Find("playerNameText1").GetComponent<Text>());
-        playersNameText.Add(GameObject.Find("playerNameText2").GetComponent<Text>());
-        playersNameText.ForEach(n => n.enabled = false);
+        string name = !isServer ? "playerName1" : "playerName2";
+        playerName =  GameObject.Find(name).GetComponent<Image>();
+        name = isServer ? "playerName1" : "playerName2";
+        GameObject.Find(name).SetActive(false);
 
         audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
     }
@@ -145,14 +145,7 @@ public class PlayerShot : NetworkBehaviour
 
     void Update()
     {
-        if (adversary == null)
-        {
-            adversary = GetAdversary();
-            if(adversary != null)
-            {
-                LoadText();
-            }
-        }
+        if (adversary == null) adversary = GetAdversary();
 
         ShowNameText();
 
@@ -205,13 +198,6 @@ public class PlayerShot : NetworkBehaviour
                 GamePad.SetVibration(PlayerIndex.One, 0, 0);
             }
         }
-    }
-
-    void LoadText()
-    {
-        string name = adversary.name == "Player1 1(Clone)" ? "playerNameText1" : "playerNameText2";
-        playerNameText = GameObject.Find(name).GetComponent<Text>();
-        playerNameText.enabled = true;
     }
 
     [Command]
@@ -332,18 +318,18 @@ public class PlayerShot : NetworkBehaviour
         if (adversary == null) return;
         if (!adversary.GetComponentInChildren<IsRendered>().WasRendered)
         {
-            playerNameText.enabled = false;
+            playerName.gameObject.SetActive(false);
             return;
         }
 
         //相手のプレイヤーが見えていたら
-        playerNameText.enabled = true;
+        playerName.gameObject.SetActive(true);
         //x(0～1),y(0～1)
         Vector3 textPosition = cam.WorldToViewportPoint(adversary.transform.position + (Vector3.up * 2));
         textPosition.x = (textPosition.x * 1280) - (1280 * 0.5f);
         textPosition.y = (textPosition.y * 720) - (720 * 0.5f);
 
-        playerNameText.rectTransform.anchoredPosition = textPosition;
+        playerName.GetComponent<RectTransform>().anchoredPosition = textPosition;
     }
 
     public void AnchorHit()

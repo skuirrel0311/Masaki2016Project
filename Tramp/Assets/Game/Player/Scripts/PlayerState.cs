@@ -154,7 +154,7 @@ public class PlayerState : NetworkBehaviour
         animator.CrossFadeInFixedTime("dead", 0.1f);
         //操作できないようにする。
         GetComponent<PlayerShot>().enabled = false;
-        GetComponent<PlayerShot>().playerNameText.enabled = false;
+        GetComponent<PlayerShot>().playerName.gameObject.SetActive(false);
         GetComponent<PlayerCreateAnchor>().enabled = false;
         lockon.enabled = true;
         GamePad.SetVibration(PlayerIndex.One, 0, 0);
