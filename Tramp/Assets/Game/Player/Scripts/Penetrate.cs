@@ -14,6 +14,9 @@ public class Penetrate : NetworkBehaviour
     [SerializeField]
     private GameObject PenetrateEffect;
 
+    [SerializeField]
+    private Sprite ClientGage;
+
     private ParticleSystem ring;
     private GameObject lightParticle;
 
@@ -50,6 +53,12 @@ public class Penetrate : NetworkBehaviour
     void Start()
     {
         PenetrateGage = GameObject.Find("GunEnergy").GetComponent<Image>();
+
+        if(!isServer)
+        {
+            PenetrateGage.sprite = ClientGage;
+        }
+
         isPenetrate = false;
         energy = MaxEnergy;
         PenetrateEffect.SetActive(false);
@@ -74,6 +83,7 @@ public class Penetrate : NetworkBehaviour
         if (GamepadInput.GamePadInput.GetButtonDown(GamepadInput.GamePadInput.Button.RightShoulder, GamepadInput.GamePadInput.Index.One)&&0<energy)
         {
             isPenetrate = !isPenetrate;
+            //開始
             if (isPenetrate)
             {
                 //renderer.material = penetrateMaterial;
@@ -94,6 +104,7 @@ public class Penetrate : NetworkBehaviour
                 GetComponent<Rigidbody>().velocity = Vector3.zero;
                 GetComponent<Rigidbody>().useGravity = true;
             }
+            //終了
             else
             {
                 StopFlowRender();

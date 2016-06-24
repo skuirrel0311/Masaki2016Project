@@ -11,7 +11,8 @@
 		Tags{ "RenderType" = "Opaque" "Queue" = "Geometry+5" }
 		//Cull[_Cull]
 		//ZWrite Off
-		ZTest Always
+		//ZTest Always
+		Offset 0,-500000
 		//============================
 		// レンダリング用のPass
 		CGPROGRAM
