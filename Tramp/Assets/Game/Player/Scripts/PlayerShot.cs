@@ -9,6 +9,9 @@ using XInputDotNetPure;
 public class PlayerShot : NetworkBehaviour
 {
     [SerializeField]
+    bool assist = false; //アシストを受けるか？
+
+    [SerializeField]
     GameObject Ammo;
 
     [SerializeField]
@@ -217,7 +220,7 @@ public class PlayerShot : NetworkBehaviour
 
     Vector3 GetTargetPosition()
     {
-        if (LookPlayer())
+        if (assist && LookPlayer(5))
         {
             //初回のみ取得
             if (defaultMaterial == null) defaultMaterial = adversary.GetComponentInChildren<SkinnedMeshRenderer>().materials;
@@ -246,7 +249,7 @@ public class PlayerShot : NetworkBehaviour
     /// <summary>
     /// 対戦相手が見えるかどうか？
     /// </summary>
-    bool LookPlayer()
+    bool LookPlayer(int range)
     {
         if (adversary == null) return false;
 
@@ -258,7 +261,15 @@ public class PlayerShot : NetworkBehaviour
         float horizontalAngle = Vector2.Angle(new Vector2(toPlayerVector.x, toPlayerVector.z),
             new Vector2(cameraForward.x, cameraForward.z));
 
-        return verticalAngle < 5 && horizontalAngle < 5;
+        return verticalAngle < range && horizontalAngle < range;
+    }
+
+    //指定した距離より近いか？
+    bool NearPlayer(float distance)
+    {
+        if (adversary == null) return false;
+        
+        return Vector3.Distance(transform.position,adversary.transform.position) < distance;
     }
 
     /// <summary>
@@ -350,7 +361,7 @@ public class PlayerShot : NetworkBehaviour
     void ChangeAdversaryPlayer()
     {
         if(adversary == null)return;
-        if (LookPlayer())
+        if (LookPlayer(10) && !NearPlayer(8))
         {
             //初回のみ取得
             if (defaultMaterial == null) defaultMaterial = adversary.GetComponentInChildren<SkinnedMeshRenderer>().materials;
