@@ -5,12 +5,14 @@ using System.Collections;
 using UnityEngine.Networking.Match;
 using UnityEngine.UI;
 using System.Collections.Generic;
-using System.Net;
+using System;
 
 public enum Winner
 {
     win, lose, draw
 }
+
+public delegate void OnJoinFaildHandler();
 
 public class MyNetworkManager : NetworkManager
 {
@@ -55,6 +57,10 @@ public class MyNetworkManager : NetworkManager
 
     public bool PlayerisServer;
 
+
+
+    public event OnJoinFaildHandler OnjoinFaild;
+
     // Use this for initialization
     void Start()
     {
@@ -86,6 +92,8 @@ public class MyNetworkManager : NetworkManager
                 DiscoveryShutdown();
                 Debug.Log("JoinFaild");
                 GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(0, 0.5f, false);
+                if (OnjoinFaild!=null)
+                    OnjoinFaild();
             }
         }
     }
@@ -218,7 +226,7 @@ public class MyNetworkManager : NetworkManager
     void SetPort()
     {
 
-        networkPort = Random.Range(7777, 7877);
+        networkPort = UnityEngine.Random.Range(7777, 7877);
     }
 
     public void DiscoveryShutdown()

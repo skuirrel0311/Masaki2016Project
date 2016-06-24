@@ -76,23 +76,23 @@ public class MainGameManager : NetworkBehaviour
         if (!myNetDiscovery.isServer)
         {
             MyNetworkManager.networkClient.Send(MainMsgType.Start, new StartMessage());
-           // StartCoroutine("SendToStart");
+            StartCoroutine("SendToStart");
         }
 
         Debug.Log(MyNetworkManager.networkSceneName);
     }
 
-    //IEnumerator SendToStart()
-    //{
-    //    yield return new WaitForSeconds(1);
-    //    while (true)
-    //    {
-    //        if (isStart) break;
-    //        MyNetworkManager.networkClient.Send(MainMsgType.Start, new StartMessage());
-    //        yield return new WaitForSeconds(1);
-    //    }
-    //    yield return null;
-    //}
+    IEnumerator SendToStart()
+    {
+        yield return new WaitForSeconds(1);
+        while (true)
+        {
+            if (isStart) break;
+            MyNetworkManager.networkClient.Send(MainMsgType.Start, new StartMessage());
+            yield return new WaitForSeconds(1);
+        }
+        yield return null;
+    }
 
     public void OnStart(NetworkMessage msg)
     {
@@ -102,6 +102,7 @@ public class MainGameManager : NetworkBehaviour
     [ClientRpc]
     public void RpcAddPlayer()
     {
+        if (isStart) return;
         //if (ClientScene.localPlayers.Count > 0) return;
         ClientScene.AddPlayer(MyNetworkManager.networkClient.connection, 0);
         isStart = true;

@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using GamepadInput;
 using UnityEngine.Events;
 using System.Collections;
+using System;
 
 
 [System.Serializable]
@@ -50,6 +51,9 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     SelectSprites sprites;
 
+    [SerializeField]
+    GameObject popUp=null;
+
     MyNetworkManager myNetworkmanager;
 
     TitleState OldScene;
@@ -64,6 +68,8 @@ public class GameManager : MonoBehaviour
 
     float oldVecY = 0;
     bool oldSelectFlag = true;
+
+    OnJoinFaildHandler PopAct;
 
     void Awake()
     {
@@ -93,15 +99,30 @@ public class GameManager : MonoBehaviour
 
         if (!myNetworkmanager.isJoin)
             GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(0, 0.5f, false);
+
+        PopAct += () =>
+        {
+            Debug.Log("call PopUp Event");
+            popUp.SetActive(true);
+        };
+
+        myNetworkmanager.OnjoinFaild += PopAct;
+    }
+
+    void OnDestroy()
+    {
+        myNetworkmanager.OnjoinFaild -= PopAct;
     }
 
     void Update()
     {
+        if (PopUp.isPopUp) return;
+        if (myNetworkmanager.isJoin) return;
         ChackBackScene();
         //タイトルの場合
         if (sceneState == TitleState.Title)
         {
-            if (GamePadInput.GetButtonDown(GamePadInput.Button.Start, GamePadInput.Index.One)|| GamePadInput.GetButtonDown(GamePadInput.Button.A, GamePadInput.Index.One))
+            if (GamePadInput.GetButtonDown(GamePadInput.Button.Start, GamePadInput.Index.One) || GamePadInput.GetButtonDown(GamePadInput.Button.A, GamePadInput.Index.One))
             {
                 audioSource.PlayOneShot(decisionSE);
                 SetScene(TitleState.GameStart);
@@ -128,13 +149,13 @@ public class GameManager : MonoBehaviour
         }
         else if (sceneState == TitleState.CreataRoom)
         {
-            ChackButtonSelect(ref isRoomCreateSelect,()=> { StartCoroutine("StartHost"); }, ()=> { StartCoroutine("JoinGame"); }, createRoomImage, joinGameImage, sprites);
+            ChackButtonSelect(ref isRoomCreateSelect, () => { StartCoroutine("StartHost"); }, () => { StartCoroutine("JoinGame"); }, createRoomImage, joinGameImage, sprites);
         }
     }
 
     IEnumerator StartHost()
     {
-        GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(1,0.5f,false);
+        GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(1, 0.5f, false);
         yield return new WaitForSeconds(0.5f);
 
         myNetworkmanager.StartupHost();
