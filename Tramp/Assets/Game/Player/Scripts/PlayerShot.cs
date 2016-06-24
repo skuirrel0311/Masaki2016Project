@@ -76,6 +76,8 @@ public class PlayerShot : NetworkBehaviour
 
     GamepadInputState padState;
 
+    Timer imageTimer = new Timer();
+
     void Start()
     {
         playerNum = GetComponent<PlayerControl>().playerNum;
@@ -156,6 +158,8 @@ public class PlayerShot : NetworkBehaviour
 
         ChangeAdversaryPlayer();
 
+        SetMarker();
+
         if (GamePadInput.GetTrigger(GamePadInput.Trigger.RightTrigger, (GamePadInput.Index)playerNum, true) <= 0 && isLocalPlayer)
         {
             playerState.animator.SetBool("RunShotEnd", true);
@@ -222,13 +226,8 @@ public class PlayerShot : NetworkBehaviour
     {
         if (assist && LookPlayer(5))
         {
-            //初回のみ取得
-            if (defaultMaterial == null) defaultMaterial = adversary.GetComponentInChildren<SkinnedMeshRenderer>().materials;
-            adversary.GetComponentInChildren<SkinnedMeshRenderer>().material = apparentMaterial;
             return adversary.transform.position + Vector3.up;
         }
-
-        if (defaultMaterial != null) adversary.GetComponentInChildren<SkinnedMeshRenderer>().materials = defaultMaterial;
 
         //カメラの中心座標からレイを飛ばす
         Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
@@ -361,15 +360,32 @@ public class PlayerShot : NetworkBehaviour
     void ChangeAdversaryPlayer()
     {
         if(adversary == null)return;
-        if (LookPlayer(10) && !NearPlayer(8))
+
+        if (LookPlayer(10) && !NearPlayer(13))
         {
-            //初回のみ取得
+            //視界(指定の範囲)に入った瞬間
             if (defaultMaterial == null) defaultMaterial = adversary.GetComponentInChildren<SkinnedMeshRenderer>().materials;
             adversary.GetComponentInChildren<SkinnedMeshRenderer>().material = apparentMaterial;
         }
         else
         {
             if (defaultMaterial != null) adversary.GetComponentInChildren<SkinnedMeshRenderer>().materials = defaultMaterial;
+            defaultMaterial = null;
+        }
+    }
+
+    void SetMarker()
+    {
+        imageTimer.Update();
+        if(assist && LookPlayer(5))
+        {
+            imageTimer.Stop();
+            cameraObj.GetComponent<CameraLockon>().SetMaker(adversary,imageTimer);
+        }
+        else
+        {
+            if (!imageTimer.IsWorking) imageTimer.TimerStart(0.3f);
+            cameraObj.GetComponent<CameraLockon>().SetMaker(null,imageTimer);
         }
     }
 }
