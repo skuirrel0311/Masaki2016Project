@@ -5,7 +5,7 @@
 		_Color("Color", Color) = (1,1,1,1)
 		_Glossiness("Smoothness", Range(0.0, 1.0)) = 0.5
 		[Gamma] _Metallic("Metallic", Range(0.0, 1.0)) = 0.0
-		[HideInInspector] _MainTex("Texture", 2D) = "white" {}
+	    _MainTex("Texture", 2D) = "white" {}
 	}
 		SubShader{
 		Tags{ "RenderType" = "Opaque" "Queue" = "Geometry+5" }
@@ -19,6 +19,7 @@
 
 		half4 _Color;
 	sampler3D	_DitherMaskLOD;
+	sampler2D _MainTex;
 
 	// 入力構造体
 	struct Input {
@@ -41,7 +42,7 @@
 		// 色
 		o.Albedo = _Color.rgb;
 		o.Alpha = _Color.a;
-		o.Emission = _Color.rgb;
+		o.Emission = _Color.rgb*tex2D(_MainTex,IN.uv_MainTex).rgb;
 	}
 	ENDCG
 	}

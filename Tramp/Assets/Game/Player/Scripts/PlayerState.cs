@@ -72,6 +72,9 @@ public class PlayerState : NetworkBehaviour
 
     HpGauge hpGauge;
 
+    [SerializeField]
+    GameObject DownEffect=null;
+
     void Awake()
     {
         playerIndex = GetComponent<PlayerControl>().playerNum;
@@ -99,6 +102,12 @@ public class PlayerState : NetworkBehaviour
     {
         if (!IsAlive)
         {
+            //エフェクトが表示されていなければ表示
+            if(!DownEffect.activeSelf)
+            {
+                DownEffect.SetActive(true);
+            }
+
             if (!isLocalPlayer) return;
             if (!IsDead)
             {
@@ -108,7 +117,13 @@ public class PlayerState : NetworkBehaviour
                 StartCoroutine("Dead");
             }
         }
-
+        else
+        {
+            if (DownEffect.activeSelf)
+            {
+                DownEffect.SetActive(false);
+            }
+        }
         hpGauge.HitPointUI(hp);
     }
 
@@ -166,6 +181,7 @@ public class PlayerState : NetworkBehaviour
     {
         CmdKillGet(isServer);
     }
+
 
     [Command]
     void CmdKillGet(bool isKilled)
