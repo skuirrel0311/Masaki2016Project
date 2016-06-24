@@ -8,7 +8,7 @@ using XInputDotNetPure;
 public class PlayerState : NetworkBehaviour
 {
     [SerializeField]
-    public int maxHp = 10;
+    public int maxHp = 3;
     public int Hp { get { return hp; } private set { hp = value; } }
     /// <summary>
     /// 体力
@@ -70,12 +70,15 @@ public class PlayerState : NetworkBehaviour
 
     bool IsDead;
 
+    HpGauge hpGauge;
+
     void Awake()
     {
         playerIndex = GetComponent<PlayerControl>().playerNum;
         animator = GetComponentInChildren<Animator>();
         control = GetComponent<PlayerControl>();
         lockon = GameObject.Find("Camera1").GetComponent<CameraLockon>();
+        hpGauge = GetComponent<HpGauge>();
         Initialize();
     }
 
@@ -105,6 +108,8 @@ public class PlayerState : NetworkBehaviour
                 StartCoroutine("Dead");
             }
         }
+
+        hpGauge.HitPointUI(hp);
     }
 
     [Client]
