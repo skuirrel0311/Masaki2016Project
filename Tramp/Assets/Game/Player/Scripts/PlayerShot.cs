@@ -11,6 +11,9 @@ public class PlayerShot : NetworkBehaviour
     [SerializeField]
     GameObject Ammo;
 
+    [SerializeField]
+    GameObject AmmoClient;
+
     GameObject cameraObj;
     Camera cam;
 
@@ -129,7 +132,7 @@ public class PlayerShot : NetworkBehaviour
         }
         else
         {
-            GameObject go = Instantiate(Ammo, shotPosition.position, shotPosition.rotation) as GameObject;
+            GameObject go = Instantiate(AmmoClient, shotPosition.position, shotPosition.rotation) as GameObject;
             go.GetComponent<Shot>().isLocal = isLocalPlayer;
             CmdAmmoSpawn(shotPosition.position, shotPosition.rotation);
         }
@@ -207,7 +210,7 @@ public class PlayerShot : NetworkBehaviour
     [Command]
     public void CmdAmmoSpawn(Vector3 shotposition, Quaternion shotrotation)
     {
-        GameObject go = Instantiate(Ammo, shotposition, shotrotation) as GameObject;
+        GameObject go = Instantiate(AmmoClient, shotposition, shotrotation) as GameObject;
         go.transform.rotation = shotrotation;
     }
 
