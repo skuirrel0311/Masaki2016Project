@@ -46,6 +46,7 @@ public class CameraLockon : MonoBehaviour
     //状態
     private bool IsEndLockOn;       //ロックオンが終わったか？
     public bool IsLockOn;           //ロックオン開始
+    public bool IsSetting;         //セットマーカーを使っている
 
     [SerializeField]
     AudioClip lockonSE;
@@ -236,26 +237,29 @@ public class CameraLockon : MonoBehaviour
         AlignmentSpriteImage.transform.localScale = (Vector3.one * 0.5f) * 2 * ((1 - timer * timer) + 0.5f);
     }
 
-    private void SetMaker()
+    public void SetMaker(GameObject target,Timer timer)
     {
-        GameObject obj = GetTargetAnchor();
+        IsSetting = true;
         Image image = AlignmentSpriteImage.GetComponent<Image>();
 
+        image.color = Color.red;
         //nullだったら中央に表示される
-        if (obj == null)
+        if (target == null)
         {
-            image.rectTransform.anchoredPosition = Vector2.zero;
+            IsSetting = false;
+            image.color = Color.white;
+            image.rectTransform.anchoredPosition = Vector2.Lerp(image.rectTransform.anchoredPosition, Vector2.zero,timer.Progress);
             return;
         }
 
         //アンカーがカメラのどこに表示されているか？(0～1)
-        Vector3 anchorPosition = cameraObj.GetComponent<Camera>().WorldToViewportPoint(obj.transform.position);
+        Vector3 anchorPosition = cameraObj.GetComponent<Camera>().WorldToViewportPoint(target.transform.position + Vector3.up);
 
         //canvasのrectのサイズの1/2を引く。
         float x = (anchorPosition.x * canvasRect.sizeDelta.x) - (canvasRect.sizeDelta.x * 0.5f);
         float y = (anchorPosition.y * canvasRect.sizeDelta.y) - (canvasRect.sizeDelta.y * 0.5f);
-
-        image.rectTransform.anchoredPosition = new Vector2(x, y);
+        
+        image.rectTransform.anchoredPosition = Vector2.Lerp(Vector2.zero, new Vector2(x, y),timer.Progress * timer.Progress);
     }
 
     #region GetTargetAnchor
