@@ -28,7 +28,7 @@ public class PlayerDamage : NetworkBehaviour
             {
                 CmdHitEffect(col.gameObject.transform.position);
                 GetComponent<PlayerState>().Damege();
-                if(state.IsAlive && !state.IsInvincible) state.animator.CrossFadeInFixedTime("damage", 0.1f);
+                if(state.IsAlive && !state.IsInvincible&&!state.ISDead) state.animator.CrossFadeInFixedTime("damage", 0.1f);
                 if (!state.IsInvincible) Blow(col.gameObject);
                 isInpuls = true;
                 Destroy(col.gameObject);

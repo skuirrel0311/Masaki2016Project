@@ -237,6 +237,7 @@ public class AppealAreaState : NetworkBehaviour
     [Client]
     public void ChangeOccupiers(bool isSev)
     {
+        isOccupiers = true;
         if (isSev)
         {
             CmdChangeSeverOccupiers();
@@ -259,10 +260,12 @@ public class AppealAreaState : NetworkBehaviour
         isOccupiers = false;
     }
 
-    [ClientCallback]
     public void ShareMax()
     {
-        CmdChangeShare(100.0f);
+        share += 100.0f;
+        if (!isOccupation)
+            RpcAreaEffect();
+        isOccupation = true;
     }
 
     [Command]

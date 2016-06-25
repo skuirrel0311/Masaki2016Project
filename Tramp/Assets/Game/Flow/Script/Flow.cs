@@ -191,11 +191,14 @@ public class Flow : NetworkBehaviour
 
         //col.gameObject.transform.rotation = Quaternion.Euler(0, col.gameObject.transform.rotation.y, 0);
 
-        col.gameObject.GetComponent<PlayerControl>().targetAnchor = targetAnchor;
-        col.gameObject.GetComponent<PlayerControl>().IsFlowing = true;
-        if (col.gameObject.GetComponent<PlayerControl>().hitFix) return;
+        PlayerControl playCon = col.gameObject.GetComponent<PlayerControl>();
+
+        playCon.targetAnchor = targetAnchor;
+        playCon.IsFlowing = true;
+        if (playCon.hitFix) return;
         body.useGravity = false;
         body.velocity = transform.up * body.velocity.magnitude * 1.1f;
+        if (col.gameObject.GetComponent<PlayerState>().ISDead) return;
         col.gameObject.GetComponent<Animator>().CrossFadeInFixedTime("ride", 0.1f);
     }
 
@@ -248,8 +251,8 @@ public class Flow : NetworkBehaviour
         CameraControl cam = GameObject.Find("Camera1").GetComponent<CameraControl>();
         cam.SetNowLatitude();
         cam.IsEndFallingCamera = false;
+        if (col.gameObject.GetComponent<PlayerState>().ISDead) return;
         col.gameObject.GetComponent<Animator>().CrossFadeInFixedTime("jump", 0.5f);
-
     }
 
     void OnDestroy()
