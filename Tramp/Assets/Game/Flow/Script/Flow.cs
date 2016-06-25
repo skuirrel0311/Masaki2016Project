@@ -76,11 +76,11 @@ public class Flow : NetworkBehaviour
         //作ったプレイヤーに合わせて色を替える
         if (whichCreatePlayer)
         {
-            GetComponent<Renderer>().materials[0].SetColor("_Color", new Color(41.0f/255.0f,139.0f/255.0f,252.0f/255.0f));
+            GetComponent<Renderer>().materials[0].SetColor("_Color", new Color(41.0f / 255.0f, 139.0f / 255.0f, 252.0f / 255.0f));
         }
         else
         {
-            GetComponent<Renderer>().materials[0].SetColor("_Color", new Color(243.0f/255.0f,59.0f/255.0f,133.0f/255.0f));
+            GetComponent<Renderer>().materials[0].SetColor("_Color", new Color(243.0f / 255.0f, 59.0f / 255.0f, 133.0f / 255.0f));
         }
 
         //接続先が固定のアンカーだったら自分の情報を固定のアンカーに送るふぃｘ
@@ -118,6 +118,8 @@ public class Flow : NetworkBehaviour
             Rigidbody body = go.gameObject.GetComponent<Rigidbody>();
             body.useGravity = false;
             body.AddForce(PlayerVector * Time.deltaTime * speed * 50, ForceMode.Acceleration);
+            body.gameObject.GetComponent<PlayerControl>().IsFlowing = true;
+            body.gameObject.GetComponent<PlayerControl>().targetAnchor = targetAnchor;
         }
     }
 
@@ -134,17 +136,14 @@ public class Flow : NetworkBehaviour
             GetComponent<LineRenderer>().enabled = false;
         }
 
-
-
-
         if (!isCalc) return;
         transform.localScale = new Vector3(2, flowVector.magnitude * 0.5f + 1.0f, 2);
         GetComponent<MeshRenderer>().materials[0].SetFloat("_LineNum", flowVector.magnitude);
         CapsuleCollider capcol = GetComponent<CapsuleCollider>();
         capcol.height = flowVector.magnitude / (flowVector.magnitude * 0.5f);
         capcol.radius = 0.5f;
-        GetComponent<LineRenderer>().SetPosition(0, transform.position + (transform.up * (transform.localScale.y-2)));
-        GetComponent<LineRenderer>().SetPosition(1, transform.position - (transform.up * (transform.localScale.y-2)));
+        GetComponent<LineRenderer>().SetPosition(0, transform.position + (transform.up * (transform.localScale.y - 2)));
+        GetComponent<LineRenderer>().SetPosition(1, transform.position - (transform.up * (transform.localScale.y - 2)));
         capcol.isTrigger = true;
         isCalc = false;
     }
@@ -187,9 +186,16 @@ public class Flow : NetworkBehaviour
 
         Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
         bodys.Add(body);
+
+        col.gameObject.transform.LookAt(col.gameObject.transform.position + FlowVector);
+
+        col.gameObject.transform.rotation = Quaternion.Euler(0, col.gameObject.transform.rotation.y, 0);
+
+        col.gameObject.GetComponent<PlayerControl>().targetAnchor = targetAnchor;
+        col.gameObject.GetComponent<PlayerControl>().IsFlowing = true;
         if (col.gameObject.GetComponent<PlayerControl>().hitFix) return;
         body.useGravity = false;
-        body.velocity = transform.up * body.velocity.magnitude*1.1f;
+        body.velocity = transform.up * body.velocity.magnitude * 1.1f;
         col.gameObject.GetComponent<Animator>().CrossFadeInFixedTime("ride", 0.1f);
     }
 
@@ -204,7 +210,6 @@ public class Flow : NetworkBehaviour
         PlayerState state = col.gameObject.GetComponent<PlayerState>();
         col.gameObject.GetComponent<PlayerControl>().IsFlowing = true;
         if (isCreatePlayer)
-
         {
             col.gameObject.GetComponent<Penetrate>().Energy++;
         }

@@ -33,6 +33,8 @@ public class PlayerControl : NetworkBehaviour
     /// </summary>
     public bool IsFlowing;
 
+    public GameObject targetAnchor;
+
     [SerializeField]
     public float EndArea = 59;
 
@@ -343,7 +345,6 @@ public class PlayerControl : NetworkBehaviour
     public void AnchorHit()
     {
         if (IsOnGround) return;
-        IsFlowing = false;
         IsFalling = true;
         cameraControl.SetNowLatitude();
         cameraControl.IsEndFallingCamera = false;
@@ -380,7 +381,7 @@ public class PlayerControl : NetworkBehaviour
         if (col.name == "FixAnchor" || col.name == "AreaAnchor")
         {
             hitFix = true;
-            if (col.name == "AreaAnchor")
+            if (col.name == "AreaAnchor"&&IsFlowing&&col.gameObject.Equals(targetAnchor))
             {
                 GetComponent<Rigidbody>().velocity = Vector3.zero;
                 GetComponent<Rigidbody>().useGravity = true;

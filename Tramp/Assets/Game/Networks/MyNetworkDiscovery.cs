@@ -12,6 +12,7 @@ public class MyNetworkDiscovery : NetworkDiscovery {
     {
         networkManager = GetComponent<MyNetworkManager>();
         isStartClient = false;
+        
     }
 
     public override void OnReceivedBroadcast(string fromAddress, string data)
