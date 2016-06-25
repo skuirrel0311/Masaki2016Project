@@ -186,10 +186,10 @@ public class Flow : NetworkBehaviour
 
         Rigidbody body = col.gameObject.GetComponent<Rigidbody>();
         bodys.Add(body);
+        Vector3 f = new Vector3(FlowVector.x,0,FlowVector.z);
+        col.gameObject.transform.LookAt(col.gameObject.transform.position+f);
 
-        col.gameObject.transform.LookAt(col.gameObject.transform.position + FlowVector);
-
-        col.gameObject.transform.rotation = Quaternion.Euler(0, col.gameObject.transform.rotation.y, 0);
+        //col.gameObject.transform.rotation = Quaternion.Euler(0, col.gameObject.transform.rotation.y, 0);
 
         col.gameObject.GetComponent<PlayerControl>().targetAnchor = targetAnchor;
         col.gameObject.GetComponent<PlayerControl>().IsFlowing = true;
