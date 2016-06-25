@@ -127,6 +127,16 @@ public class PlayerState : NetworkBehaviour
         hpGauge.HitPointUI(hp);
     }
 
+    void LateUpdate()
+    {
+        if (!isLocalPlayer) return;
+        if (!IsDead) return;
+        if(!PlayerControl.ChackCurrentAnimatorName(animator,"dead"))
+        {
+            animator.CrossFadeInFixedTime("dead",0.2f);
+        }
+    }
+
     [Client]
     void Initialize()
     {
@@ -158,6 +168,7 @@ public class PlayerState : NetworkBehaviour
         GetComponent<PlayerCreateAnchor>().enabled = false;
         lockon.enabled = true;
         GamePad.SetVibration(PlayerIndex.One, 0, 0);
+        animator.SetLayerWeight(1,0);
         //殺したプレイヤーにはご褒美を
 
         float time = 0;
@@ -199,6 +210,7 @@ public class PlayerState : NetworkBehaviour
 
         //殺したほうの占拠フラグにする
         areaList[randomIndex].ChangeOccupiers(!isKilled);
+        Debug.Log("CallEnd KillGet");
     }
 
     public override void OnStartLocalPlayer()
@@ -210,6 +222,7 @@ public class PlayerState : NetworkBehaviour
     public void Damege()
     {
         if (IsInvincible) return;
+        if (IsDead) return;
         CmdHpDamage();
     }
 

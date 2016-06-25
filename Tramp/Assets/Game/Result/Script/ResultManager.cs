@@ -45,8 +45,6 @@ public class ResultManager : MonoBehaviour
         switch (winner)
         {
             case Winner.win:
-                loopAudioSource.clip = winBGM;
-                break;
             case Winner.lose:
                 Win.SetActive(true);
                 Lose.SetActive(true);
@@ -68,6 +66,10 @@ public class ResultManager : MonoBehaviour
                 Draw.SetActive(true);
                 break;
         }
+
+        if(winner==Winner.win)
+            loopAudioSource.clip = winBGM;
+
         loopAudioSource.Play();
 
         if (mynet.PlayerisServer)
@@ -75,10 +77,13 @@ public class ResultManager : MonoBehaviour
             SeverText.text = mynet.occuping.ToString();
             ClientText.text = mynet.occupied.ToString();
 
-            if (winner == Winner.win) 
-                ClientPlayer.GetComponent<Animator>().CrossFadeInFixedTime("lose",0);
-            else  if(winner==Winner.lose)
+            if (winner == Winner.win)
+                ClientPlayer.GetComponent<Animator>().CrossFadeInFixedTime("lose", 0);
+            else if (winner == Winner.lose)
+            {
                 HostPlayer.GetComponent<Animator>().CrossFadeInFixedTime("lose", 0);
+                HostPlayer.transform.rotation = Quaternion.identity;
+            }
         }
         else
         {
@@ -86,7 +91,10 @@ public class ResultManager : MonoBehaviour
             SeverText.text = mynet.occupied.ToString();
 
             if (winner == Winner.win)
+            {
                 HostPlayer.GetComponent<Animator>().CrossFadeInFixedTime("lose", 0);
+                HostPlayer.transform.rotation = Quaternion.identity;
+            }
             else if (winner == Winner.lose)
                 ClientPlayer.GetComponent<Animator>().CrossFadeInFixedTime("lose", 0);
         }
