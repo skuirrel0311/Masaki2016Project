@@ -254,6 +254,32 @@ namespace GamepadInput
         public float LeftTrigger = 0;
         public float RightTrigger = 0;
 
+
+        public bool IsNoInput()
+        {
+            if(A == false&&
+            B == false&&
+            X == false&&
+            Y == false&&
+            Start == false&&
+            Back == false&&
+            Left == false&&
+            Right == false&&
+            Up == false&&
+            Down == false&&
+            LeftStick == false&&
+            RightStick == false&&
+            RightShoulder == false&&
+            LeftShoulder == false&&
+            LeftStickAxis == Vector2.zero&&
+            rightStickAxis == Vector2.zero&&
+            dPadAxis == Vector2.zero&&
+            LeftTrigger == 0&&
+            RightTrigger == 0) return true;
+
+            return false;
+            
+        }
     }
 
 }

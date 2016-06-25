@@ -65,13 +65,17 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     AudioClip selectSE;
     AudioSource audioSource;
+    AudioSource loopAudioSource;
 
     float oldVecY = 0;
     bool oldSelectFlag = true;
 
     OnJoinFaildHandler PopAct;
-    
-    AudioSource loopAudioSource;
+
+    [SerializeField]
+    MovieTexture titleMovie;
+    bool IsMovie;
+    Timer movieTimer = new Timer();
 
     void Awake()
     {
@@ -111,6 +115,8 @@ public class GameManager : MonoBehaviour
         };
 
         myNetworkmanager.OnjoinFaild += PopAct;
+        titleMovie.loop = true;
+        movieTimer.TimerStart(120);
     }
 
     void OnDestroy()
@@ -157,6 +163,8 @@ public class GameManager : MonoBehaviour
         {
             ChackButtonSelect(ref isRoomCreateSelect, () => { StartCoroutine("StartHost"); }, () => { StartCoroutine("JoinGame"); }, createRoomImage, joinGameImage, sprites);
         }
+
+        ChackControl();
     }
 
     IEnumerator StartHost()
@@ -256,6 +264,32 @@ public class GameManager : MonoBehaviour
         }
 
         return null;
+    }
+
+    void ChackControl()
+    {
+        GamepadInputState state = GamePadInput.GetState(GamePadInput.Index.One);
+
+        if(!state.IsNoInput())
+        {
+            movieTimer.Reset();
+            if (!loopAudioSource.isPlaying) loopAudioSource.Play();
+            if (titleMovie.isPlaying) titleMovie.Stop();
+            IsMovie = false;
+            return;
+        }
+
+        movieTimer.Update();
+        IsMovie = movieTimer.IsLimitTime;
+    }
+
+    void OnGUI()
+    {
+        if (!IsMovie) return;
+        loopAudioSource.Stop();
+        if (!titleMovie.isPlaying) titleMovie.Play();
+        
+        GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), titleMovie);
     }
 
 }
