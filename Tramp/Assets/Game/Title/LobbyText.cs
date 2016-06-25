@@ -9,6 +9,7 @@ public class LobbyText : NetworkBehaviour
     GameObject toru;
     GameObject hana;
     GameObject connecting;
+    GameObject pleaseWait;
 
     GameObject networkManager = null;
     MyNetworkManager myNetManager;
@@ -23,6 +24,7 @@ public class LobbyText : NetworkBehaviour
         youIsHana = transform.FindChild("YouIsHana").gameObject;
         toru = transform.FindChild("Toru").gameObject;
         hana = transform.FindChild("Hana").gameObject;
+        pleaseWait = transform.FindChild("pleaseWait").gameObject;
         connecting = GameObject.Find("connecting");
         toru.SetActive(true);
     }
@@ -40,6 +42,7 @@ public class LobbyText : NetworkBehaviour
         else
         {
             youIsHana.SetActive(true);
+            pleaseWait.SetActive(true);
         }
 
         connecting.SetActive(!myNetManager.isStarted);
