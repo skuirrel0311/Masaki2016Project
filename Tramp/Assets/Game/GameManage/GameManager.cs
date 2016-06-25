@@ -26,7 +26,7 @@ public enum TitleState
 
 public class GameManager : MonoBehaviour
 {
-    static TitleState sceneState = TitleState.Title;
+    public static TitleState sceneState = TitleState.Title;
 
     [SerializeField]
     GameObject[] Scenes;
@@ -143,13 +143,15 @@ public class GameManager : MonoBehaviour
                 //ハウトゥーへ
                 () =>
                 {
-                    SetScene(TitleState.CreataRoom);
+                    SetScene(TitleState.HowtoPlay);
                 },
                 GameStartImage, HowToImage, gamestartSprites);
         }
         else if (sceneState == TitleState.HowtoPlay)
         {
-
+            if (OldScene == sceneState) return;
+            myNetworkmanager.offlineScene = "HowToPlay";
+            myNetworkmanager.ServerChangeScene("HowToPlay");
         }
         else if (sceneState == TitleState.CreataRoom)
         {
