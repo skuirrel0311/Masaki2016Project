@@ -84,6 +84,7 @@ public class PlayerControl : NetworkBehaviour
     SoundManager soundManager;
     PlayerState state;
 
+
     bool landingEnd;
 
     void Start()
@@ -161,7 +162,7 @@ public class PlayerControl : NetworkBehaviour
             landingEnd = false;
         }
         //街のモーションでなく、動いていなければ待ちのモーションにする
-        if (!ChackCurrentAnimatorName(animator, "wait") && !ismove)
+        if (!ChackCurrentAnimatorName(animator, "wait")&& !ismove)
         {
             isRun = false;
             animator.SetBool("IsRun", isRun);
@@ -429,14 +430,14 @@ public class PlayerControl : NetworkBehaviour
         body.isKinematic = false;
         onGroundTimer.TimerStart(0.4f);
         atJumpPosition = transform.position;
-        if (ChackCurrentAnimatorName(animator, "dead")) return;
+        if (state.ISDead) return;
         animator.CrossFadeInFixedTime("jump_landing", 0.1f);
     }
 
     private void JumpAnimationPlay()
     {
         if (IsFlowing) return;
-        if (ChackCurrentAnimatorName(animator, "dead")) return;
+        if (state.ISDead) return;
 
         animator.CrossFadeInFixedTime("jump", 0.5f);
     }

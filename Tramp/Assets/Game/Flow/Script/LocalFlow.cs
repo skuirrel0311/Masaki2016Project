@@ -66,6 +66,7 @@ public class LocalFlow : MonoBehaviour{
         if (col.gameObject.GetComponent<PlayerControl>().hitFix) return;
         body.useGravity = false;
         body.velocity = transform.up * body.velocity.magnitude;
+        if (col.gameObject.GetComponent<PlayerState>().ISDead) return;
         col.gameObject.GetComponent<Animator>().CrossFadeInFixedTime("ride", 0.1f);
     }
 

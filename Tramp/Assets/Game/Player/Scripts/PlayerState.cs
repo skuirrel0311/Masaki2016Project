@@ -73,7 +73,7 @@ public class PlayerState : NetworkBehaviour
     HpGauge hpGauge;
 
     [SerializeField]
-    GameObject DownEffect=null;
+    GameObject DownEffect = null;
 
     void Awake()
     {
@@ -96,6 +96,8 @@ public class PlayerState : NetworkBehaviour
         {
             map.GetComponent<MapPlayerPosition>().SetClientPlayer(gameObject);
         }
+
+        IsDead = false;
     }
 
     void Update()
@@ -103,7 +105,7 @@ public class PlayerState : NetworkBehaviour
         if (!IsAlive)
         {
             //エフェクトが表示されていなければ表示
-            if(!DownEffect.activeSelf)
+            if (!DownEffect.activeSelf)
             {
                 DownEffect.SetActive(true);
             }
@@ -131,9 +133,10 @@ public class PlayerState : NetworkBehaviour
     {
         if (!isLocalPlayer) return;
         if (!IsDead) return;
-        if(!PlayerControl.ChackCurrentAnimatorName(animator,"dead"))
+        if (!PlayerControl.ChackCurrentAnimatorName(animator, "dead") && !PlayerControl.ChackCurrentAnimatorName(animator, "deadLoop"))
         {
-            animator.CrossFadeInFixedTime("dead",0.2f);
+            Debug.Log("Current Animator");
+            animator.Play("dead", 0);
         }
     }
 
@@ -168,7 +171,7 @@ public class PlayerState : NetworkBehaviour
         GetComponent<PlayerCreateAnchor>().enabled = false;
         lockon.enabled = true;
         GamePad.SetVibration(PlayerIndex.One, 0, 0);
-        animator.SetLayerWeight(1,0);
+        animator.SetLayerWeight(1, 0);
         //殺したプレイヤーにはご褒美を
 
         float time = 0;
@@ -197,20 +200,28 @@ public class PlayerState : NetworkBehaviour
     [Command]
     void CmdKillGet(bool isKilled)
     {
+        Debug.Log("CallStart KillGet");
         //アピールエリア(AppealAreaState)を取得
         List<AppealAreaState> areaList = GameObject.FindGameObjectWithTag("MainGameManager").GetComponent<MainGameManager>().AppealAreas;
         //自分が占拠したエリアを取得(殺されたほう)
-        areaList.Where(area => (area.isOccupation && area.isOccupiers == isKilled) || !area.isOccupation);
+        List<AppealAreaState> areas=new List<AppealAreaState>();
+        for (int i = 0; i < areaList.Count; i++)
+        {
+            if (!areaList[i].isOccupation || (areaList[i].isOccupation && areaList[i].isOccupiers == isKilled))
+            {
+                areas.Add(areaList[i]);
+            }
+        }
         //なかったらreturn
-        if (areaList.Count == 0) return;
+        if (areas.Count == 0) return;
 
-        int randomIndex = Random.Range(0, areaList.Count);
+        int randomIndex = Random.Range(0, areas.Count);
 
-        areaList[randomIndex].ShareMax();
+        areas[randomIndex].ShareMax();
 
         //殺したほうの占拠フラグにする
-        areaList[randomIndex].ChangeOccupiers(!isKilled);
-        Debug.Log("CallEnd KillGet");
+        areas[randomIndex].ChangeOccupiers(!isKilled);
+        Debug.Log("CallEnd KillGet:areas"+areas.Count);
     }
 
     public override void OnStartLocalPlayer()
