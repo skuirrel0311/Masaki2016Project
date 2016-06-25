@@ -28,19 +28,29 @@ public class ResultManager : MonoBehaviour
 
     GameObject networkManager;
 
+    [SerializeField]
+    AudioClip winBGM;
+    [SerializeField]
+    AudioClip loseBGM;
+    AudioSource loopAudioSource;
+
     // Use this for initialization
     void Start()
     {
         networkManager = GameObject.FindGameObjectWithTag("NetworkManager");
         MyNetworkManager mynet = networkManager.GetComponent<MyNetworkManager>();
         Winner winner = mynet.winner;
+        loopAudioSource = GetComponent<AudioSource>();
 
         switch (winner)
         {
             case Winner.win:
+                loopAudioSource.clip = winBGM;
+                break;
             case Winner.lose:
                 Win.SetActive(true);
                 Lose.SetActive(true);
+                loopAudioSource.clip = loseBGM;
 
                 bool isServerLose = winner == Winner.lose &&mynet.PlayerisServer;
                 bool isClientWin = winner == Winner.win && !mynet.PlayerisServer;
@@ -54,9 +64,11 @@ public class ResultManager : MonoBehaviour
 
                 break;
             case Winner.draw:
+                loopAudioSource.clip = loseBGM;
                 Draw.SetActive(true);
                 break;
         }
+        loopAudioSource.Play();
 
         if (mynet.PlayerisServer)
         {
@@ -89,6 +101,8 @@ public class ResultManager : MonoBehaviour
         {
             networkManager.GetComponent<MyNetworkManager>().offlineScene = "Menu";
             networkManager.GetComponent<MyNetworkManager>().ServerChangeScene("Menu");
+
+            loopAudioSource.Stop();
         }
     }
 }

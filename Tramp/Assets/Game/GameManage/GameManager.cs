@@ -70,6 +70,8 @@ public class GameManager : MonoBehaviour
     bool oldSelectFlag = true;
 
     OnJoinFaildHandler PopAct;
+    
+    AudioSource loopAudioSource;
 
     void Awake()
     {
@@ -96,6 +98,8 @@ public class GameManager : MonoBehaviour
         GameObject go = GameObject.FindGameObjectWithTag("NetworkManager");
         myNetworkmanager = go.GetComponent<MyNetworkManager>();
         audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
+        loopAudioSource = GetComponent<AudioSource>();
+        loopAudioSource.Play();
 
         if (!myNetworkmanager.isJoin)
             GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(0, 0.5f, false);
@@ -157,7 +161,7 @@ public class GameManager : MonoBehaviour
     {
         GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(1, 0.5f, false);
         yield return new WaitForSeconds(0.5f);
-
+        loopAudioSource.Stop();
         myNetworkmanager.StartupHost();
         yield return null;
     }
@@ -166,7 +170,7 @@ public class GameManager : MonoBehaviour
     {
         GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(1, 0.5f, false);
         yield return new WaitForSeconds(0.5f);
-
+        loopAudioSource.Stop();
         myNetworkmanager.JoinGame();
         yield return null;
     }
