@@ -23,9 +23,12 @@ public class SoundManager : MonoBehaviour
     public bool isEnd = false;
     public static bool isWin;
 
+    private float timer;
+
     public void PlayMusic()
     {
         mainMusic.Play();
+        timer = 0;
 
         Voice_A_Audio.Play();
 
@@ -37,6 +40,7 @@ public class SoundManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        timer = 0;
         isEnd = false;
         isWin = false;
         GameObject netMana = GameObject.FindGameObjectWithTag("NetworkManager");
@@ -48,6 +52,8 @@ public class SoundManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        timer += Time.deltaTime;
+
         if (myNetDiscovery.isServer)
         {
             if (myNetManager.winner == Winner.lose)
@@ -75,7 +81,7 @@ public class SoundManager : MonoBehaviour
             }
         }
 
-        if (mainMusic.time >= mainMusic.clip.length)
+        if (timer >= mainMusic.clip.length)
         {
             if (isEnd) return;
             GameObject cam = GameObject.FindGameObjectWithTag("MainCamera");

@@ -19,6 +19,7 @@ public class ErrorManager : MonoBehaviour {
 
         if(inputA)
         {
+            GetComponent<AudioSource>().PlayOneShot(GetComponent<AudioSource>().clip);
             networkManager.offlineScene = "Menu";
             networkManager.ServerChangeScene("Menu");
         }
