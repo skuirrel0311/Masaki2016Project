@@ -104,7 +104,7 @@ public class PlayerControl : NetworkBehaviour
             cameraControl.SetPlayer(gameObject);
             cameraObj = GameObject.FindGameObjectWithTag("MainCamera");
         }
-        state=GetComponent<PlayerState>();
+        state = GetComponent<PlayerState>();
         audioSource = GetComponent<PlayerSound>().LoopAoudioSource;
         audioSource.clip = rideSE;
         soundManager = GameObject.Find("SoundManager").GetComponent<SoundManager>();
@@ -162,7 +162,7 @@ public class PlayerControl : NetworkBehaviour
             landingEnd = false;
         }
         //街のモーションでなく、動いていなければ待ちのモーションにする
-        if (!ChackCurrentAnimatorName(animator, "wait")&& !ismove)
+        if (!ChackCurrentAnimatorName(animator, "wait") && !ismove)
         {
             isRun = false;
             animator.SetBool("IsRun", isRun);
@@ -206,7 +206,7 @@ public class PlayerControl : NetworkBehaviour
         if (fallTimer.IsWorking && fallTimer.IsLimitTime)
         {
             fallTimer.Stop(true);
-            if(!IsOnGround)IsJumping = true;
+            if (!IsOnGround) IsJumping = true;
         }
     }
 
@@ -312,7 +312,7 @@ public class PlayerControl : NetworkBehaviour
         Vector3 mov = transform.position - Vector3.zero;
         mov = (mov * 1.01f);
         float effectRotationY = Mathf.Atan2(mov.x, mov.z) * Mathf.Rad2Deg;
-        Destroy(Instantiate(barrierEffect, mov + Vector3.up, Quaternion.Euler(0,effectRotationY,0)), 0.3f);
+        Destroy(Instantiate(barrierEffect, mov + Vector3.up, Quaternion.Euler(0, effectRotationY, 0)), 0.3f);
     }
 
     void Jump()
@@ -335,7 +335,8 @@ public class PlayerControl : NetworkBehaviour
     IEnumerator SleepHItFix()
     {
         yield return new WaitForSeconds(1);
-        hitFix = false;
+        if (!GetComponent<Penetrate>().isPenetrate)
+            hitFix = false;
     }
 
     void OnCollisionEnter(Collision collision)
@@ -389,7 +390,7 @@ public class PlayerControl : NetworkBehaviour
         if (col.name == "FixAnchor" || col.name == "AreaAnchor")
         {
             hitFix = true;
-            if (col.name == "AreaAnchor"&&IsFlowing&&col.gameObject.Equals(targetAnchor))
+            if (col.name == "AreaAnchor" && IsFlowing && col.gameObject.Equals(targetAnchor))
             {
                 GetComponent<Rigidbody>().velocity = Vector3.zero;
                 GetComponent<Rigidbody>().useGravity = true;

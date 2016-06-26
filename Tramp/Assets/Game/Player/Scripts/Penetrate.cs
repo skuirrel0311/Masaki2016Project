@@ -41,7 +41,7 @@ public class Penetrate : NetworkBehaviour
     }
     private float energy = 0;
 
-    private bool isPenetrate;
+    public bool isPenetrate;
 
     [SerializeField]
     AudioClip enableSE;
