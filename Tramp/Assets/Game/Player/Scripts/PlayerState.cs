@@ -115,6 +115,7 @@ public class PlayerState : NetworkBehaviour
             {
                 for(int i = 0;i<2;i++) Instantiate(DownEffect1, transform.position + Vector3.up, transform.rotation);
                 IsDead = true;
+                animator.SetLayerWeight(1, 0);
                 if (!isLocalPlayer) return;
                 //コルーチンを呼ぶのは1回のみ
                 KillPlayer();
@@ -125,7 +126,12 @@ public class PlayerState : NetworkBehaviour
         {
             if (DownEffect2.activeSelf)
             {
+                ISDead = false;
                 DownEffect2.SetActive(false);
+            }
+            if (PlayerControl.ChackCurrentAnimatorName(animator, "dead") ||PlayerControl.ChackCurrentAnimatorName(animator, "deadLoop"))
+            {
+                animator.Play("wait",0);
             }
         }
         hpGauge.HitPointUI(hp);
@@ -133,8 +139,7 @@ public class PlayerState : NetworkBehaviour
 
     void LateUpdate()
     {
-        if (!isLocalPlayer) return;
-        if (!IsDead) return;
+        if (IsAlive) return;
         if (!PlayerControl.ChackCurrentAnimatorName(animator, "dead") && !PlayerControl.ChackCurrentAnimatorName(animator, "deadLoop"))
         {
             Debug.Log("Current Animator");
