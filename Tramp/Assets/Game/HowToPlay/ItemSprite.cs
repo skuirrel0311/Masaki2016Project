@@ -4,7 +4,7 @@ public class ItemSprite
 {
     GameObject selectSprite;
     GameObject nonSelectSprite;
-    bool oldIsSelect;
+    public bool oldIsSelect;
 
     public ItemSprite(string selectName, string nonSelectName)
     {

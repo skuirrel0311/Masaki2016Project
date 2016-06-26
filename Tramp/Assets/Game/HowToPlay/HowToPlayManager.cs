@@ -11,7 +11,6 @@ public class HowToPlayManager : MonoBehaviour
 
     public int selectMenuState;
 
-
     public int oldSelectMenuState;
     
     Vector2 oldInputVec;
@@ -192,7 +191,11 @@ public class HowToPlayManager : MonoBehaviour
     void ChangeSideScene()
     {
         if((MenuState)oldSelectSceneState != MenuState.HowTo) descriptionTexture[oldSelectSceneState].Stop();
+        MenuItems[selectMenuState].oldIsSelect = false;
+        selectMenuState = selectSceneState;
+        MenuItems[selectSceneState].oldIsSelect = true;
         descriptionTexture[oldSelectSceneState].gameObject.SetActive(false);
+
         descriptionTexture[selectSceneState].gameObject.SetActive(true);
         if ((MenuState)selectSceneState != MenuState.HowTo) descriptionTexture[selectSceneState].Play();
     }
