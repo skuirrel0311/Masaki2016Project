@@ -42,6 +42,7 @@ public class ResultManager : MonoBehaviour
         Winner winner = mynet.winner;
         loopAudioSource = GetComponent<AudioSource>();
 
+        //勝敗の状況を見て素材の置き方を調整
         switch (winner)
         {
             case Winner.win:
@@ -72,6 +73,7 @@ public class ResultManager : MonoBehaviour
 
         loopAudioSource.Play();
 
+        //アニメーションの制御
         if (mynet.PlayerisServer)
         {
             SeverText.text = mynet.occuping.ToString();
@@ -98,6 +100,8 @@ public class ResultManager : MonoBehaviour
             else if (winner == Winner.lose)
                 ClientPlayer.GetComponent<Animator>().CrossFadeInFixedTime("lose", 0);
         }
+
+        mynet.DiscoveryShutdown();
     }
 
     // Update is called once per frame

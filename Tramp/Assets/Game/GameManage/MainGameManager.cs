@@ -70,8 +70,7 @@ public class MainGameManager : NetworkBehaviour
         myNetDiscovery = networkManager.GetComponent<MyNetworkDiscovery>();
         soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
         isStart = false;
-        NetworkServer.RegisterHandler(MainMsgType.Start, OnStart);
-        NetworkServer.RegisterHandler(MainMsgType.GameEnd, OnGameEnd);
+
 
         if (!myNetDiscovery.isServer)
         {
@@ -79,7 +78,9 @@ public class MainGameManager : NetworkBehaviour
             StartCoroutine("SendToStart");
         }
 
-        Debug.Log(MyNetworkManager.networkSceneName);
+        NetworkServer.RegisterHandler(MainMsgType.Start, OnStart);
+        NetworkServer.RegisterHandler(MainMsgType.GameEnd, OnGameEnd);
+
     }
 
     IEnumerator SendToStart()

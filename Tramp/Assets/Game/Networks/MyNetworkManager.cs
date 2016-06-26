@@ -264,12 +264,19 @@ public class MyNetworkManager : NetworkManager
     public override void OnClientError(NetworkConnection conn, int errorCode)
     {
         Debug.Log("Call Client Error:" + (NetworkConnectionError)errorCode);
+        if (offlineScene != "Result")
+            offlineScene = "Error";
+        DiscoveryShutdown();
         base.OnClientError(conn, errorCode);
     }
 
     public override void OnServerError(NetworkConnection conn, int errorCode)
     {
         Debug.Log("Call Sever Error:" + (NetworkConnectionError)errorCode);
+        if (offlineScene != "Result")
+            offlineScene = "Error";
+        if (networkSceneName == "main")
+            DiscoveryShutdown();
         base.OnServerError(conn, errorCode);
     }
 }

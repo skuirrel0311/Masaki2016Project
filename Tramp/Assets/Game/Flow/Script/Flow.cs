@@ -260,6 +260,8 @@ public class Flow : NetworkBehaviour
         foreach (Rigidbody body in bodys)
         {
             body.useGravity = true;
+            body.gameObject.GetComponent<PlayerControl>().IsFlowing = false;
+            body.gameObject.GetComponent<Animator>().CrossFadeInFixedTime("wait",0.2f);
         }
     }
 }

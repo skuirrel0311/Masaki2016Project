@@ -16,6 +16,7 @@ public struct SelectSprites
     public Sprite SelectDownSprite;
 
     public Sprite NonSelectDownSprite;
+
 }
 
 [System.Serializable]
@@ -68,10 +69,11 @@ public class GameManager : MonoBehaviour
 
     float oldVecY = 0;
     bool oldSelectFlag = true;
+    bool isStert = false;
 
-    OnJoinFaildHandler PopAct;
-    
     AudioSource loopAudioSource;
+
+    GameObject Panel;
 
     void Awake()
     {
@@ -89,7 +91,7 @@ public class GameManager : MonoBehaviour
         }
         obj.SetActive(true);
 
-
+        isStert = false;
     }
 
     void Start()
@@ -100,15 +102,10 @@ public class GameManager : MonoBehaviour
         audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
         loopAudioSource = GetComponent<AudioSource>();
         loopAudioSource.Play();
+        Panel = GameObject.Find("Panel");
 
         if (!myNetworkmanager.isJoin)
-            GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(0, 0.5f, false);
-
-        PopAct += () =>
-        {
-            Debug.Log("call PopUp Event");
-            popUp.SetActive(true);
-        };
+            Panel.GetComponent<Image>().CrossFadeAlpha(0, 0.5f, false);
 
         myNetworkmanager.OnjoinFaild += PopAct;
     }
@@ -118,10 +115,23 @@ public class GameManager : MonoBehaviour
         myNetworkmanager.OnjoinFaild -= PopAct;
     }
 
+    void PopAct()
+    {
+        Debug.Log("call PopUp Event");
+        popUp.SetActive(true);
+    }
+
     void Update()
     {
         if (PopUp.isPopUp) return;
         if (myNetworkmanager.isJoin) return;
+        if (isStert) return;
+
+        if(!isStert&&!myNetworkmanager.isJoin&&Panel.GetComponent<Image>().color.a>=1.0f)
+        {
+            Panel.GetComponent<Image>().CrossFadeAlpha(0, 0.5f, false);
+        }
+        
         ChackBackScene();
         //タイトルの場合
         if (sceneState == TitleState.Title)
@@ -160,6 +170,7 @@ public class GameManager : MonoBehaviour
     IEnumerator StartHost()
     {
         GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(1, 0.5f, false);
+        isStert = true;
         yield return new WaitForSeconds(0.5f);
         loopAudioSource.Stop();
         myNetworkmanager.StartupHost();
