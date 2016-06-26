@@ -182,6 +182,7 @@ public class PlayerControl : NetworkBehaviour
             if (!IsFalling) cameraControl.SetNowLatitude();
             cameraControl.IsEndFallingCamera = false;
             IsFalling = true;
+            animator.SetTrigger("IsFalling");
         }
 
         if (GetComponent<Rigidbody>().useGravity == false)
@@ -355,6 +356,7 @@ public class PlayerControl : NetworkBehaviour
     {
         if (IsOnGround) return;
         IsFalling = true;
+        animator.SetTrigger("IsFalling");
         cameraControl.SetNowLatitude();
         cameraControl.IsEndFallingCamera = false;
         JumpAnimationPlay();
@@ -382,6 +384,7 @@ public class PlayerControl : NetworkBehaviour
         if (!IsFalling) cameraControl.SetNowLatitude();
         cameraControl.IsEndFallingCamera = false;
         IsFalling = true;
+        animator.SetTrigger("IsFalling");
         fallTimer.TimerStart(1);
     }
 

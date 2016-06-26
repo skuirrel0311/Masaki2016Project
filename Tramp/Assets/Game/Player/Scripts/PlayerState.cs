@@ -45,7 +45,9 @@ public class PlayerState : NetworkBehaviour
         }
     }
 
+    [SyncVar]
     public bool IsInvincible;
+    private float invincibleTimer;
 
     /// <summary>
     /// アピールエリアの所有権を持っているか？
@@ -114,6 +116,7 @@ public class PlayerState : NetworkBehaviour
             if (!IsDead)
             {
                 for(int i = 0;i<2;i++) Instantiate(DownEffect1, transform.position + Vector3.up, transform.rotation);
+                invincibleTimer = 0;
                 IsDead = true;
                 animator.SetLayerWeight(1, 0);
                 if (!isLocalPlayer) return;
@@ -135,6 +138,9 @@ public class PlayerState : NetworkBehaviour
             }
         }
         hpGauge.HitPointUI(hp);
+
+        if (IsInvincible) InvinciblePlayer();
+        else GetComponentInChildren<Renderer>().enabled = true;
     }
 
     void LateUpdate()
@@ -153,7 +159,7 @@ public class PlayerState : NetworkBehaviour
         hp = maxHp;
         animator.CrossFadeInFixedTime("wait", 0.1f);
         control.SetSratPosition();
-        IsInvincible = false;
+        CmdInvincible(0);
     }
 
     void Restoration()
@@ -192,9 +198,9 @@ public class PlayerState : NetworkBehaviour
         Restoration();
         hp = maxHp;
 
-        IsInvincible = true;
-        yield return new WaitForSeconds(1);
-        IsInvincible = false;
+        CmdInvincible(1);
+        yield return new WaitForSeconds(2);
+        CmdInvincible(0);
     }
 
     //殺したときに呼ばれる
@@ -202,7 +208,6 @@ public class PlayerState : NetworkBehaviour
     {
         CmdKillGet(isServer);
     }
-
 
     [Command]
     void CmdKillGet(bool isKilled)
@@ -255,5 +260,32 @@ public class PlayerState : NetworkBehaviour
     {
         //hpを減らす
         hp = hp <= 0 ? 0 : hp - 1;
+    }
+
+    void InvinciblePlayer()
+    {
+        Renderer renderer = GetComponentInChildren<Renderer>();
+        invincibleTimer += Time.deltaTime;
+        int temp = (int)(invincibleTimer / 0.06f);
+        //0.1で割った数字を２で割ってあまりが１だったら
+        if (temp % 2 == 1) renderer.enabled = false;
+        else renderer.enabled = true;
+    }
+
+    /// <summary>
+    ///invincible同期
+    /// </summary>
+    /// <param name="s">s==0ならfalse、s!=0ならtrue</param>
+    [Command]
+    void CmdInvincible(short s)
+    {
+        if(s==0)
+        {
+            IsInvincible = false;
+        }
+        else
+        {
+            IsInvincible = true;
+        }
     }
 }
