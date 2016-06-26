@@ -45,7 +45,7 @@ public class RemainingTime : MonoBehaviour
         if (!MainGameManager.isGameStart)
             time = 180;
 
-        if (soundManager.isEnd)
+        if (SoundManager.isEnd)
             time = 0;
 
         if (time < 60 && MInute.color != Color.red)

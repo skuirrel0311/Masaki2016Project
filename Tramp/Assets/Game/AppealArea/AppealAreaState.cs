@@ -162,7 +162,7 @@ public class AppealAreaState : NetworkBehaviour
     //占有度に変化があるときの処理
     void UpdateShare()
     {
-        if (RidePlayers.Count != 1)
+        if (RidePlayers.Count != 1||SoundManager.isEnd)
         {
             //占有量変更ストップ
             loopAudioSource.Stop();
@@ -170,7 +170,6 @@ public class AppealAreaState : NetworkBehaviour
             return;
         }
         if (!isServer) return;
-        
         //誰にも占拠されていない
         if (share == 0)
         {

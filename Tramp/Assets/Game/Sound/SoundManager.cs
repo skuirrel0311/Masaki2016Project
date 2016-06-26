@@ -20,7 +20,7 @@ public class SoundManager : MonoBehaviour
     private MyNetworkManager myNetManager;
     private MyNetworkDiscovery myNetDiscovery;
 
-    public bool isEnd = false;
+    public static bool isEnd = false;
     public static bool isWin;
 
     private float timer;

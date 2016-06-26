@@ -76,6 +76,8 @@ public class PlayerShot : NetworkBehaviour
 
     GamepadInputState padState;
 
+    SoundManager soundManager;
+
     Timer imageTimer = new Timer();
 
     void Start()
@@ -98,6 +100,7 @@ public class PlayerShot : NetworkBehaviour
         GameObject.Find(name).SetActive(false);
 
         audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
+        soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
     }
 
     float vibrationTimer;
@@ -160,7 +163,7 @@ public class PlayerShot : NetworkBehaviour
             isShot = false;
         }
 
-        if (GamePadInput.GetTrigger(GamePadInput.Trigger.RightTrigger, GamePadInput.Index.One, true) > 0 && isLocalPlayer && shotTimer == -1 && !isShot)
+        if (GamePadInput.GetTrigger(GamePadInput.Trigger.RightTrigger, GamePadInput.Index.One, true) > 0 && isLocalPlayer && shotTimer == -1 && !isShot&&MainGameManager.isGameStart&&!SoundManager.isEnd)
         {
             shotTimer = 0;
             Shot();

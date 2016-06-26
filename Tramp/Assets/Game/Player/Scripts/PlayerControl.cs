@@ -253,7 +253,7 @@ public class PlayerControl : NetworkBehaviour
             }
             return false;
         }
-        if (soundManager.isEnd)
+        if (SoundManager.isEnd)
         {
             if (temp.magnitude > EndArea)
             {
@@ -319,8 +319,10 @@ public class PlayerControl : NetworkBehaviour
     void Jump()
     {
         if (state.ISDead) return;
-        //プレイヤーがジャンプをしようとしたとき
-        if (GamePadInput.GetButtonDown(GamePadInput.Button.A, (GamePadInput.Index)playerNum) && !IsJumping && !MainGameManager.IsPause)
+        if (!MainGameManager.isGameStart) return;
+        if (SoundManager.isEnd) return;
+            //プレイヤーがジャンプをしようとしたとき
+            if (GamePadInput.GetButtonDown(GamePadInput.Button.A, (GamePadInput.Index)playerNum) && !IsJumping && !MainGameManager.IsPause)
         {
             //ジャンプ時の地点を保持
             atJumpPosition = transform.position;
