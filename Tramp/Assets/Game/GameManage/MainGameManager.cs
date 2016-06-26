@@ -232,6 +232,7 @@ public class MainGameManager : NetworkBehaviour
     void OnDestroy()
     {
         NetworkServer.UnregisterHandler(MainMsgType.Start);
+        NetworkServer.UnregisterHandler(MainMsgType.GameEnd);
         isGameStart = false;
     }
 

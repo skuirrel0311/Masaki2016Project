@@ -9,6 +9,8 @@ public class AppealAreaState : NetworkBehaviour
     [SyncVar]
     public float share;
 
+    private float localShare;
+
     //どちらが占領中か
     [SyncVar]
     public bool isOccupiers;
@@ -70,6 +72,7 @@ public class AppealAreaState : NetworkBehaviour
         isOccupiers = false;
         isOccupation = false;
         share = 0;
+        localShare = 0;
         RidePlayers = new List<GameObject>();
         StageMesh = transform.FindChild("pSphere1").GetComponent<Renderer>();
         ShareImage = ShareImageObject.transform.FindChild("ShareImage").GetComponent<Image>();
@@ -204,15 +207,25 @@ public class AppealAreaState : NetworkBehaviour
 
     void ShareUI()
     {
+        if(isServer)
+        {
+            localShare = share;
+        }
+        else
+        {
+            localShare = Mathf.Lerp(localShare, share, Time.deltaTime * 15.0f);
+        }
+
+
         if (isOccupiers == true)
         {
             ShareImage.sprite = ServerImage;
-            ShareImage.fillAmount = share / 100;
+            ShareImage.fillAmount = localShare / 100.0f;
         }
         else
         {
             ShareImage.sprite = ClientImage;
-            ShareImage.fillAmount = share / 100;
+            ShareImage.fillAmount = localShare/100.0f;
         }
 
         foreach (GameObject player in RidePlayers)
@@ -222,12 +235,12 @@ public class AppealAreaState : NetworkBehaviour
                 if (isOccupiers == true)
                 {
                     ShareImageHost.SetActive(true);
-                    ShareImageHost.GetComponent<Image>().fillAmount = share / 100;
+                    ShareImageHost.GetComponent<Image>().fillAmount = localShare / 100.0f;
                 }
                 else
                 {
                     ShareImageClient.SetActive(true);
-                    ShareImageClient.GetComponent<Image>().fillAmount = share / 100;
+                    ShareImageClient.GetComponent<Image>().fillAmount = localShare/100.0f;
                 }
                 isDrawUI = true;
             }

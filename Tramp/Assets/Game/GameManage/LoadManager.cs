@@ -13,13 +13,13 @@ public class LoadManager : NetworkBehaviour
 
     public class LoadMessage : MessageBase
     {
-        public bool Loaded;
+
     }
 
     AsyncOperation asyncOperation;
 
     MyNetworkManager netManager;
-    bool isClientReady;
+    bool isClientReady=false;
     bool isflag;
     // Use this for initialization
     void Start()
@@ -29,15 +29,12 @@ public class LoadManager : NetworkBehaviour
         isflag = true;
 
         NetworkServer.RegisterHandler(MyMsgType.Load, OnClientReady);
-
-
     }
 
     // Update is called once per frame
     void Update()
     {
-        //if (asyncOperation.progress < 0.9f) return;
-
+        //サーバーは受信状況を見てからスタート
         if (MyNetworkManager.discovery.isServer)
         {
             if (isClientReady && isflag == true)
@@ -48,51 +45,24 @@ public class LoadManager : NetworkBehaviour
         }
         else
         {
-            StartCoroutine("ClientReady");
+            CallClientReady();
             isClientReady = true;
         }
-
-
     }
 
-    IEnumerator ClientReady()
+    void OnDestroy()
     {
-        CallClientReady();
-        //yield return new WaitForSeconds(1);
-        //int n = 100;
-        //while (n-- > 0)
-        //{
-        //    CallClientReady();
-        //    yield return new WaitForSeconds(1);
-        //}
-
-        yield return null;
+        NetworkServer.UnregisterHandler(MyMsgType.Load);
     }
 
     void CallClientReady()
     {
-        LoadMessage msg = new LoadMessage();
-        msg.Loaded=true;
-        MyNetworkManager.networkClient.Send(MyMsgType.Load,msg);
+        MyNetworkManager.networkClient.Send(MyMsgType.Load, new LoadMessage());
     }
 
     public void OnClientReady(NetworkMessage netMsg)
     {
         Debug.Log("Call OnClientReadyHandler");
-        LoadMessage msg = netMsg.ReadMessage<LoadMessage>();
-        isClientReady = msg.Loaded;
+        isClientReady = true;
     }
-
-    [ClientRpc]
-    public void RpcAutoCreatePlayer()
-    {
-        netManager.autoCreatePlayer = true;
-    }
-
-    IEnumerator ClientStart()
-    {
-        yield return new WaitForSeconds(1);
-        asyncOperation.allowSceneActivation = true;
-    }
-
 }

@@ -24,12 +24,14 @@ public class LobbyManager : NetworkBehaviour
     MyNetworkManager myNetManager;
     MyNetworkDiscovery myNetDiscoverry;
 
+    bool isStart;
     // Use this for initialization
     void Start()
     {
         //_2pText = _2PSprite.transform.FindChild("Text").GetComponent<Text>();
         _2PPlayerObject.SetActive(false);
         GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(0, 0.5f, false);
+        isStart = false;
     }
 
     void Update()
@@ -81,7 +83,9 @@ public class LobbyManager : NetworkBehaviour
     public void OnMoveNextScene()
     {
         //RpcAutoCreatePlayer();
+        if (isStart) return;
         myNetManager.ServerChangeScene("load");
+        isStart = true;
         //asyncOperation.allowSceneActivation = true;
         // asyncOperation.allowSceneActivation = true;
     }
@@ -100,8 +104,8 @@ public class LobbyManager : NetworkBehaviour
 
     IEnumerator SceneBack()
     {
+        myNetManager.offlineScene = "Menu";
         yield return new WaitForSeconds(0.5f);
-
         myNetManager.DiscoveryShutdown();
         yield return null;
     }
