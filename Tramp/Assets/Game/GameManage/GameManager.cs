@@ -27,7 +27,7 @@ public enum TitleState
 
 public class GameManager : MonoBehaviour
 {
-    static TitleState sceneState = TitleState.Title;
+    public static TitleState sceneState = TitleState.Title;
 
     [SerializeField]
     GameObject[] Scenes;
@@ -66,12 +66,16 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     AudioClip selectSE;
     AudioSource audioSource;
+    AudioSource loopAudioSource;
 
     float oldVecY = 0;
     bool oldSelectFlag = true;
     bool isStert = false;
 
-    AudioSource loopAudioSource;
+    [SerializeField]
+    MovieTexture titleMovie;
+    bool IsMovie;
+    Timer movieTimer = new Timer();
 
     GameObject Panel;
 
@@ -108,6 +112,8 @@ public class GameManager : MonoBehaviour
             Panel.GetComponent<Image>().CrossFadeAlpha(0, 0.5f, false);
 
         myNetworkmanager.OnjoinFaild += PopAct;
+        titleMovie.loop = true;
+        movieTimer.TimerStart(120);
     }
 
     void OnDestroy()
@@ -153,18 +159,22 @@ public class GameManager : MonoBehaviour
                 //ハウトゥーへ
                 () =>
                 {
-                    SetScene(TitleState.CreataRoom);
+                    SetScene(TitleState.HowtoPlay);
                 },
                 GameStartImage, HowToImage, gamestartSprites);
         }
         else if (sceneState == TitleState.HowtoPlay)
         {
-
+            if (OldScene == sceneState) return;
+            myNetworkmanager.offlineScene = "HowToPlay";
+            myNetworkmanager.ServerChangeScene("HowToPlay");
         }
         else if (sceneState == TitleState.CreataRoom)
         {
             ChackButtonSelect(ref isRoomCreateSelect, () => { StartCoroutine("StartHost"); }, () => { StartCoroutine("JoinGame"); }, createRoomImage, joinGameImage, sprites);
         }
+
+        ChackControl();
     }
 
     IEnumerator StartHost()
@@ -265,6 +275,32 @@ public class GameManager : MonoBehaviour
         }
 
         return null;
+    }
+
+    void ChackControl()
+    {
+        GamepadInputState state = GamePadInput.GetState(GamePadInput.Index.One);
+
+        if(!state.IsNoInput())
+        {
+            movieTimer.Reset();
+            if (!loopAudioSource.isPlaying) loopAudioSource.Play();
+            if (titleMovie.isPlaying) titleMovie.Stop();
+            IsMovie = false;
+            return;
+        }
+
+        movieTimer.Update();
+        IsMovie = movieTimer.IsLimitTime;
+    }
+
+    void OnGUI()
+    {
+        if (!IsMovie) return;
+        loopAudioSource.Stop();
+        if (!titleMovie.isPlaying) titleMovie.Play();
+        
+        GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), titleMovie);
     }
 
 }
