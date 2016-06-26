@@ -73,7 +73,9 @@ public class PlayerState : NetworkBehaviour
     HpGauge hpGauge;
 
     [SerializeField]
-    GameObject DownEffect = null;
+    GameObject DownEffect1 = null;
+    [SerializeField]
+    GameObject DownEffect2 = null;
 
     void Awake()
     {
@@ -105,15 +107,15 @@ public class PlayerState : NetworkBehaviour
         if (!IsAlive)
         {
             //エフェクトが表示されていなければ表示
-            if (!DownEffect.activeSelf)
+            if (!DownEffect2.activeSelf)
             {
-                DownEffect.SetActive(true);
+                DownEffect2.SetActive(true);
             }
-
-            if (!isLocalPlayer) return;
             if (!IsDead)
             {
+                for(int i = 0;i<2;i++) Instantiate(DownEffect1, transform.position + Vector3.up, transform.rotation);
                 IsDead = true;
+                if (!isLocalPlayer) return;
                 //コルーチンを呼ぶのは1回のみ
                 KillPlayer();
                 StartCoroutine("Dead");
@@ -121,9 +123,9 @@ public class PlayerState : NetworkBehaviour
         }
         else
         {
-            if (DownEffect.activeSelf)
+            if (DownEffect2.activeSelf)
             {
-                DownEffect.SetActive(false);
+                DownEffect2.SetActive(false);
             }
         }
         hpGauge.HitPointUI(hp);
