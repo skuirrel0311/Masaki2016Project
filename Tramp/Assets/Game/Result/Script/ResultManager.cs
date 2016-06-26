@@ -28,6 +28,9 @@ public class ResultManager : MonoBehaviour
 
     GameObject networkManager;
 
+    Winner winner;
+    MyNetworkManager mynet;
+
     [SerializeField]
     AudioClip winBGM;
     [SerializeField]
@@ -38,49 +41,74 @@ public class ResultManager : MonoBehaviour
     void Start()
     {
         networkManager = GameObject.FindGameObjectWithTag("NetworkManager");
-        MyNetworkManager mynet = networkManager.GetComponent<MyNetworkManager>();
-        Winner winner = mynet.winner;
+        mynet = networkManager.GetComponent<MyNetworkManager>();
+        winner = mynet.winner;
+
+        SetSprite();
+        SetBGM();
+
+        SetAnimation();
+
+        mynet.DiscoveryShutdown();
+    }
+
+    void SetBGM()
+    {
         loopAudioSource = GetComponent<AudioSource>();
+        if (winner == Winner.win) loopAudioSource.clip = winBGM;
+        else loopAudioSource.clip = loseBGM;
+        
+        loopAudioSource.Play();
+    }
 
-        //勝敗の状況を見て素材の置き方を調整
-        switch (winner)
+    void SetSprite()
+    {
+        if (winner != Winner.draw)
         {
-            case Winner.win:
-            case Winner.lose:
-                Win.SetActive(true);
-                Lose.SetActive(true);
-                loopAudioSource.clip = loseBGM;
+            Win.SetActive(true);
+            Lose.SetActive(true);
 
-                bool isServerLose = winner == Winner.lose &&mynet.PlayerisServer;
-                bool isClientWin = winner == Winner.win && !mynet.PlayerisServer;
+            bool isServerLose = winner == Winner.lose && mynet.PlayerisServer;
+            bool isClientWin = winner == Winner.win && !mynet.PlayerisServer;
 
-                if (isServerLose||isClientWin)
-                {
-                    Vector2 tmp = Win.GetComponent<RectTransform>().anchoredPosition;
-                    Win.GetComponent<RectTransform>().anchoredPosition = Lose.GetComponent<RectTransform>().anchoredPosition;
-                    Lose.GetComponent<RectTransform>().anchoredPosition = tmp;
-                }
-
-                break;
-            case Winner.draw:
-                loopAudioSource.clip = loseBGM;
-                Draw.SetActive(true);
-                break;
+            if (isServerLose || isClientWin)
+            {
+                //座標を入れ替える
+                Vector2 tmp = Win.GetComponent<RectTransform>().anchoredPosition;
+                Win.GetComponent<RectTransform>().anchoredPosition = Lose.GetComponent<RectTransform>().anchoredPosition;
+                Lose.GetComponent<RectTransform>().anchoredPosition = tmp;
+            }
+        }
+        else
+        {
+            Draw.SetActive(true);
         }
 
-        if(winner==Winner.win)
-            loopAudioSource.clip = winBGM;
+        GameObject canvas = GameObject.Find("Canvas");
 
-        loopAudioSource.Play();
+        if(mynet.PlayerisServer)
+        {
+            canvas.transform.FindChild("YouIsToru").gameObject.SetActive(true);
+        }
+        else
+        {
+            canvas.transform.FindChild("YouIsHana").gameObject.SetActive(true);
+        }
+    }
 
+    void SetAnimation()
+    {
         //アニメーションの制御
         if (mynet.PlayerisServer)
         {
+            //サーバー
             SeverText.text = mynet.occuping.ToString();
             ClientText.text = mynet.occupied.ToString();
 
             if (winner == Winner.win)
+            {
                 ClientPlayer.GetComponent<Animator>().CrossFadeInFixedTime("lose", 0);
+            }
             else if (winner == Winner.lose)
             {
                 HostPlayer.GetComponent<Animator>().CrossFadeInFixedTime("lose", 0);
@@ -89,8 +117,9 @@ public class ResultManager : MonoBehaviour
         }
         else
         {
-            ClientText.text = mynet.occuping.ToString();
-            SeverText.text = mynet.occupied.ToString();
+            //クライアント
+            ClientText.text = mynet.occuping.ToString();  //とった
+            SeverText.text = mynet.occupied.ToString();   //とられた
 
             if (winner == Winner.win)
             {
@@ -98,10 +127,10 @@ public class ResultManager : MonoBehaviour
                 HostPlayer.transform.rotation = Quaternion.identity;
             }
             else if (winner == Winner.lose)
+            {
                 ClientPlayer.GetComponent<Animator>().CrossFadeInFixedTime("lose", 0);
+            }
         }
-
-        mynet.DiscoveryShutdown();
     }
 
     // Update is called once per frame
