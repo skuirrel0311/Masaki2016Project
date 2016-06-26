@@ -71,6 +71,7 @@ public class GameManager : MonoBehaviour
     float oldVecY = 0;
     bool oldSelectFlag = true;
     bool isStert = false;
+    public bool isJoin = false;
 
     [SerializeField]
     MovieTexture titleMovie;
@@ -96,6 +97,7 @@ public class GameManager : MonoBehaviour
         obj.SetActive(true);
 
         isStert = false;
+        isJoin = false;
     }
 
     void Start()
@@ -132,8 +134,9 @@ public class GameManager : MonoBehaviour
         if (PopUp.isPopUp) return;
         if (myNetworkmanager.isJoin) return;
         if (isStert) return;
+        if (isJoin) return;
 
-        if(!isStert&&!myNetworkmanager.isJoin&&Panel.GetComponent<Image>().color.a>=1.0f)
+        if(!isStert&&!myNetworkmanager.isJoin&&!isJoin&&Panel.GetComponent<Image>().color.a>=1.0f)
         {
             Panel.GetComponent<Image>().CrossFadeAlpha(0, 0.5f, false);
         }
@@ -190,6 +193,7 @@ public class GameManager : MonoBehaviour
     IEnumerator JoinGame()
     {
         GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(1, 0.5f, false);
+        isJoin = true;
         yield return new WaitForSeconds(0.5f);
         loopAudioSource.Stop();
         myNetworkmanager.JoinGame();

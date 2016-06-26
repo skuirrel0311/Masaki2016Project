@@ -92,6 +92,7 @@ public class MyNetworkManager : NetworkManager
                 DiscoveryShutdown();
                 Debug.Log("JoinFaild");
                 GameObject.Find("Panel").GetComponent<Image>().CrossFadeAlpha(0, 0.5f, false);
+                GameObject.Find("Manager").GetComponent<GameManager>().isJoin=false;
                 if (OnjoinFaild!=null)
                     OnjoinFaild();
             }
