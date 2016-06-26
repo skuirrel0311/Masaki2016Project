@@ -231,7 +231,7 @@ public class PlayerControl : NetworkBehaviour
         //ポーズ中だったら終了
         if (MainGameManager.IsPause) return false;
         if (!MainGameManager.isGameStart) return false;
-        if (soundManager.isEnd) return false;
+
 
         // body.velocity = new Vector3(0,body.velocity.y,0);
         //カメラの角度のx､zは見ない
@@ -252,7 +252,14 @@ public class PlayerControl : NetworkBehaviour
             }
             return false;
         }
-
+        if (soundManager.isEnd)
+        {
+            if (temp.magnitude > EndArea)
+            {
+                OutStage(temp);
+            }
+            return false;
+        }
         //アニメーションの再生
         if (!ChackCurrentAnimatorName(animator, "Take 001") && !ChackCurrentAnimatorName(animator, "BackRun"))
         {

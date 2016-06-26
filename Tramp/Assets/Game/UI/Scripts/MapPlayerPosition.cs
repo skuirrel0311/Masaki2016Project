@@ -20,6 +20,8 @@ public class MapPlayerPosition : MonoBehaviour
     void Start()
     {
         Camera = GameObject.FindGameObjectWithTag("MainCamera");
+        if (MyNetworkManager.discovery.isServer)
+            GetComponent<RectTransform>().Rotate(0,0,180);
     }
 
     public void SetHostPlayer(GameObject go)
@@ -36,8 +38,10 @@ public class MapPlayerPosition : MonoBehaviour
     void Update()
     {
         if (HostPlayerObject == null || ClientPlayerObject == null) return;
-        HostPlayerSprite.anchoredPosition = new Vector2(HostPlayerObject.transform.position.x, HostPlayerObject.transform.position.z);
-        ClientPlayerSprite.anchoredPosition = new Vector2(ClientPlayerObject.transform.position.x, ClientPlayerObject.transform.position.z);
+
+            HostPlayerSprite.anchoredPosition =  new Vector2(HostPlayerObject.transform.position.x, HostPlayerObject.transform.position.z);
+            ClientPlayerSprite.anchoredPosition = new Vector2(ClientPlayerObject.transform.position.x, ClientPlayerObject.transform.position.z);
+
 
         if (MyNetworkManager.discovery.isServer)
         {
