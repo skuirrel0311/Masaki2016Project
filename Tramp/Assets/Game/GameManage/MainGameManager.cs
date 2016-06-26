@@ -75,7 +75,6 @@ public class MainGameManager : NetworkBehaviour
         if (!myNetDiscovery.isServer)
         {
             MyNetworkManager.networkClient.Send(MainMsgType.Start, new StartMessage());
-            StartCoroutine("SendToStart");
         }
 
         NetworkServer.RegisterHandler(MainMsgType.Start, OnStart);
@@ -83,17 +82,6 @@ public class MainGameManager : NetworkBehaviour
 
     }
 
-    IEnumerator SendToStart()
-    {
-        yield return new WaitForSeconds(1);
-        while (true)
-        {
-            if (isStart) break;
-            MyNetworkManager.networkClient.Send(MainMsgType.Start, new StartMessage());
-            yield return new WaitForSeconds(1);
-        }
-        yield return null;
-    }
 
     public void OnStart(NetworkMessage msg)
     {
@@ -124,6 +112,11 @@ public class MainGameManager : NetworkBehaviour
 
     void Update()
     {
+        if (!isStart)
+        {
+            MyNetworkManager.networkClient.Send(MainMsgType.Start, new StartMessage());
+        }
+
         if (GamePadInput.GetButtonDown(GamePadInput.Button.Start, GamePadInput.Index.One))
         {
             if (IsPause)
