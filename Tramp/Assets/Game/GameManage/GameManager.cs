@@ -127,6 +127,7 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("call PopUp Event");
         popUp.SetActive(true);
+        PopUp.isPopUp = true;
     }
 
     void Update()
