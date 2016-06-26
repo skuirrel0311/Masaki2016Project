@@ -1,10 +1,13 @@
 ﻿anchor.ogg　    アンカー生成音
 cancel.ogg    　キャンセル音
 capture.ogg   　エリア制圧完了時に鳴らす音
-enable.ogg　    流れ無効化機能オン　
+count.ogg　　　 ゲーム開始時（3,2,1,GO）の時に鳴らす
+damage.ogg      プレイヤーに射撃が当たった時の音　
 decision.ogg  　決定音
 disable.ogg　   流れ無効化機能オフ
+enable.ogg　    流れ無効化機能オン
 hit.ogg　　　 　射撃着弾音
+KO.ogg　　　　　プレイヤーがやられた時（体力０の時）に鳴らす音
 lock.ogg　　　　ロック音（切り替え時も鳴らす）
 m_anchor.ogg　　アンカー生成ができない時に鳴らす音
 nowCap.ogg　　　エリア制圧中に流す音
