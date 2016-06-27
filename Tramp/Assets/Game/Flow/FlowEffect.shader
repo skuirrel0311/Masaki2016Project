@@ -55,7 +55,10 @@
 
 				fixed4 c = _Color;
 				o.Albedo = c.rgb;
-				o.Alpha = lerp(0.0f,1.0f,(texy*2.0f));
+				float  y = 0;
+				if (IN.uv_MainTex.y > 0.95f)
+					y = lerp(0.0f, 1.0f, (IN.uv_MainTex.y-0.95f)*20.0f);
+				o.Alpha = lerp(0.0f,1.0f,(texy*2.0f))*(1-(y*y));
 				o.Emission = c.rgb;
 			}
 
