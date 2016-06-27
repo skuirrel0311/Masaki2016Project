@@ -14,10 +14,16 @@ public class PlayerDamage : NetworkBehaviour
 
     public static bool isInpuls = false;
 
+    [SerializeField]
+    AudioClip damegeSE;
+
+    AudioSource audioSource;
+
     void Start()
     {
         state = gameObject.GetComponent<PlayerState>();
         isInpuls = false;
+        audioSource = GetComponent<AudioSource>();
     }
 
     void OnCollisionEnter(Collision col)
@@ -51,7 +57,14 @@ public class PlayerDamage : NetworkBehaviour
     void CmdHitEffect(Vector3 position)
     {
         Debug.Log("HitEffect");
+        RpcHitSound();
         GameObject go = Instantiate(HitEffect, position, Quaternion.identity) as GameObject;
         NetworkServer.Spawn(go);
+    }
+
+    [ClientRpc]
+    void RpcHitSound()
+    {
+        audioSource.PlayOneShot(damegeSE,1);
     }
 }

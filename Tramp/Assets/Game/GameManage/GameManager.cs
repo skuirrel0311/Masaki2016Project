@@ -169,8 +169,8 @@ public class GameManager : MonoBehaviour
         else if (sceneState == TitleState.HowtoPlay)
         {
             if (OldScene == sceneState) return;
-            myNetworkmanager.offlineScene = "HowToPlay";
-            myNetworkmanager.ServerChangeScene("HowToPlay");
+            myNetworkmanager.offlineScene = "HowToPlayLoad";
+            myNetworkmanager.ServerChangeScene("HowToPlayLoad");
         }
         else if (sceneState == TitleState.CreataRoom)
         {

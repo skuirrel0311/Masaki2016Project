@@ -63,6 +63,7 @@ public class PlayerShot : NetworkBehaviour
 
     [SerializeField]
     AudioClip shotSE;
+
     AudioSource audioSource;
 
     /// <summary>
@@ -283,7 +284,7 @@ public class PlayerShot : NetworkBehaviour
     /// <summary>
     /// 対戦相手を取得します
     /// </summary>
-    GameObject GetAdversary()
+    public GameObject GetAdversary()
     {
         return GameObject.FindGameObjectsWithTag("Player").ToList().Find(n => !n.Equals(gameObject));
     }

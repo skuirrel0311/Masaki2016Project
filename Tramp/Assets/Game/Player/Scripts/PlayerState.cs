@@ -78,6 +78,11 @@ public class PlayerState : NetworkBehaviour
     GameObject DownEffect1 = null;
     [SerializeField]
     GameObject DownEffect2 = null;
+    
+    [SerializeField]
+    AudioClip koSE;
+
+    AudioSource audioSource;
 
     void Awake()
     {
@@ -102,6 +107,7 @@ public class PlayerState : NetworkBehaviour
         }
 
         IsDead = false;
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -116,9 +122,12 @@ public class PlayerState : NetworkBehaviour
             if (!IsDead)
             {
                 for(int i = 0;i<2;i++) Instantiate(DownEffect1, transform.position + Vector3.up, transform.rotation);
+                
                 invincibleTimer = 0;
                 IsDead = true;
                 animator.SetLayerWeight(1, 0);
+                audioSource.PlayOneShot(koSE,1.5f);
+
                 if (!isLocalPlayer) return;
                 //コルーチンを呼ぶのは1回のみ
                 KillPlayer();

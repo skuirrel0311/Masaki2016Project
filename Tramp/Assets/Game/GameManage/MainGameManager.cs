@@ -54,6 +54,10 @@ public class MainGameManager : NetworkBehaviour
     public event OnOccupied OnOccupiedHnadler;
     private bool isStart;
 
+    [SerializeField]
+    AudioClip startSE;
+    AudioSource audioSource;
+
     void Awake()
     {
         Debug.Log("main Awake");
@@ -69,6 +73,7 @@ public class MainGameManager : NetworkBehaviour
         myNetManager = networkManager.GetComponent<MyNetworkManager>();
         myNetDiscovery = networkManager.GetComponent<MyNetworkDiscovery>();
         soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
+        audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
         isStart = false;
 
 
@@ -101,11 +106,12 @@ public class MainGameManager : NetworkBehaviour
     {
         StartCoroutine("GameStart");
         StartEffect.SetActive(true);
+        audioSource.PlayOneShot(startSE);
     }
 
     IEnumerator GameStart()
     {
-        yield return new WaitForSeconds(2.5f);
+        yield return new WaitForSeconds(1.8f);
         soundManager.PlayMusic();
         isGameStart = true;
     }
