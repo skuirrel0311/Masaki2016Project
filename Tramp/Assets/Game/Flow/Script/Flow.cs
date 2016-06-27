@@ -194,8 +194,8 @@ public class Flow : NetworkBehaviour
         PlayerControl playCon = col.gameObject.GetComponent<PlayerControl>();
 
         playCon.targetAnchor = targetAnchor;
-        playCon.IsFlowing = true;
         if (playCon.hitFix) return;
+        playCon.IsFlowing = true;
         body.useGravity = false;
         body.velocity = transform.up * body.velocity.magnitude * 1.1f;
         if (col.gameObject.GetComponent<PlayerState>().ISDead) return;
@@ -209,7 +209,11 @@ public class Flow : NetworkBehaviour
 
     void PlayerStay(Collider col)
     {
-        if (col.gameObject.GetComponent<PlayerControl>().hitFix) return;
+        if (col.gameObject.GetComponent<PlayerControl>().hitFix)
+        {
+            col.gameObject.GetComponent<PlayerControl>().IsFlowing = false;
+            return;
+        }
         PlayerState state = col.gameObject.GetComponent<PlayerState>();
         col.gameObject.GetComponent<PlayerControl>().IsFlowing = true;
         if (isCreatePlayer)

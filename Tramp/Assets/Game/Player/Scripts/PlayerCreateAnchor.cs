@@ -53,6 +53,9 @@ public class PlayerCreateAnchor : NetworkBehaviour
     AudioClip missSE;
     AudioSource audioSource;
 
+    Queue<GameObject> anchorQueueHost;
+    Queue<GameObject> anchorQueueClient;
+
     // Use this for initialization
     void Start()
     {
@@ -61,11 +64,28 @@ public class PlayerCreateAnchor : NetworkBehaviour
         playerState = GetComponent<PlayerState>();
         cameraObj = GameObject.Find("ThirdPersonCamera");
         audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
+        anchorQueueHost = new Queue<GameObject>();
+        anchorQueueClient = new Queue<GameObject>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        if(isServer)
+        {
+            if(anchorQueueHost.Count>15)
+            {
+                anchorQueueHost.Dequeue().GetComponent<AnchorHit>().Crush();
+            }
+            
+            if(anchorQueueClient.Count>15)
+            {
+                anchorQueueClient.Dequeue().GetComponent<AnchorHit>().Crush();
+            }
+        }
+
+
+
         if (GamePadInput.GetTrigger(GamePadInput.Trigger.LeftTrigger, GamePadInput.Index.One) == 1.0f&&timer == -1)
         {
             timer = 0;
@@ -194,10 +214,12 @@ public class PlayerCreateAnchor : NetworkBehaviour
         if (isCreater)
         {
             obj = Instantiate(InstanceAnchorHost, createPosition, transform.rotation) as GameObject;
+            anchorQueueHost.Enqueue(obj);
         }
         else
         {
             obj = Instantiate(InstanceAnchorClient, createPosition, transform.rotation) as GameObject;
+            anchorQueueClient.Enqueue(obj);
         }
         obj.GetComponent<CreateFlow>().SetCreatePlayerIndex(1);
         NetworkServer.Spawn(obj);

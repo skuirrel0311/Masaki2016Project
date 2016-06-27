@@ -39,4 +39,11 @@ public class AnchorHit : MonoBehaviour {
             }
         }
     }
+
+    public  void  Crush()
+    {
+        Instantiate(HitEffect, transform.position, transform.rotation);
+        Destroy(gameObject);
+        Destroy(FlowEffect);
+    }
 }

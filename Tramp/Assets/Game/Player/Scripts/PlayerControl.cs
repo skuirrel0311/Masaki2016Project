@@ -232,7 +232,7 @@ public class PlayerControl : NetworkBehaviour
         //ポーズ中だったら終了
         if (MainGameManager.IsPause) return false;
         if (!MainGameManager.isGameStart) return false;
-
+        if (IsFlowing) return false;
 
         // body.velocity = new Vector3(0,body.velocity.y,0);
         //カメラの角度のx､zは見ない
