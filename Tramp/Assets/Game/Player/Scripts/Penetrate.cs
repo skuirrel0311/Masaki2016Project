@@ -49,12 +49,22 @@ public class Penetrate : NetworkBehaviour
     AudioClip disableSE;
     AudioSource enableAudioSource;
     AudioSource disableAudioSource;
+
+    Image Outgage;
+
+    [SerializeField]
+    Sprite defaultGage;
+
+    [SerializeField]
+    Sprite UseSprite;
+
     // Use this for initialization
     void Start()
     {
         PenetrateGage = GameObject.Find("GunEnergy").GetComponent<Image>();
+        Outgage = GameObject.Find("GunMeter").GetComponent<Image>();
 
-        if(!isServer)
+        if (!isServer)
         {
             PenetrateGage.sprite = ClientGage;
         }
@@ -80,7 +90,7 @@ public class Penetrate : NetworkBehaviour
     {
         if (!isLocalPlayer) return;
         PenetrateGage.fillAmount = energy / MaxEnergy;
-        if (GamepadInput.GamePadInput.GetButtonDown(GamepadInput.GamePadInput.Button.RightShoulder, GamepadInput.GamePadInput.Index.One)&&0<energy)
+        if (GamepadInput.GamePadInput.GetButtonDown(GamepadInput.GamePadInput.Button.RightShoulder, GamepadInput.GamePadInput.Index.One) && 0 < energy)
         {
             isPenetrate = !isPenetrate;
             //開始
@@ -103,18 +113,19 @@ public class Penetrate : NetworkBehaviour
                 GetComponent<PlayerControl>().hitFix = true;
                 GetComponent<Rigidbody>().velocity = Vector3.zero;
                 GetComponent<Rigidbody>().useGravity = true;
+
+                Outgage.sprite = UseSprite;
             }
             //終了
             else
             {
                 StopFlowRender();
             }
-
         }
 
-        if(isPenetrate)
+        if (isPenetrate)
         {
-            energy-=reduce;
+            energy -= reduce;
 
             if (energy <= 0)
             {
@@ -129,6 +140,7 @@ public class Penetrate : NetworkBehaviour
     {
         //renderer.material = defaultMaterial;
         disableAudioSource.Play();
+        Outgage.sprite = defaultGage;
         StartCoroutine("ReversePlayParticle");
         GameObject[] gos = GameObject.FindGameObjectsWithTag("Flow");
         GetComponent<PlayerControl>().hitFix = false;
