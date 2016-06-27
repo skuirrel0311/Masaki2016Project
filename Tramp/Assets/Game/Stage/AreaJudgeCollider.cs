@@ -4,7 +4,7 @@ using System.Collections;
 public class AreaJudgeCollider : MonoBehaviour
 {
     AppealAreaState state;
-    
+
     void Start()
     {
         state = gameObject.GetComponentInParent<AppealAreaState>();
@@ -15,6 +15,8 @@ public class AreaJudgeCollider : MonoBehaviour
         if (col.tag != "Player") return;
 
         state.RidePlayers.Add(col.gameObject);
+
+        col.gameObject.GetComponent<PlayerControl>().hitFix = true;
     }
 
     void OnTriggerExit(Collider col)
@@ -22,5 +24,7 @@ public class AreaJudgeCollider : MonoBehaviour
         if (col.tag != "Player") return;
 
         state.RidePlayers.Remove(col.gameObject);
+        if (!col.gameObject.GetComponent<Penetrate>().isPenetrate)
+            col.gameObject.GetComponent<PlayerControl>().hitFix = false;
     }
 }
