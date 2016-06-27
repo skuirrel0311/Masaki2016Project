@@ -21,13 +21,15 @@ public class LoadManager : NetworkBehaviour
     MyNetworkManager netManager;
     bool isClientReady=false;
     bool isflag;
+
+    float Timer = 0;
     // Use this for initialization
     void Start()
     {
         isClientReady = false;
         netManager = GameObject.FindGameObjectWithTag("NetworkManager").GetComponent<MyNetworkManager>();
         isflag = true;
-
+        Timer = 0;
         NetworkServer.RegisterHandler(MyMsgType.Load, OnClientReady);
     }
 
@@ -47,6 +49,13 @@ public class LoadManager : NetworkBehaviour
         {
             CallClientReady();
             isClientReady = true;
+        }
+
+        Timer += Time.deltaTime;
+        if(Timer>45)
+        {
+            Timer = 0;
+            netManager.DiscoveryShutdown();
         }
     }
 
