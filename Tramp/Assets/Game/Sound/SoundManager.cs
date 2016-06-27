@@ -66,7 +66,7 @@ public class SoundManager : MonoBehaviour
             }
             else
             {
-                MuteVoices(true, true);
+                MuteVoices(false, false);
             }
         }
         else
@@ -81,7 +81,7 @@ public class SoundManager : MonoBehaviour
             }
             else
             {
-                MuteVoices(true, true);
+                MuteVoices(false, false);
             }
         }
 
