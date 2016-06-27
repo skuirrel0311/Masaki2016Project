@@ -53,8 +53,8 @@ public class PlayerCreateAnchor : NetworkBehaviour
     AudioClip missSE;
     AudioSource audioSource;
 
-    Queue<GameObject> anchorQueueHost = new Queue<GameObject>();
-    Queue<GameObject> anchorQueueClient = new Queue<GameObject>();
+    List<GameObject> anchorQueueHost = new List<GameObject>();
+    List<GameObject> anchorQueueClient = new List<GameObject>();
 
     [SerializeField]
     int maxAnchor = 5;
@@ -67,27 +67,13 @@ public class PlayerCreateAnchor : NetworkBehaviour
         playerState = GetComponent<PlayerState>();
         cameraObj = GameObject.Find("ThirdPersonCamera");
         audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
-        anchorQueueHost = new Queue<GameObject>();
-        anchorQueueClient = new Queue<GameObject>();
+        anchorQueueHost = new List<GameObject>();
+        anchorQueueClient = new List<GameObject>();
     }
 
     // Update is called once per frame
     void Update()
     {
-
-        if (anchorQueueHost.Count > maxAnchor)
-        {
-            anchorQueueHost.Dequeue().GetComponent<AnchorHit>().Crush();
-        }
-
-        if (anchorQueueClient.Count > maxAnchor)
-        {
-            anchorQueueClient.Dequeue().GetComponent<AnchorHit>().Crush();
-        }
-
-
-
-
         if (GamePadInput.GetTrigger(GamePadInput.Trigger.LeftTrigger, GamePadInput.Index.One) == 1.0f && timer == -1)
         {
             timer = 0;
@@ -216,22 +202,29 @@ public class PlayerCreateAnchor : NetworkBehaviour
         if (isCreater)
         {
             obj = Instantiate(InstanceAnchorHost, createPosition, transform.rotation) as GameObject;
-            anchorQueueHost.Enqueue(obj);
+            anchorQueueHost.Add(obj);
+            anchorQueueHost.RemoveAll(n=>n==null);
+            
         }
         else
         {
             obj = Instantiate(InstanceAnchorClient, createPosition, transform.rotation) as GameObject;
-            anchorQueueClient.Enqueue(obj);
+            anchorQueueClient.Add(obj);
+            anchorQueueClient.RemoveAll(n => n == null);
         }
+
+        
 
         if (anchorQueueHost.Count > maxAnchor)
         {
-            anchorQueueHost.Dequeue().GetComponent<AnchorHit>().Crush();
+            anchorQueueHost[0].GetComponent<AnchorHit>().Crush();
+            anchorQueueHost.Remove(anchorQueueHost[0]);
         }
 
         if (anchorQueueClient.Count > maxAnchor)
         {
-            anchorQueueClient.Dequeue().GetComponent<AnchorHit>().Crush();
+            anchorQueueClient[0].GetComponent<AnchorHit>().Crush();
+            anchorQueueClient.Remove(anchorQueueClient[0]);
         }
 
         obj.GetComponent<CreateFlow>().SetCreatePlayerIndex(1);

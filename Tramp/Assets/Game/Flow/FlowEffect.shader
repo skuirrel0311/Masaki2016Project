@@ -6,14 +6,14 @@
 		_LineNum("_LineNum", Float) = 10.0
 	}
 		SubShader{
-			Tags { "RenderType" = "Opaque" }
+			Tags{ "Queue" = "Transparent+3"
+			"RenderType" = "Transparent+3"}
 			LOD 200
 			Lighting off
 			Cull[_Cull]
-
 			CGPROGRAM
 			// Physically based Standard lighting model, and enable shadows on all light types
-			#pragma surface surf Lambert  noshadow noforwardadd
+			#pragma surface surf Lambert  noshadow  alpha
 
 			// Use shader model 3.0 target, to get nicer looking lighting
 			#pragma target 3.0
@@ -55,7 +55,7 @@
 
 				fixed4 c = _Color;
 				o.Albedo = c.rgb;
-				o.Alpha = c.a;
+				o.Alpha = lerp(0.0f,1.0f,(texy*2.0f));
 				o.Emission = c.rgb;
 			}
 
