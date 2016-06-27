@@ -86,7 +86,6 @@ public class PlayerControl : NetworkBehaviour
 
 
     bool landingEnd;
-    public bool isOnArea;
 
     void Start()
     {
@@ -111,7 +110,6 @@ public class PlayerControl : NetworkBehaviour
         soundManager = GameObject.Find("SoundManager").GetComponent<SoundManager>();
         audioSource.Stop();
         RideEffect.SetActive(false);
-        isOnArea = false;
     }
 
     void OnDestroy()
@@ -341,7 +339,6 @@ public class PlayerControl : NetworkBehaviour
     {
         yield return new WaitForSeconds(1);
         if (GetComponent<Penetrate>().isPenetrate) yield break;
-        if (isOnArea) yield break;
         hitFix = false;
         
 

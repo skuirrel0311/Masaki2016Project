@@ -42,10 +42,10 @@ public class PlayerCreateAnchor : NetworkBehaviour
     /// </summary>
     public bool IsToArea = false;
 
-    private float timer=-1;
+    private float timer = -1;
 
     [SerializeField]
-    private float ShotDistance=1;
+    private float ShotDistance = 1;
 
     [SerializeField]
     AudioClip createSE;
@@ -53,8 +53,11 @@ public class PlayerCreateAnchor : NetworkBehaviour
     AudioClip missSE;
     AudioSource audioSource;
 
-    Queue<GameObject> anchorQueueHost;
-    Queue<GameObject> anchorQueueClient;
+    Queue<GameObject> anchorQueueHost = new Queue<GameObject>();
+    Queue<GameObject> anchorQueueClient = new Queue<GameObject>();
+
+    [SerializeField]
+    int maxAnchor = 5;
 
     // Use this for initialization
     void Start()
@@ -71,22 +74,21 @@ public class PlayerCreateAnchor : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(isServer)
+
+        if (anchorQueueHost.Count > maxAnchor)
         {
-            if(anchorQueueHost.Count>15)
-            {
-                anchorQueueHost.Dequeue().GetComponent<AnchorHit>().Crush();
-            }
-            
-            if(anchorQueueClient.Count>15)
-            {
-                anchorQueueClient.Dequeue().GetComponent<AnchorHit>().Crush();
-            }
+            anchorQueueHost.Dequeue().GetComponent<AnchorHit>().Crush();
+        }
+
+        if (anchorQueueClient.Count > maxAnchor)
+        {
+            anchorQueueClient.Dequeue().GetComponent<AnchorHit>().Crush();
         }
 
 
 
-        if (GamePadInput.GetTrigger(GamePadInput.Trigger.LeftTrigger, GamePadInput.Index.One) == 1.0f&&timer == -1)
+
+        if (GamePadInput.GetTrigger(GamePadInput.Trigger.LeftTrigger, GamePadInput.Index.One) == 1.0f && timer == -1)
         {
             timer = 0;
             if (MainGameManager.IsPause) return;
@@ -113,7 +115,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
 
             //アンカーを置く
             CreateAnchor();
-            
+
             //流れを生成する
             CmdCreateFlowObject(targetPosition, CreatePosition, flowVector, isServer);
         }
@@ -122,7 +124,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
         {
             timer += Time.deltaTime;
 
-            if(timer>ShotDistance)
+            if (timer > ShotDistance)
             {
                 timer = -1;
             }
@@ -201,13 +203,13 @@ public class PlayerCreateAnchor : NetworkBehaviour
     void CreateAnchor()
     {
         //アンカーを置く
-        Cmd_rezobjectonserver(CreatePosition,isServer);
+        Cmd_rezobjectonserver(CreatePosition, isServer);
         audioSource.PlayOneShot(createSE);
         Debug.Log("clientCallend");
     }
 
     [Command]
-    public void Cmd_rezobjectonserver(Vector3 createPosition,bool isCreater)
+    public void Cmd_rezobjectonserver(Vector3 createPosition, bool isCreater)
     {
         Debug.Log("end1");
         GameObject obj;
@@ -221,6 +223,17 @@ public class PlayerCreateAnchor : NetworkBehaviour
             obj = Instantiate(InstanceAnchorClient, createPosition, transform.rotation) as GameObject;
             anchorQueueClient.Enqueue(obj);
         }
+
+        if (anchorQueueHost.Count > maxAnchor)
+        {
+            anchorQueueHost.Dequeue().GetComponent<AnchorHit>().Crush();
+        }
+
+        if (anchorQueueClient.Count > maxAnchor)
+        {
+            anchorQueueClient.Dequeue().GetComponent<AnchorHit>().Crush();
+        }
+
         obj.GetComponent<CreateFlow>().SetCreatePlayerIndex(1);
         NetworkServer.Spawn(obj);
         Debug.Log("end2");
@@ -272,7 +285,7 @@ public class PlayerCreateAnchor : NetworkBehaviour
         return true;
     }
 
-    public  static bool IsPossibleCreateFlow(Vector3 position,Vector3 flowVec)
+    public static bool IsPossibleCreateFlow(Vector3 position, Vector3 flowVec)
     {
         Ray ray = new Ray(position, flowVec);
         float radius = 0.1f;
