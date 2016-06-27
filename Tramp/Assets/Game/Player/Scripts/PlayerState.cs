@@ -126,7 +126,7 @@ public class PlayerState : NetworkBehaviour
                 invincibleTimer = 0;
                 IsDead = true;
                 animator.SetLayerWeight(1, 0);
-                audioSource.PlayOneShot(koSE,1.5f);
+                audioSource.PlayOneShot(koSE);
 
                 if (!isLocalPlayer) return;
                 //コルーチンを呼ぶのは1回のみ
