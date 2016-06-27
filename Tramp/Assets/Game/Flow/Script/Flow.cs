@@ -120,6 +120,10 @@ public class Flow : NetworkBehaviour
             body.AddForce(PlayerVector * Time.deltaTime * speed * 50, ForceMode.Acceleration);
             body.gameObject.GetComponent<PlayerControl>().IsFlowing = true;
             body.gameObject.GetComponent<PlayerControl>().targetAnchor = targetAnchor;
+            if(!PlayerControl.ChackCurrentAnimatorName(body.gameObject.GetComponent<Animator>(),"ride"))
+            {
+                body.gameObject.GetComponent<Animator>().CrossFadeInFixedTime("ride",0.2f);
+            }
         }
     }
 

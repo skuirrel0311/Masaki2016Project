@@ -17,6 +17,7 @@ public class AreaJudgeCollider : MonoBehaviour
         state.RidePlayers.Add(col.gameObject);
 
         col.gameObject.GetComponent<PlayerControl>().hitFix = true;
+        col.gameObject.GetComponent<PlayerControl>().isOnArea = true;
     }
 
     void OnTriggerExit(Collider col)
@@ -24,7 +25,9 @@ public class AreaJudgeCollider : MonoBehaviour
         if (col.tag != "Player") return;
 
         state.RidePlayers.Remove(col.gameObject);
-        if (!col.gameObject.GetComponent<Penetrate>().isPenetrate)
+        if (!col.gameObject.GetComponent<Penetrate>().isPenetrate) 
             col.gameObject.GetComponent<PlayerControl>().hitFix = false;
+
+        col.gameObject.GetComponent<PlayerControl>().isOnArea = false;
     }
 }
