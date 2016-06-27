@@ -7,6 +7,7 @@ decision.ogg  　決定音
 disable.ogg　   流れ無効化機能オフ
 enable.ogg　    流れ無効化機能オン
 hit.ogg　　　 　射撃着弾音
+HowTo.ogg       How to play画面で流すBGM（ループあり）
 KO.ogg　　　　　プレイヤーがやられた時（体力０の時）に鳴らす音
 lock.ogg　　　　ロック音（切り替え時も鳴らす）
 m_anchor.ogg　　アンカー生成ができない時に鳴らす音

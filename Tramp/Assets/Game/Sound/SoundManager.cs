@@ -58,26 +58,30 @@ public class SoundManager : MonoBehaviour
         {
             if (myNetManager.winner == Winner.lose)
             {
-                Voice_A_Audio.mute = true;
-                Voice_B_Audio.mute = false;
+                MuteVoices(true,false);
+            }
+            else if(myNetManager.winner == Winner.win)
+            {
+                MuteVoices(false,true);
             }
             else
             {
-                Voice_A_Audio.mute = false;
-                Voice_B_Audio.mute = true;
+                MuteVoices(true, true);
             }
         }
         else
         {
             if (myNetManager.winner == Winner.lose)
             {
-                Voice_A_Audio.mute = false;
-                Voice_B_Audio.mute = true;
+                MuteVoices(false, true);
+            }
+            else if (myNetManager.winner == Winner.win)
+            {
+                MuteVoices(true, false);
             }
             else
             {
-                Voice_A_Audio.mute = true;
-                Voice_B_Audio.mute = false;
+                MuteVoices(true, true);
             }
         }
 
@@ -94,6 +98,12 @@ public class SoundManager : MonoBehaviour
             isEnd = true;
         }
 
+    }
+
+    void MuteVoices(bool vo_a,bool vo_b)
+    {
+        Voice_A_Audio.mute = vo_a;
+        Voice_B_Audio.mute = vo_b;
     }
 
     void OnDestroy()
