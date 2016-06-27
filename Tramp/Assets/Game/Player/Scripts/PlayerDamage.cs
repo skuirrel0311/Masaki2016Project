@@ -30,7 +30,6 @@ public class PlayerDamage : NetworkBehaviour
     {
         if (col.gameObject.tag == "Ammo")
         {
-            audioSource.PlayOneShot(damegeSE);
             if (isLocalPlayer && !col.gameObject.GetComponent<Shot>().isLocal)
             {
                 CmdHitEffect(col.gameObject.transform.position);
@@ -58,7 +57,7 @@ public class PlayerDamage : NetworkBehaviour
     void CmdHitEffect(Vector3 position)
     {
         Debug.Log("HitEffect");
-        //RpcHitSound();
+        RpcHitSound();
         GameObject go = Instantiate(HitEffect, position, Quaternion.identity) as GameObject;
         NetworkServer.Spawn(go);
     }
