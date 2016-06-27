@@ -107,7 +107,7 @@ public class PlayerState : NetworkBehaviour
         }
 
         IsDead = false;
-        audioSource = GetComponent<AudioSource>();
+        audioSource = GetComponent<PlayerSound>().EnableAudioSource;
     }
 
     void Update()

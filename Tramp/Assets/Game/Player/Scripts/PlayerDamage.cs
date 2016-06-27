@@ -23,7 +23,7 @@ public class PlayerDamage : NetworkBehaviour
     {
         state = gameObject.GetComponent<PlayerState>();
         isInpuls = false;
-        audioSource = GetComponent<AudioSource>();
+        audioSource = GetComponent<PlayerSound>().EnableAudioSource;
     }
 
     void OnCollisionEnter(Collision col)
