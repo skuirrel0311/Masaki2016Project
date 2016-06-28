@@ -44,6 +44,9 @@ public class AnchorHit : MonoBehaviour {
     {
         Instantiate(HitEffect, transform.position, transform.rotation);
         Destroy(gameObject);
-        Destroy(FlowEffect);
+        if (FlowEffect != null)
+        {
+            Destroy(FlowEffect);
+        }
     }
 }
