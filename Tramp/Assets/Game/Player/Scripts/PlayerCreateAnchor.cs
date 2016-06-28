@@ -203,14 +203,14 @@ public class PlayerCreateAnchor : NetworkBehaviour
         {
             obj = Instantiate(InstanceAnchorHost, createPosition, transform.rotation) as GameObject;
             anchorQueueHost.Add(obj);
-            anchorQueueHost.RemoveAll(n=>n==null);
+            anchorQueueHost.RemoveAll(n=>n.gameObject==null);
             
         }
         else
         {
             obj = Instantiate(InstanceAnchorClient, createPosition, transform.rotation) as GameObject;
             anchorQueueClient.Add(obj);
-            anchorQueueClient.RemoveAll(n => n == null);
+            anchorQueueClient.RemoveAll(n => n.gameObject == null);
         }
 
         obj.GetComponent<CreateFlow>().SetCreatePlayerIndex(1);
