@@ -129,7 +129,6 @@ public class HowToPlayManager : MonoBehaviour
         {
             audioSource.PlayOneShot(cancelSE);
             GameManager.sceneState = TitleState.Title;
-            loopAudioSource.Stop();
 
             networkManager.GetComponent<MyNetworkManager>().offlineScene = "Menu";
             networkManager.GetComponent<MyNetworkManager>().ServerChangeScene("Menu");
