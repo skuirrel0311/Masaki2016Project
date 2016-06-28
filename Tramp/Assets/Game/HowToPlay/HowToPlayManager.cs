@@ -127,6 +127,7 @@ public class HowToPlayManager : MonoBehaviour
 
         if(GamePadInput.GetButtonDown(GamePadInput.Button.B,GamePadInput.Index.One))
         {
+            if (GameManager.sceneState == TitleState.Title) return;
             audioSource.PlayOneShot(cancelSE);
             GameManager.sceneState = TitleState.Title;
 
