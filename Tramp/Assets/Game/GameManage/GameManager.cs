@@ -65,6 +65,9 @@ public class GameManager : MonoBehaviour
     AudioClip decisionSE;
     [SerializeField]
     AudioClip selectSE;
+    [SerializeField]
+    AudioClip pvBGM;
+    AudioClip titleBGM;
     AudioSource audioSource;
     AudioSource loopAudioSource;
 
@@ -115,7 +118,8 @@ public class GameManager : MonoBehaviour
 
         myNetworkmanager.OnjoinFaild += PopAct;
         titleMovie.loop = true;
-        movieTimer.TimerStart(120);
+        
+        movieTimer.TimerStart(10);
     }
 
     void OnDestroy()
@@ -286,11 +290,16 @@ public class GameManager : MonoBehaviour
     {
         GamepadInputState state = GamePadInput.GetState(GamePadInput.Index.One);
 
+        //入力があったら
         if(!state.IsNoInput())
         {
             movieTimer.Reset();
-            if (!loopAudioSource.isPlaying) loopAudioSource.Play();
-            if (titleMovie.isPlaying) titleMovie.Stop();
+            if (titleMovie.isPlaying)
+            {
+                loopAudioSource.clip = titleBGM;
+                loopAudioSource.Play();
+                titleMovie.Stop();
+            }
             IsMovie = false;
             return;
         }
@@ -302,8 +311,15 @@ public class GameManager : MonoBehaviour
     void OnGUI()
     {
         if (!IsMovie) return;
-        loopAudioSource.Stop();
-        if (!titleMovie.isPlaying) titleMovie.Play();
+
+        if (!titleMovie.isPlaying)
+        {
+            loopAudioSource.Stop();
+            titleBGM = loopAudioSource.clip;
+            loopAudioSource.clip = pvBGM;
+            loopAudioSource.Play();
+            titleMovie.Play();
+        }
         
         GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), titleMovie);
     }
