@@ -50,8 +50,6 @@ public class HowToPlayManager : MonoBehaviour
         MenuItems[selectMenuState].SetActive(true);
 
         audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
-        loopAudioSource = GetComponent<AudioSource>();
-        loopAudioSource.Play();
     }
 
     void LoadItem()
