@@ -65,8 +65,7 @@ public class GameManager : MonoBehaviour
     AudioClip decisionSE;
     [SerializeField]
     AudioClip selectSE;
-    [SerializeField]
-    AudioClip pvBGM;
+    
     AudioClip titleBGM;
     AudioSource audioSource;
     AudioSource loopAudioSource;
@@ -109,7 +108,7 @@ public class GameManager : MonoBehaviour
         GameObject go = GameObject.FindGameObjectWithTag("NetworkManager");
         myNetworkmanager = go.GetComponent<MyNetworkManager>();
         audioSource = GameObject.Find("AudioSource").GetComponent<AudioSource>();
-        loopAudioSource = GetComponent<AudioSource>();
+        loopAudioSource = GameObject.Find("TitleBGM").GetComponent<AudioSource>();
         loopAudioSource.Play();
         Panel = GameObject.Find("Panel");
 
@@ -119,7 +118,7 @@ public class GameManager : MonoBehaviour
         myNetworkmanager.OnjoinFaild += PopAct;
         titleMovie.loop = true;
         
-        movieTimer.TimerStart(10);
+        movieTimer.TimerStart(60);
     }
 
     void OnDestroy()
@@ -317,7 +316,7 @@ public class GameManager : MonoBehaviour
         {
             loopAudioSource.Stop();
             titleBGM = loopAudioSource.clip;
-            loopAudioSource.clip = pvBGM;
+            loopAudioSource.clip = titleMovie.audioClip;
             loopAudioSource.Play();
             titleMovie.Play();
         }
