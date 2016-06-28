@@ -213,7 +213,9 @@ public class PlayerCreateAnchor : NetworkBehaviour
             anchorQueueClient.RemoveAll(n => n == null);
         }
 
-        
+        obj.GetComponent<CreateFlow>().SetCreatePlayerIndex(1);
+        NetworkServer.Spawn(obj);
+
 
         if (anchorQueueHost.Count > maxAnchor)
         {
@@ -227,8 +229,6 @@ public class PlayerCreateAnchor : NetworkBehaviour
             anchorQueueClient.Remove(anchorQueueClient[0]);
         }
 
-        obj.GetComponent<CreateFlow>().SetCreatePlayerIndex(1);
-        NetworkServer.Spawn(obj);
         Debug.Log("end2");
     }
 
