@@ -396,11 +396,14 @@ public class PlayerControl : NetworkBehaviour
     {
         if (col.name == "FixAnchor" || col.name == "AreaAnchor")
         {
-            hitFix = true;
+
             if (col.name == "AreaAnchor" && IsFlowing && col.gameObject.Equals(targetAnchor))
             {
+                hitFix = true;
                 GetComponent<Rigidbody>().velocity = Vector3.zero;
                 GetComponent<Rigidbody>().useGravity = true;
+                IsFlowing = false;
+                animator.SetTrigger("IsFalling");
             }
         }
         if (col.gameObject.name == "FixAnchor") AnchorHit();

@@ -12,6 +12,9 @@ public class ThroughArea : MonoBehaviour
     //waitのモーションでいた時間
     float waitTime;
 
+    [SerializeField]
+    float judgeHeight = 0.5f;
+
     // Use this for initialization
     void Start()
     {
@@ -26,7 +29,7 @@ public class ThroughArea : MonoBehaviour
         if (!col.GetComponent<PlayerControl>().isLocalPlayer) return;
         if (IsTrigger) return;
         //床の座標よりもプレイヤーの座標が高ければ戻る
-        if ((col.gameObject.transform.position.y + 0.5f > transform.position.y)) return;
+        if ((col.gameObject.transform.position.y + judgeHeight >areaTrigger.transform.position.y)) return;
         areaCollider.isTrigger = true;
         IsTrigger = true;
     }
